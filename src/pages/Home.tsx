@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Pix, Banknote, FileText, History } from 'lucide-react';
+import { Smartphone, Banknote, FileText, History } from 'lucide-react';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -82,7 +82,7 @@ const Home = () => {
           onClick={() => handleNavigation('pix')}
           className="bg-[#0057FF] text-white rounded-lg p-4 flex flex-col items-center justify-center space-y-2 h-24 transition-colors hover:bg-[#0047CC]"
         >
-          <Pix className="w-6 h-6" />
+          <Smartphone className="w-6 h-6" />
           <span className="text-sm font-medium">Pix</span>
         </button>
 
