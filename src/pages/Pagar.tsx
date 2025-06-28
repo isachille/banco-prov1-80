@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 
-const Ted = () => {
+const Pagar = () => {
   const [formData, setFormData] = useState({
     banco: '',
     agencia: '',
@@ -51,7 +51,7 @@ const Ted = () => {
       // Mock success
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      toast.success('TED enviado com sucesso!');
+      toast.success('Pagamento via TED enviado com sucesso!');
       setFormData({
         banco: '',
         agencia: '',
@@ -60,8 +60,8 @@ const Ted = () => {
         valor: ''
       });
     } catch (error) {
-      console.error('Erro ao enviar TED:', error);
-      toast.error('Erro ao enviar TED. Tente novamente.');
+      console.error('Erro ao fazer pagamento:', error);
+      toast.error('Erro ao realizar pagamento. Tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -70,12 +70,12 @@ const Ted = () => {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="bg-white rounded-xl shadow-lg p-6">
-        <h1 className="text-2xl font-bold text-[#1F1F1F] mb-6">Transferência TED</h1>
+        <h1 className="text-2xl font-bold text-[#1F1F1F] mb-6">Pagamento via TED</h1>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="banco" className="text-[#1F1F1F] font-medium">
-              Banco destinatário
+              Banco
             </Label>
             <Input
               id="banco"
@@ -120,7 +120,7 @@ const Ted = () => {
 
           <div>
             <Label htmlFor="documento" className="text-[#1F1F1F] font-medium">
-              CPF/CNPJ do destinatário
+              CPF/CNPJ
             </Label>
             <Input
               id="documento"
@@ -168,4 +168,4 @@ const Ted = () => {
   );
 };
 
-export default Ted;
+export default Pagar;

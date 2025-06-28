@@ -5,11 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 
-const Cobranca = () => {
+const Transferir = () => {
   const [formData, setFormData] = useState({
-    target_document: '',
-    valor: '',
-    vencimento: ''
+    chave_pix: '',
+    valor: ''
   });
   const [loading, setLoading] = useState(false);
 
@@ -30,32 +29,28 @@ const Cobranca = () => {
 
     try {
       // Em produção seria:
-      // const response = await fetch('https://seu-xano.com/api/charges', {
+      // const response = await fetch('https://seu-xano.com/api/transactions', {
       //   method: 'POST',
       //   headers: {
       //     'Authorization': `Bearer ${token}`,
       //     'Content-Type': 'application/json'
       //   },
       //   body: JSON.stringify({
-      //     origin_wallet_id: userWalletId,
-      //     target_document: formData.target_document,
+      //     from_wallet_id: userWalletId,
+      //     to_pix_key: formData.chave_pix,
       //     valor: parseFloat(formData.valor),
-      //     vencimento: formData.vencimento
+      //     tipo: "pix"
       //   })
       // });
 
       // Mock success
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      toast.success('Cobrança criada com sucesso!');
-      setFormData({
-        target_document: '',
-        valor: '',
-        vencimento: ''
-      });
+      toast.success('Transferência via Pix realizada com sucesso!');
+      setFormData({ chave_pix: '', valor: '' });
     } catch (error) {
-      console.error('Erro ao criar cobrança:', error);
-      toast.error('Erro ao criar cobrança. Tente novamente.');
+      console.error('Erro ao fazer transferência:', error);
+      toast.error('Erro ao realizar transferência. Tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -64,19 +59,19 @@ const Cobranca = () => {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="bg-white rounded-xl shadow-lg p-6">
-        <h1 className="text-2xl font-bold text-[#1F1F1F] mb-6">Cobrar outro usuário</h1>
+        <h1 className="text-2xl font-bold text-[#1F1F1F] mb-6">Transferência via Pix</h1>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <Label htmlFor="target_document" className="text-[#1F1F1F] font-medium">
-              CPF ou e-mail do destinatário
+            <Label htmlFor="chave_pix" className="text-[#1F1F1F] font-medium">
+              Chave Pix do destinatário
             </Label>
             <Input
-              id="target_document"
+              id="chave_pix"
               type="text"
-              value={formData.target_document}
-              onChange={(e) => handleInputChange('target_document', e.target.value)}
-              placeholder="Ex: 123.456.789-00 ou email@exemplo.com"
+              value={formData.chave_pix}
+              onChange={(e) => handleInputChange('chave_pix', e.target.value)}
+              placeholder="Ex: 11999999999 ou email@exemplo.com"
               className="mt-1"
               required
             />
@@ -104,26 +99,12 @@ const Cobranca = () => {
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="vencimento" className="text-[#1F1F1F] font-medium">
-              Vencimento
-            </Label>
-            <Input
-              id="vencimento"
-              type="date"
-              value={formData.vencimento}
-              onChange={(e) => handleInputChange('vencimento', e.target.value)}
-              className="mt-1"
-              required
-            />
-          </div>
-
           <Button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#0057FF] hover:bg-[#0047CC] text-white font-medium py-3 mt-6"
+            className="w-full bg-[#0057FF] hover:bg-[#0047CC] text-white font-medium py-3"
           >
-            {loading ? 'Criando...' : 'Criar cobrança'}
+            {loading ? 'Enviando...' : 'Enviar Pix'}
           </Button>
         </form>
       </div>
@@ -131,4 +112,4 @@ const Cobranca = () => {
   );
 };
 
-export default Cobranca;
+export default Transferir;

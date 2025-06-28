@@ -12,7 +12,7 @@ const Pix = () => {
   });
   const [loading, setLoading] = useState(false);
 
-  // Mock user data - em produção viria de contexto/auth
+  // Mock user data
   const userWalletId = "user-wallet-123";
   const token = "mock-token";
 
@@ -43,7 +43,7 @@ const Pix = () => {
       //   })
       // });
 
-      // Mock success por enquanto
+      // Mock success
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       toast.success('Pix enviado com sucesso!');
@@ -57,9 +57,9 @@ const Pix = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5] font-inter p-4">
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h1 className="text-xl font-bold text-[#1F1F1F] mb-6">Enviar Pix</h1>
+    <div className="max-w-2xl mx-auto">
+      <div className="bg-white rounded-xl shadow-lg p-6">
+        <h1 className="text-2xl font-bold text-[#1F1F1F] mb-6">Enviar Pix</h1>
         
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
@@ -71,7 +71,7 @@ const Pix = () => {
               type="text"
               value={formData.chave_pix}
               onChange={(e) => handleInputChange('chave_pix', e.target.value)}
-              placeholder="Ex: 11999999999 ou email"
+              placeholder="Ex: 11999999999 ou email@exemplo.com"
               className="mt-1"
               required
             />
@@ -92,7 +92,7 @@ const Pix = () => {
                 min="0"
                 value={formData.valor}
                 onChange={(e) => handleInputChange('valor', e.target.value)}
-                placeholder="Ex: 150.00"
+                placeholder="150.00"
                 className="pl-10"
                 required
               />

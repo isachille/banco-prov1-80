@@ -1,21 +1,25 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Smartphone, Banknote, FileText, History } from 'lucide-react';
+import { ArrowRight, Smartphone, QrCode, CreditCard } from 'lucide-react';
 
 const Home = () => {
   const navigate = useNavigate();
-  const [saldo, setSaldo] = useState<number>(0);
+  const [userData, setUserData] = useState({
+    nome: 'João Silva',
+    saldo: 5230.80,
+    limite: 2000.00,
+    rendimento_mes: 125.50
+  });
   const [loading, setLoading] = useState(true);
 
-  // Mock user data - em produção viria de contexto/auth
-  const userName = "João Silva";
+  // Mock user data
   const userId = "123";
   const token = "mock-token";
 
   useEffect(() => {
     // Simular chamada da API
-    const fetchSaldo = async () => {
+    const fetchUserData = async () => {
       try {
         // Em produção seria: 
         // const response = await fetch(`https://seu-xano.com/api/wallets/user/${userId}`, {
@@ -27,16 +31,21 @@ const Home = () => {
         
         // Mock data por enquanto
         setTimeout(() => {
-          setSaldo(5230.80);
+          setUserData({
+            nome: 'João Silva',
+            saldo: 5230.80,
+            limite: 2000.00,
+            rendimento_mes: 125.50
+          });
           setLoading(false);
         }, 1000);
       } catch (error) {
-        console.error('Erro ao buscar saldo:', error);
+        console.error('Erro ao buscar dados do usuário:', error);
         setLoading(false);
       }
     };
 
-    fetchSaldo();
+    fetchUserData();
   }, [userId, token]);
 
   const formatCurrency = (value: number) => {
@@ -46,69 +55,71 @@ const Home = () => {
     }).format(value);
   };
 
-  const handleNavigation = (route: string) => {
-    navigate(`/${route.toLowerCase()}`);
-  };
+  const quickActions = [
+    { label: 'Transferir', icon: ArrowRight, path: '/transferir' },
+    { label: 'Pagar', icon: Smartphone, path: '/pagar' },
+    { label: 'QR Code', icon: QrCode, path: '/qrcode' },
+    { label: 'Cartão', icon: CreditCard, path: '/cartoes' }
+  ];
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5] font-inter p-4">
-      {/* Container Principal */}
-      <div className="bg-white rounded-lg shadow-sm p-6 mb-4">
-        <h1 className="text-lg font-bold text-[#1F1F1F]">
-          Olá, {userName} 👋
+    <div className="max-w-4xl mx-auto space-y-6">
+      {/* Saudação */}
+      <div className="bg-white rounded-xl shadow-lg p-6">
+        <h1 className="text-xl font-bold text-[#1F1F1F]">
+          Olá, {userData.nome} 👋
         </h1>
       </div>
 
-      {/* Container de Saldo */}
-      <div className="bg-[#D4E4FF] rounded-lg p-6 mb-6">
-        <h2 className="text-[#1F1F1F] text-sm font-medium mb-2">Saldo atual</h2>
+      {/* Informações Financeiras */}
+      <div className="bg-[#D4E4FF] rounded-xl p-6">
         {loading ? (
-          <div className="animate-pulse">
-            <div className="h-8 bg-white/30 rounded w-32 mb-2"></div>
+          <div className="animate-pulse space-y-4">
+            <div className="h-6 bg-white/30 rounded w-48"></div>
+            <div className="h-6 bg-white/30 rounded w-32"></div>
+            <div className="h-6 bg-white/30 rounded w-40"></div>
           </div>
         ) : (
-          <p className="text-[#1F1F1F] text-2xl font-bold mb-3">
-            {formatCurrency(saldo)}
-          </p>
+          <div className="space-y-4">
+            <div>
+              <p className="text-[#1F1F1F] text-sm font-medium">Saldo disponível</p>
+              <p className="text-[#1F1F1F] text-2xl font-bold">
+                {formatCurrency(userData.saldo)}
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-[#1F1F1F] text-sm font-medium">Limite</p>
+                <p className="text-[#1F1F1F] text-lg font-semibold">
+                  {formatCurrency(userData.limite)}
+                </p>
+              </div>
+              <div>
+                <p className="text-[#1F1F1F] text-sm font-medium">Rendimento do mês</p>
+                <p className="text-[#1F1F1F] text-lg font-semibold text-green-600">
+                  {formatCurrency(userData.rendimento_mes)}
+                </p>
+              </div>
+            </div>
+          </div>
         )}
-        <div className="text-xs text-[#1F1F1F]/60">
-          <p>📈 Gráfico 7 dias - em breve</p>
-        </div>
       </div>
 
-      {/* Grid de Botões */}
-      <div className="grid grid-cols-2 gap-3">
-        <button
-          onClick={() => handleNavigation('pix')}
-          className="bg-[#0057FF] text-white rounded-lg p-4 flex flex-col items-center justify-center space-y-2 h-24 transition-colors hover:bg-[#0047CC]"
-        >
-          <Smartphone className="w-6 h-6" />
-          <span className="text-sm font-medium">Pix</span>
-        </button>
-
-        <button
-          onClick={() => handleNavigation('ted')}
-          className="bg-[#D4E4FF] text-[#0057FF] rounded-lg p-4 flex flex-col items-center justify-center space-y-2 h-24 transition-colors hover:bg-[#C4D4EF]"
-        >
-          <Banknote className="w-6 h-6" />
-          <span className="text-sm font-medium">TED</span>
-        </button>
-
-        <button
-          onClick={() => handleNavigation('cobranca')}
-          className="bg-[#D4E4FF] text-[#0057FF] rounded-lg p-4 flex flex-col items-center justify-center space-y-2 h-24 transition-colors hover:bg-[#C4D4EF]"
-        >
-          <FileText className="w-6 h-6" />
-          <span className="text-sm font-medium">Cobrar</span>
-        </button>
-
-        <button
-          onClick={() => handleNavigation('extrato')}
-          className="bg-[#D4E4FF] text-[#0057FF] rounded-lg p-4 flex flex-col items-center justify-center space-y-2 h-24 transition-colors hover:bg-[#C4D4EF]"
-        >
-          <History className="w-6 h-6" />
-          <span className="text-sm font-medium">Extrato</span>
-        </button>
+      {/* Ações Rápidas */}
+      <div className="bg-white rounded-xl shadow-lg p-6">
+        <h2 className="text-lg font-bold text-[#1F1F1F] mb-4">Ações Rápidas</h2>
+        <div className="grid grid-cols-2 gap-4">
+          {quickActions.map((action, index) => (
+            <button
+              key={index}
+              onClick={() => navigate(action.path)}
+              className="flex items-center space-x-3 p-4 rounded-xl bg-[#0057FF] text-white hover:bg-[#0047CC] transition-colors"
+            >
+              <action.icon className="w-6 h-6" />
+              <span className="font-medium">{action.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
