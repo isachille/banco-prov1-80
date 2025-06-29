@@ -1,11 +1,14 @@
 
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, CreditCard, ArrowRight, Smartphone, TrendingUp, Settings, HelpCircle } from 'lucide-react';
+import { Home, CreditCard, ArrowRight, Smartphone, TrendingUp, Settings, HelpCircle, Sun, Moon } from 'lucide-react';
+import { useTheme } from '@/contexts/ThemeContext';
+import { Button } from '@/components/ui/button';
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme, toggleTheme } = useTheme();
 
   const menuItems = [
     { id: 'home', label: 'Início', icon: Home, path: '/home' },
@@ -24,12 +27,15 @@ const Sidebar = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="w-[220px] bg-[#061A44] min-h-screen fixed left-0 top-0 flex flex-col">
+    <div className="w-[220px] bg-hsl(var(--banking-sidebar)) min-h-screen fixed left-0 top-0 flex flex-col transition-colors duration-300">
       {/* Logo */}
       <div className="p-4 border-b border-blue-700/30">
         <div className="flex items-center space-x-3">
-          <span className="text-2xl">🏦</span>
-          <span className="text-white font-bold text-lg">Banco Pro</span>
+          <img 
+            src="/lovable-uploads/4712549c-a705-4aad-8498-4702dc3cdd8f.png" 
+            alt="Banco Pro" 
+            className="h-8 w-auto"
+          />
         </div>
       </div>
 
@@ -50,6 +56,28 @@ const Sidebar = () => {
           </button>
         ))}
       </nav>
+
+      {/* Theme Toggle */}
+      <div className="p-4 border-t border-blue-700/30">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={toggleTheme}
+          className="w-full flex items-center space-x-3 text-[#B0C4DE] hover:bg-blue-700/30 hover:text-white"
+        >
+          {theme === 'light' ? (
+            <>
+              <Moon className="w-5 h-5" />
+              <span className="font-medium">Modo Escuro</span>
+            </>
+          ) : (
+            <>
+              <Sun className="w-5 h-5" />
+              <span className="font-medium">Modo Claro</span>
+            </>
+          )}
+        </Button>
+      </div>
     </div>
   );
 };

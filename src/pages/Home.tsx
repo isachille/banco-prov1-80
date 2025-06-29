@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Eye, EyeOff, CreditCard, Smartphone, TrendingUp, Building, Car, QrCode, Receipt } from 'lucide-react';
+import { Eye, EyeOff, CreditCard, Smartphone, TrendingUp, Building, Car, QrCode, Receipt, User } from 'lucide-react';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -16,12 +16,12 @@ const Home = () => {
   });
 
   const quickActions = [
-    { icon: Smartphone, label: 'Pix', action: () => navigate('/pix'), color: 'bg-purple-100 text-purple-600' },
-    { icon: Receipt, label: 'Boletos', action: () => navigate('/pagar'), color: 'bg-red-100 text-red-600' },
-    { icon: CreditCard, label: 'Cartões', action: () => navigate('/cartoes'), color: 'bg-blue-100 text-blue-600' },
-    { icon: TrendingUp, label: 'Investir', action: () => navigate('/investir'), color: 'bg-green-100 text-green-600' },
-    { icon: Building, label: 'Financiamento', action: () => navigate('/financiamento'), color: 'bg-orange-100 text-orange-600' },
-    { icon: Car, label: 'Consórcio', action: () => navigate('/consorcio'), color: 'bg-indigo-100 text-indigo-600' }
+    { icon: Smartphone, label: 'Pix', action: () => navigate('/pix'), color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400' },
+    { icon: Receipt, label: 'Boletos', action: () => navigate('/pagar'), color: 'bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400' },
+    { icon: CreditCard, label: 'Cartões', action: () => navigate('/cartoes'), color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400' },
+    { icon: TrendingUp, label: 'Investir', action: () => navigate('/investir'), color: 'bg-green-100 text-green-600 dark:bg-green-900/20 dark:text-green-400' },
+    { icon: Building, label: 'Financiamento', action: () => navigate('/financiamento'), color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400' },
+    { icon: Car, label: 'Consórcio', action: () => navigate('/consorcio'), color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' }
   ];
 
   useEffect(() => {
@@ -30,7 +30,7 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {/* Header */}
       <div className="bg-[#0057FF] text-white p-6 rounded-b-3xl">
         <div className="flex justify-between items-center mb-6">
@@ -41,13 +41,13 @@ const Home = () => {
           <div className="flex space-x-3">
             <button 
               onClick={() => navigate('/perfil')}
-              className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center"
+              className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-colors"
             >
-              👤
+              <User className="w-5 h-5" />
             </button>
             <button 
               onClick={() => navigate('/ajuda')}
-              className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center"
+              className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-colors"
             >
               ❓
             </button>
@@ -88,7 +88,7 @@ const Home = () => {
                 </div>
                 <div>
                   <p className="font-semibold">Cartão Banco Pro</p>
-                  <p className="text-sm text-gray-500">•••• 1234</p>
+                  <p className="text-sm text-muted-foreground">•••• 1234</p>
                 </div>
               </div>
               <button 
@@ -129,7 +129,7 @@ const Home = () => {
 
         {/* Ações Rápidas */}
         <div className="mb-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Ações Rápidas</h2>
+          <h2 className="text-xl font-bold text-foreground mb-4">Ações Rápidas</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {quickActions.map((action, index) => (
               <Card 
@@ -138,10 +138,10 @@ const Home = () => {
                 onClick={action.action}
               >
                 <CardContent className="p-4 text-center">
-                  <div className={`w-12 h-12 ${action.color} rounded-full flex items-center justify-center mx-auto mb-3`}>
+                  <div className={`w-12 h-12 ${action.color} rounded-full flex items-center justify-center mx-auto mb-3 transition-colors`}>
                     <action.icon className="w-6 h-6" />
                   </div>
-                  <p className="font-medium text-gray-800">{action.label}</p>
+                  <p className="font-medium text-foreground">{action.label}</p>
                 </CardContent>
               </Card>
             ))}
@@ -152,7 +152,7 @@ const Home = () => {
         <Card>
           <CardContent className="p-4">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="font-bold text-gray-800">Últimas transações</h3>
+              <h3 className="font-bold text-foreground">Últimas transações</h3>
               <button 
                 onClick={() => navigate('/extrato')}
                 className="text-[#0057FF] text-sm font-medium"
@@ -163,28 +163,28 @@ const Home = () => {
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <span className="text-green-600 text-sm">↓</span>
+                  <div className="w-8 h-8 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
+                    <span className="text-green-600 dark:text-green-400 text-sm">↓</span>
                   </div>
                   <div>
-                    <p className="font-medium">Transferência recebida</p>
-                    <p className="text-sm text-gray-500">Ontem às 14:30</p>
+                    <p className="font-medium text-foreground">Transferência recebida</p>
+                    <p className="text-sm text-muted-foreground">Ontem às 14:30</p>
                   </div>
                 </div>
-                <span className="font-bold text-green-600">+R$ 350,00</span>
+                <span className="font-bold text-green-600 dark:text-green-400">+R$ 350,00</span>
               </div>
               
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                    <span className="text-purple-600 text-sm">📱</span>
+                  <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/20 rounded-full flex items-center justify-center">
+                    <span className="text-purple-600 dark:text-purple-400 text-sm">📱</span>
                   </div>
                   <div>
-                    <p className="font-medium">Pix enviado</p>
-                    <p className="text-sm text-gray-500">Hoje às 09:15</p>
+                    <p className="font-medium text-foreground">Pix enviado</p>
+                    <p className="text-sm text-muted-foreground">Hoje às 09:15</p>
                   </div>
                 </div>
-                <span className="font-bold text-red-600">-R$ 120,00</span>
+                <span className="font-bold text-red-600 dark:text-red-400">-R$ 120,00</span>
               </div>
             </div>
           </CardContent>

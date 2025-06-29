@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import Layout from "./components/Layout";
 import Index from "./pages/Index";
 import Splash from "./pages/Splash";
@@ -24,39 +25,43 @@ import Ted from "./pages/Ted";
 import Cobranca from "./pages/Cobranca";
 import Extrato from "./pages/Extrato";
 import Financiamento from "./pages/Financiamento";
+import Perfil from "./pages/Perfil";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Splash />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/cadastro" element={<CadastroTipo />} />
-          <Route path="/cadastro-pf" element={<CadastroPF />} />
-          <Route path="/cadastro-pj" element={<CadastroPJ />} />
-          <Route path="/conta-analise" element={<ContaAnalise />} />
-          <Route path="/home" element={<Layout><Home /></Layout>} />
-          <Route path="/cartoes" element={<Layout><Cartoes /></Layout>} />
-          <Route path="/transferir" element={<Layout><Transferir /></Layout>} />
-          <Route path="/pagar" element={<Layout><Pagar /></Layout>} />
-          <Route path="/investir" element={<Layout><Investir /></Layout>} />
-          <Route path="/configuracoes" element={<Layout><Configuracoes /></Layout>} />
-          <Route path="/ajuda" element={<Layout><Ajuda /></Layout>} />
-          <Route path="/pix" element={<Layout><Pix /></Layout>} />
-          <Route path="/ted" element={<Layout><Ted /></Layout>} />
-          <Route path="/cobranca" element={<Layout><Cobranca /></Layout>} />
-          <Route path="/extrato" element={<Layout><Extrato /></Layout>} />
-          <Route path="/financiamento" element={<Financiamento />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <ThemeProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Splash />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/cadastro" element={<CadastroTipo />} />
+            <Route path="/cadastro-pf" element={<CadastroPF />} />
+            <Route path="/cadastro-pj" element={<CadastroPJ />} />
+            <Route path="/conta-analise" element={<ContaAnalise />} />
+            <Route path="/home" element={<Layout><Home /></Layout>} />
+            <Route path="/cartoes" element={<Layout><Cartoes /></Layout>} />
+            <Route path="/transferir" element={<Layout><Transferir /></Layout>} />
+            <Route path="/pagar" element={<Layout><Pagar /></Layout>} />
+            <Route path="/investir" element={<Layout><Investir /></Layout>} />
+            <Route path="/configuracoes" element={<Layout><Configuracoes /></Layout>} />
+            <Route path="/ajuda" element={<Layout><Ajuda /></Layout>} />
+            <Route path="/pix" element={<Layout><Pix /></Layout>} />
+            <Route path="/ted" element={<Layout><Ted /></Layout>} />
+            <Route path="/cobranca" element={<Layout><Cobranca /></Layout>} />
+            <Route path="/extrato" element={<Layout><Extrato /></Layout>} />
+            <Route path="/perfil" element={<Layout><Perfil /></Layout>} />
+            <Route path="/financiamento" element={<Financiamento />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

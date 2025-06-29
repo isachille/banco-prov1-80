@@ -65,12 +65,16 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-900 dark:to-blue-900 flex items-center justify-center p-4 transition-colors duration-300">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="text-6xl mb-4">🏦</div>
+          <img 
+            src="/lovable-uploads/4712549c-a705-4aad-8498-4702dc3cdd8f.png" 
+            alt="Banco Pro" 
+            className="h-16 w-auto mx-auto mb-4"
+          />
           <CardTitle className="text-2xl font-bold text-[#0057FF]">Banco Pro</CardTitle>
-          <p className="text-gray-600">Entre na sua conta</p>
+          <p className="text-muted-foreground">Entre na sua conta</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">

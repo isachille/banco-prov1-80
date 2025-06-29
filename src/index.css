@@ -40,20 +40,18 @@ All colors MUST be HSL.
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Custom banking colors */
+    --banking-primary: 215 100% 50%;
+    --banking-secondary: 215 100% 97%;
+    --banking-sidebar: 215 100% 15%;
   }
 
   .dark {
@@ -92,6 +90,11 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Custom banking colors for dark mode */
+    --banking-primary: 215 100% 60%;
+    --banking-secondary: 215 100% 8%;
+    --banking-sidebar: 215 100% 8%;
   }
 }
 
@@ -101,7 +104,7 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground transition-colors duration-300;
     font-family: 'Inter', sans-serif;
   }
 }
