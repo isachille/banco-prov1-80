@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Eye, EyeOff, CreditCard, Smartphone, TrendingUp, Building, Car, QrCode, Receipt, User } from 'lucide-react';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { Eye, EyeOff, CreditCard, Smartphone, TrendingUp, Building, Car, QrCode, Receipt, User, Gift, Banknote, PiggyBank, Link } from 'lucide-react';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -24,8 +24,34 @@ const Home = () => {
     { icon: Car, label: 'Consórcio', action: () => navigate('/consorcio'), color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' }
   ];
 
+  const giftCards = [
+    {
+      name: 'Netflix',
+      image: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=200&fit=crop',
+      description: 'Stranger Things, La Casa de Papel e muito mais',
+      values: [25, 50, 100]
+    },
+    {
+      name: 'Google Play',
+      image: 'https://images.unsplash.com/photo-1607252650355-f7fd0460ccdb?w=400&h=200&fit=crop',
+      description: 'Apps, jogos e entretenimento',
+      values: [15, 30, 50, 100]
+    },
+    {
+      name: 'PlayStation',
+      image: 'https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=400&h=200&fit=crop',
+      description: 'God of War, FIFA, Spider-Man e mais',
+      values: [50, 100, 150, 200]
+    },
+    {
+      name: 'Xbox',
+      image: 'https://images.unsplash.com/photo-1612198188060-c7c2a3b66eae?w=400&h=200&fit=crop',
+      description: 'Call of Duty, Halo e jogos exclusivos',
+      values: [50, 100, 150, 200]
+    }
+  ];
+
   useEffect(() => {
-    // Simular busca de dados do usuário
     console.log('Buscando dados do usuário...');
   }, []);
 
@@ -78,6 +104,35 @@ const Home = () => {
       </div>
 
       <div className="p-6 -mt-4">
+        {/* Open Finance e Cofrinho */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 bg-gradient-to-r from-green-500 to-teal-500 text-white"
+            onClick={() => navigate('/open-finance')}
+          >
+            <CardContent className="p-4 flex items-center space-x-3">
+              <Link className="w-8 h-8" />
+              <div>
+                <h3 className="font-bold">Open Finance</h3>
+                <p className="text-sm opacity-90">Conectar outra conta</p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 bg-gradient-to-r from-pink-500 to-purple-500 text-white"
+            onClick={() => navigate('/cofrinho')}
+          >
+            <CardContent className="p-4 flex items-center space-x-3">
+              <PiggyBank className="w-8 h-8" />
+              <div>
+                <h3 className="font-bold">Cofrinho</h3>
+                <p className="text-sm opacity-90">Guardar e Investir</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Cartões */}
         <Card className="mb-6 shadow-md">
           <CardContent className="p-4">
@@ -149,7 +204,7 @@ const Home = () => {
         </div>
 
         {/* Últimas transações */}
-        <Card>
+        <Card className="mb-6">
           <CardContent className="p-4">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-foreground">Últimas transações</h3>
@@ -189,6 +244,50 @@ const Home = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Gift Cards */}
+        <div className="mb-6">
+          <div className="flex items-center space-x-2 mb-4">
+            <Gift className="w-6 h-6 text-[#0057FF]" />
+            <h2 className="text-xl font-bold text-foreground">Gift Cards</h2>
+          </div>
+          <Carousel className="w-full">
+            <CarouselContent className="-ml-2">
+              {giftCards.map((card, index) => (
+                <CarouselItem key={index} className="pl-2 basis-4/5 md:basis-1/2 lg:basis-1/3">
+                  <Card 
+                    className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 overflow-hidden"
+                    onClick={() => navigate('/gift-cards', { state: { card } })}
+                  >
+                    <div className="relative">
+                      <img 
+                        src={card.image} 
+                        alt={card.name}
+                        className="w-full h-32 object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                      <div className="absolute bottom-0 left-0 p-3 text-white">
+                        <h3 className="font-bold text-lg">{card.name}</h3>
+                        <p className="text-sm opacity-90">{card.description}</p>
+                      </div>
+                    </div>
+                    <CardContent className="p-3">
+                      <div className="flex flex-wrap gap-1">
+                        {card.values.map((value, i) => (
+                          <span key={i} className="bg-[#0057FF] text-white text-xs px-2 py-1 rounded">
+                            R$ {value}
+                          </span>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+          </Carousel>
+        </div>
       </div>
     </div>
   );

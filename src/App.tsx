@@ -26,6 +26,9 @@ import Cobranca from "./pages/Cobranca";
 import Extrato from "./pages/Extrato";
 import Financiamento from "./pages/Financiamento";
 import Perfil from "./pages/Perfil";
+import GiftCards from "./pages/GiftCards";
+import OpenFinance from "./pages/OpenFinance";
+import Cofrinho from "./pages/Cofrinho";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -57,6 +60,9 @@ const App = () => (
             <Route path="/extrato" element={<Layout><Extrato /></Layout>} />
             <Route path="/perfil" element={<Layout><Perfil /></Layout>} />
             <Route path="/financiamento" element={<Financiamento />} />
+            <Route path="/gift-cards" element={<GiftCards />} />
+            <Route path="/open-finance" element={<OpenFinance />} />
+            <Route path="/cofrinho" element={<Cofrinho />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
