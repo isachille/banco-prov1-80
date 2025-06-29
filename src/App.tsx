@@ -13,6 +13,7 @@ import CadastroTipo from "./pages/CadastroTipo";
 import CadastroPF from "./pages/CadastroPF";
 import CadastroPJ from "./pages/CadastroPJ";
 import ContaAnalise from "./pages/ContaAnalise";
+import PainelAdmin from "./pages/PainelAdmin";
 import Home from "./pages/Home";
 import Cartoes from "./pages/Cartoes";
 import Transferir from "./pages/Transferir";
@@ -47,6 +48,7 @@ const App = () => (
             <Route path="/cadastro-pf" element={<CadastroPF />} />
             <Route path="/cadastro-pj" element={<CadastroPJ />} />
             <Route path="/conta-analise" element={<ContaAnalise />} />
+            <Route path="/painel-admin" element={<PainelAdmin />} />
             <Route path="/home" element={<Layout><Home /></Layout>} />
             <Route path="/cartoes" element={<Layout><Cartoes /></Layout>} />
             <Route path="/transferir" element={<Layout><Transferir /></Layout>} />

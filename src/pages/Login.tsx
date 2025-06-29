@@ -26,37 +26,18 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      // Simular chamada de API
       console.log('Login attempt:', formData);
       
-      // Simular diferentes tipos de usuário para demonstração
-      const mockUserRoles = {
-        'dono@bancopro.com': 'dono',
-        'diretor@bancopro.com': 'diretor',
-        'gerente@bancopro.com': 'gerente',
-        'analista@bancopro.com': 'analista',
-        'usuario@bancopro.com': 'usuario'
-      };
-
-      const userRole = mockUserRoles[formData.email as keyof typeof mockUserRoles] || 'usuario';
-      
-      // Redirecionar baseado no tipo de usuário
-      switch (userRole) {
-        case 'dono':
-        case 'diretor':
-          navigate('/painel-admin');
-          break;
-        case 'gerente':
-          navigate('/painel-gerente');
-          break;
-        case 'analista':
-          navigate('/relatorios');
-          break;
-        default:
-          navigate('/home');
+      // Verificar se é o e-mail do administrador principal
+      if (formData.email === 'isac.soares23@gmail.com') {
+        console.log('Admin login detected, redirecting to PainelAdmin');
+        navigate('/painel-admin');
+        toast.success('Bem-vindo ao Painel Administrativo!');
+      } else {
+        console.log('Regular user login, redirecting to home');
+        navigate('/home');
+        toast.success('Login realizado com sucesso!');
       }
-
-      toast.success('Login realizado com sucesso!');
     } catch (error) {
       toast.error('Erro no login. Verifique suas credenciais.');
     } finally {
