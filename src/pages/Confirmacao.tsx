@@ -11,7 +11,6 @@ const Confirmacao = () => {
   useEffect(() => {
     const verifyEmail = async () => {
       const access_token = searchParams.get('access_token');
-      const refresh_token = searchParams.get('refresh_token');
       
       if (!access_token) {
         alert("❌ Token de acesso não encontrado.");
@@ -20,10 +19,9 @@ const Confirmacao = () => {
       }
 
       try {
-        // Set the session using the tokens from the URL
-        const { error } = await supabase.auth.setSession({
-          access_token,
-          refresh_token: refresh_token || ''
+        const { error } = await supabase.auth.verifyOtp({
+          type: 'signup',
+          token: access_token,
         });
 
         if (error) {
