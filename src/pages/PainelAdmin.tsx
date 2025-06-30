@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Users, Wallet, PiggyBank, Activity, Building, Globe, Zap } from 'lucide-react';
+import { ArrowLeft, Users, Wallet, PiggyBank, Activity, Building, Globe, Zap, Receipt, MoveHorizontal, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -24,46 +23,86 @@ const PainelAdmin = () => {
     totalBalance: 2850000,
     pendingAllocations: 5,
     activeSubaccounts: 23,
-    monthlyTransactions: 15678
+    monthlyTransactions: 15678,
+    blockedBalance: 15000,
+    totalRetained: 8500
   };
 
   const renderContent = () => {
     switch (activeTab) {
       case 'overview':
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total de Usuários</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{mockData.totalUsers.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">+12% em relação ao mês passado</p>
-              </CardContent>
-            </Card>
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total de Usuários</CardTitle>
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{mockData.totalUsers.toLocaleString()}</div>
+                  <p className="text-xs text-muted-foreground">+12% em relação ao mês passado</p>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Saldo Total</CardTitle>
-                <Wallet className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">R$ {(mockData.totalBalance / 1000000).toFixed(1)}M</div>
-                <p className="text-xs text-muted-foreground">Carteira-mãe + Subcontas</p>
-              </CardContent>
-            </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Saldo Total</CardTitle>
+                  <Wallet className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">R$ {(mockData.totalBalance / 1000000).toFixed(1)}M</div>
+                  <p className="text-xs text-muted-foreground">Carteira-mãe + Subcontas</p>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Alocações Pendentes</CardTitle>
-                <PiggyBank className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{mockData.pendingAllocations}</div>
-                <p className="text-xs text-muted-foreground">Investimentos Cofrinho</p>
-              </CardContent>
-            </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Saldo Bloqueado</CardTitle>
+                  <Shield className="h-4 w-4 text-red-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-red-600">R$ {mockData.blockedBalance.toLocaleString()}</div>
+                  <p className="text-xs text-muted-foreground">Em análise/retenção</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Ações Rápidas de Controle */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card 
+                className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105"
+                onClick={() => navigate('/transacoes-globais')}
+              >
+                <CardContent className="p-4 text-center">
+                  <Receipt className="w-8 h-8 mx-auto mb-2 text-blue-600" />
+                  <h3 className="font-bold">Transações Globais</h3>
+                  <p className="text-sm text-muted-foreground">Ver todas as movimentações</p>
+                </CardContent>
+              </Card>
+
+              <Card 
+                className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105"
+                onClick={() => navigate('/realocacao-fundos')}
+              >
+                <CardContent className="p-4 text-center">
+                  <MoveHorizontal className="w-8 h-8 mx-auto mb-2 text-orange-600" />
+                  <h3 className="font-bold">Realocação de Fundos</h3>
+                  <p className="text-sm text-muted-foreground">Mover saldo entre contas</p>
+                </CardContent>
+              </Card>
+
+              <Card 
+                className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105"
+                onClick={() => navigate('/auditoria')}
+              >
+                <CardContent className="p-4 text-center">
+                  <Shield className="w-8 h-8 mx-auto mb-2 text-green-600" />
+                  <h3 className="font-bold">Sistema de Auditoria</h3>
+                  <p className="text-sm text-muted-foreground">Logs e segurança</p>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         );
 
@@ -76,14 +115,17 @@ const PainelAdmin = () => {
             <CardContent>
               <div className="space-y-4">
                 {[
-                  { name: 'João Silva', email: 'joao@email.com', balance: 15000, status: 'Ativa' },
-                  { name: 'Maria Santos', email: 'maria@email.com', balance: 8500, status: 'Bloqueada' },
-                  { name: 'Pedro Costa', email: 'pedro@email.com', balance: 22000, status: 'Em Análise' },
+                  { name: 'João Silva', email: 'joao@email.com', balance: 15000, blocked: 0, status: 'Ativa' },
+                  { name: 'Maria Santos', email: 'maria@email.com', balance: 7500, blocked: 1000, status: 'Bloqueada' },
+                  { name: 'Pedro Costa', email: 'pedro@email.com', balance: 22000, blocked: 0, status: 'Em Análise' },
                 ].map((user, index) => (
                   <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
                       <h4 className="font-medium">{user.name}</h4>
                       <p className="text-sm text-muted-foreground">{user.email}</p>
+                      {user.blocked > 0 && (
+                        <p className="text-xs text-red-600">R$ {user.blocked.toLocaleString()} em análise</p>
+                      )}
                     </div>
                     <div className="text-right">
                       <p className="font-medium">R$ {user.balance.toLocaleString()}</p>
@@ -102,15 +144,30 @@ const PainelAdmin = () => {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Carteira-Mãe</CardTitle>
+              <CardTitle>Carteira-Mãe - Controle Total</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                <div className="text-center p-6 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg">
-                  <h3 className="text-3xl font-bold text-[#0057FF]">R$ 2.850.000,00</h3>
-                  <p className="text-muted-foreground">Saldo total disponível</p>
+                <div className="text-center p-6 bg-gradient-to-r from-[#001B3A] to-[#003F5C] text-white rounded-lg">
+                  <h3 className="text-3xl font-bold">R$ 2.850.000,00</h3>
+                  <p className="text-blue-100">Saldo total na carteira-mãe</p>
                 </div>
                 
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 border rounded-lg">
+                    <h4 className="font-medium text-green-600">Total em Subcontas</h4>
+                    <p className="text-2xl font-bold">R$ 2.465.000</p>
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <h4 className="font-medium text-orange-600">Total Retido</h4>
+                    <p className="text-2xl font-bold">R$ {mockData.totalRetained.toLocaleString()}</p>
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <h4 className="font-medium text-red-600">Total Bloqueado</h4>
+                    <p className="text-2xl font-bold">R$ {mockData.blockedBalance.toLocaleString()}</p>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 border rounded-lg">
                     <h4 className="font-medium">Entradas (30 dias)</h4>
@@ -238,8 +295,8 @@ const PainelAdmin = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-[#0057FF] text-white p-6">
+      {/* Header com novo visual espacial */}
+      <div className="bg-gradient-to-r from-[#001B3A] to-[#003F5C] text-white p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <button

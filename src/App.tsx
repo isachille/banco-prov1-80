@@ -30,6 +30,9 @@ import Perfil from "./pages/Perfil";
 import GiftCards from "./pages/GiftCards";
 import OpenFinance from "./pages/OpenFinance";
 import Cofrinho from "./pages/Cofrinho";
+import TransacoesGlobais from "./pages/TransacoesGlobais";
+import RealocacaoFundos from "./pages/RealocacaoFundos";
+import Auditoria from "./pages/Auditoria";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -49,6 +52,9 @@ const App = () => (
             <Route path="/cadastro-pj" element={<CadastroPJ />} />
             <Route path="/conta-analise" element={<ContaAnalise />} />
             <Route path="/painel-admin" element={<PainelAdmin />} />
+            <Route path="/transacoes-globais" element={<TransacoesGlobais />} />
+            <Route path="/realocacao-fundos" element={<RealocacaoFundos />} />
+            <Route path="/auditoria" element={<Auditoria />} />
             <Route path="/home" element={<Layout><Home /></Layout>} />
             <Route path="/cartoes" element={<Layout><Cartoes /></Layout>} />
             <Route path="/transferir" element={<Layout><Transferir /></Layout>} />

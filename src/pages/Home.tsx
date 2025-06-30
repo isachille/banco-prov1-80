@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -14,6 +13,7 @@ const Home = () => {
   const [userData, setUserData] = useState({
     nome: 'João Silva',
     saldo: 2500.45,
+    saldoBloqueado: 150.00,
     limite: 5000.00,
     rendimento: 125.30
   });
@@ -65,14 +65,14 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-      {/* Header com controles */}
-      <div className="bg-[#0057FF] text-white p-4 rounded-b-3xl">
+      {/* Header com novo visual espacial */}
+      <div className="bg-gradient-to-r from-[#001B3A] to-[#003F5C] text-white p-4 rounded-b-3xl">
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center space-x-3">
             <img 
               src="/lovable-uploads/4712549c-a705-4aad-8498-4702dc3cdd8f.png" 
               alt="Banco Pro" 
-              className="h-8 w-auto"
+              className="h-8 w-auto filter brightness-0 invert"
             />
             <div>
               <h1 className="text-xl font-bold">Olá, {userData.nome} 👋</h1>
@@ -82,34 +82,44 @@ const Home = () => {
           <div className="flex space-x-2">
             <button
               onClick={toggleTheme}
-              className="w-9 h-9 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-colors"
+              className="w-9 h-9 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-colors backdrop-blur-sm"
             >
               {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
             </button>
             <button 
               onClick={() => navigate('/perfil')}
-              className="w-9 h-9 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-colors"
+              className="w-9 h-9 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-colors backdrop-blur-sm"
             >
               <User className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* Saldo */}
-        <Card className="bg-white bg-opacity-10 border-0 text-white mb-4">
+        {/* Saldo com novo visual */}
+        <Card className="bg-white bg-opacity-10 border-0 text-white mb-4 backdrop-blur-sm">
           <CardContent className="p-4">
             <div className="flex justify-between items-center mb-3">
               <span className="text-blue-200 text-sm">Saldo disponível</span>
               <button
                 onClick={() => setShowBalance(!showBalance)}
-                className="text-blue-200 hover:text-white"
+                className="text-blue-200 hover:text-white transition-colors"
               >
                 {showBalance ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
-            <div className="text-2xl font-bold mb-3">
+            <div className="text-2xl font-bold mb-2">
               {showBalance ? `R$ ${userData.saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '• • • • •'}
             </div>
+            
+            {/* Sistema de espelho - mostra saldo bloqueado */}
+            {userData.saldoBloqueado > 0 && (
+              <div className="mb-3 p-2 bg-orange-500 bg-opacity-20 rounded border border-orange-400 border-opacity-30">
+                <p className="text-xs text-orange-200">
+                  R$ {userData.saldoBloqueado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} em análise / retenção
+                </p>
+              </div>
+            )}
+            
             <div className="flex justify-between text-xs text-blue-200">
               <span>Limite: R$ {userData.limite.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
               <span>Rendimento: +R$ {userData.rendimento.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
