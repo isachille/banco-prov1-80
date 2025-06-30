@@ -9,7 +9,118 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      transactions: {
+        Row: {
+          criado_em: string | null
+          descricao: string | null
+          id: string
+          tipo: string
+          valor: number
+          wallet_id: string | null
+        }
+        Insert: {
+          criado_em?: string | null
+          descricao?: string | null
+          id?: string
+          tipo: string
+          valor: number
+          wallet_id?: string | null
+        }
+        Update: {
+          criado_em?: string | null
+          descricao?: string | null
+          id?: string
+          tipo?: string
+          valor?: number
+          wallet_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          cpf_cnpj: string
+          criado_em: string | null
+          email: string
+          id: string
+          mae: string | null
+          nascimento: string | null
+          nome_completo: string
+          profissao: string | null
+          role: string | null
+          status: string | null
+          tipo: string
+        }
+        Insert: {
+          cpf_cnpj: string
+          criado_em?: string | null
+          email: string
+          id?: string
+          mae?: string | null
+          nascimento?: string | null
+          nome_completo: string
+          profissao?: string | null
+          role?: string | null
+          status?: string | null
+          tipo: string
+        }
+        Update: {
+          cpf_cnpj?: string
+          criado_em?: string | null
+          email?: string
+          id?: string
+          mae?: string | null
+          nascimento?: string | null
+          nome_completo?: string
+          profissao?: string | null
+          role?: string | null
+          status?: string | null
+          tipo?: string
+        }
+        Relationships: []
+      }
+      wallets: {
+        Row: {
+          atualizado_em: string | null
+          id: string
+          motivo_bloq: string | null
+          saldo: number | null
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          atualizado_em?: string | null
+          id?: string
+          motivo_bloq?: string | null
+          saldo?: number | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          atualizado_em?: string | null
+          id?: string
+          motivo_bloq?: string | null
+          saldo?: number | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

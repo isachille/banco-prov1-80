@@ -5,12 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
-    password: ''
+    senha: ''
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -26,19 +27,40 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      console.log('Login attempt:', formData);
+      console.log('Tentativa de login:', formData);
       
-      // Verificar se é o e-mail do administrador principal
-      if (formData.email === 'isac.soares23@gmail.com') {
-        console.log('Admin login detected, redirecting to PainelAdmin');
-        navigate('/painel-admin');
-        toast.success('Bem-vindo ao Painel Administrativo!');
-      } else {
-        console.log('Regular user login, redirecting to home');
-        navigate('/home');
-        toast.success('Login realizado com sucesso!');
+      // Fazer login usando Supabase
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.senha
+      });
+
+      if (error) {
+        console.error('Erro no login:', error);
+        toast.error('Erro no login: ' + error.message);
+        return;
+      }
+
+      if (data.user && data.session) {
+        console.log('Login bem-sucedido:', data);
+        
+        // Salvar token e user_id globalmente no localStorage
+        localStorage.setItem('token', data.session.access_token);
+        localStorage.setItem('user_id', data.user.id);
+        
+        // Verificar se é o administrador principal
+        if (formData.email === 'isac.soares23@gmail.com') {
+          console.log('Admin login detectado, redirecionando para PainelAdmin');
+          navigate('/painel-admin');
+          toast.success('Bem-vindo ao Painel Administrativo!');
+        } else {
+          console.log('Login de usuário regular, redirecionando para home');
+          navigate('/home');
+          toast.success('Login realizado com sucesso!');
+        }
       }
     } catch (error) {
+      console.error('Erro no login:', error);
       toast.error('Erro no login. Verifique suas credenciais.');
     } finally {
       setIsLoading(false);
@@ -73,9 +95,9 @@ const Login = () => {
             <div>
               <Input
                 type="password"
-                name="password"
+                name="senha"
                 placeholder="Senha"
-                value={formData.password}
+                value={formData.senha}
                 onChange={handleInputChange}
                 required
                 className="h-12"
