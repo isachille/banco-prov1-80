@@ -30,36 +30,44 @@ const Login = () => {
         .from('users')
         .select('status, is_admin, role')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Erro ao buscar dados do usuário:', error);
-        // Se não encontrar o usuário na tabela users, criar um registro básico
-        if (error.code === 'PGRST116') {
-          const { data: authUser } = await supabase.auth.getUser();
-          if (authUser.user) {
-            const { error: insertError } = await supabase
-              .from('users')
-              .insert({
-                id: authUser.user.id,
-                email: authUser.user.email || '',
-                nome: authUser.user.user_metadata?.nome || '',
-                nome_completo: authUser.user.user_metadata?.nome_completo || '',
-                cpf_cnpj: authUser.user.user_metadata?.cpf_cnpj || '',
-                telefone: authUser.user.user_metadata?.telefone || '',
-                tipo: 'cliente',
-                status: 'pendente',
-                role: 'cliente'
-              });
-            
-            if (!insertError) {
-              navigate('/aguardando-aprovacao');
-              return;
-            }
-          }
-        }
-        toast.error('Erro ao verificar status da conta');
+        toast.error('Erro ao verificar dados do usuário');
         return;
+      }
+
+      // Se o usuário não existe na tabela users, criar um registro
+      if (!userData) {
+        console.log('Usuário não encontrado na tabela users, criando registro...');
+        const { data: authUser } = await supabase.auth.getUser();
+        
+        if (authUser.user) {
+          const { error: insertError } = await supabase
+            .from('users')
+            .insert({
+              id: authUser.user.id,
+              email: authUser.user.email || '',
+              nome: authUser.user.user_metadata?.nome || '',
+              nome_completo: authUser.user.user_metadata?.nome_completo || '',
+              cpf_cnpj: authUser.user.user_metadata?.cpf_cnpj || '',
+              telefone: authUser.user.user_metadata?.telefone || '',
+              tipo: 'cliente',
+              status: 'pendente',
+              role: 'cliente'
+            });
+          
+          if (insertError) {
+            console.error('Erro ao criar usuário:', insertError);
+            toast.error('Erro ao criar dados do usuário');
+            return;
+          }
+          
+          console.log('Usuário criado com status pendente');
+          navigate('/aguardando-aprovacao');
+          return;
+        }
       }
 
       console.log('Dados do usuário:', userData);
@@ -91,7 +99,7 @@ const Login = () => {
       }
     } catch (error) {
       console.error('Erro ao verificar status:', error);
-      toast.error('Erro ao verificar status da conta');
+      toast.error('Erro interno ao verificar status da conta');
     }
   };
 
