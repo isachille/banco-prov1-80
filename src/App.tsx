@@ -16,6 +16,7 @@ import CadastroPF from "./pages/CadastroPF";
 import CadastroPJ from "./pages/CadastroPJ";
 import ContaAnalise from "./pages/ContaAnalise";
 import PainelAdmin from "./pages/PainelAdmin";
+import Admin from "./pages/Admin";
 import Home from "./pages/Home";
 import Cartoes from "./pages/Cartoes";
 import Transferir from "./pages/Transferir";
@@ -62,12 +63,12 @@ const App = () => (
             <Route path="/aguardando-aprovacao" element={<AguardandoAprovacao />} />
             <Route path="/conta-recusada" element={<ContaRecusada />} />
             
-            {/* Rota protegida para Admin */}
+            {/* Rotas protegidas para Admin */}
             <Route 
               path="/admin" 
               element={
                 <ProtectedRoute adminOnly={true} requireActive={false}>
-                  <PainelAdmin />
+                  <Admin />
                 </ProtectedRoute>
               } 
             />
@@ -89,6 +90,7 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
+            
             <Route 
               path="/cartoes" 
               element={
