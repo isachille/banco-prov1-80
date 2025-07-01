@@ -592,6 +592,21 @@ export type Database = {
         Args: { user_id: string }
         Returns: boolean
       }
+      upsert_usuario_admin: {
+        Args: {
+          p_email: string
+          p_nome: string
+          p_nome_completo: string
+          p_cpf: string
+          p_cpf_cnpj: string
+          p_telefone: string
+          p_status?: string
+          p_role?: string
+          p_tipo?: string
+          p_senha?: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

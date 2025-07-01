@@ -124,9 +124,11 @@ const Login = () => {
   };
 
   const redirectBasedOnUserData = (userData: any) => {
-    // Verificar se é admin/gerente primeiro
+    console.log('Redirecionando baseado em dados do usuário:', userData);
+    
+    // Verificar se é admin/gerente/dono primeiro - ORDEM IMPORTA
     if (userData.is_admin || userData.role === 'admin' || userData.role === 'gerente' || userData.role === 'dono') {
-      console.log('Usuário é admin, redirecionando para painel-admin');
+      console.log('Usuário é admin/gerente/dono, redirecionando para painel-admin');
       navigate('/painel-admin');
       return;
     }
@@ -146,7 +148,7 @@ const Login = () => {
         navigate('/conta-recusada');
         break;
       default:
-        console.log('Status desconhecido, redirecionando para aguardando-aprovacao');
+        console.log('Status desconhecido:', userData.status, 'redirecionando para aguardando-aprovacao');
         navigate('/aguardando-aprovacao');
     }
   };

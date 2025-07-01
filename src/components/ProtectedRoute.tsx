@@ -57,7 +57,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
                 telefone: session.user.user_metadata?.telefone || '',
                 tipo: 'cliente',
                 status: 'pendente',
-                role: 'cliente'
+                role: 'usuario'
               });
             
             if (!insertError) {
@@ -78,14 +78,17 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
                          userData?.role === 'gerente' || 
                          userData?.role === 'dono';
           
+          console.log('Verificando se é admin:', { isAdmin, userData });
+          
           if (!isAdmin) {
-            console.log('Acesso negado - não é admin');
+            console.log('Acesso negado - não é admin/gerente/dono');
             navigate('/login');
             return;
           }
 
           // Para admins, permitir acesso mesmo com status pendente se allowPendingForAdmin for true
-          if (!allowPendingForAdmin && userData.status !== 'ativo') {
+          if (!allowPendingForAdmin && userData.status !== 'ativo' && userData.role !== 'dono') {
+            console.log('Admin sem status ativo, redirecionando para aguardando aprovação');
             navigate('/aguardando-aprovacao');
             return;
           }
@@ -93,19 +96,27 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
         // Para usuários normais, verificar status
         if (requireActive && !adminOnly) {
-          switch (userData.status) {
-            case 'pendente':
-              navigate('/aguardando-aprovacao');
-              return;
-            case 'recusado':
-              navigate('/conta-recusada');
-              return;
-            case 'ativo':
-              // Continuar normalmente
-              break;
-            default:
-              navigate('/aguardando-aprovacao');
-              return;
+          // Usuários dono/admin sempre passam
+          const isAdminUser = userData?.is_admin || 
+                             userData?.role === 'admin' || 
+                             userData?.role === 'gerente' || 
+                             userData?.role === 'dono';
+          
+          if (!isAdminUser) {
+            switch (userData.status) {
+              case 'pendente':
+                navigate('/aguardando-aprovacao');
+                return;
+              case 'recusado':
+                navigate('/conta-recusada');
+                return;
+              case 'ativo':
+                // Continuar normalmente
+                break;
+              default:
+                navigate('/aguardando-aprovacao');
+                return;
+            }
           }
         }
 
