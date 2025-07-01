@@ -49,6 +49,7 @@ const CadastroPF = () => {
         email: formData.email,
         password: formData.senha,
         options: {
+          emailRedirectTo: `${window.location.origin}/confirmacao`,
           data: {
             nome_completo: formData.nome_completo,
             cpf_cnpj: formData.cpf,
@@ -66,8 +67,8 @@ const CadastroPF = () => {
 
       if (data.user) {
         console.log('Cadastro realizado com sucesso:', data);
-        toast.success('Cadastro realizado com sucesso! Sua conta está em análise.');
-        navigate('/aguardando-aprovacao');
+        toast.success('Cadastro realizado! Verifique seu email para confirmar a conta.');
+        navigate('/login');
       }
     } catch (error) {
       console.error('Erro no cadastro:', error);
@@ -177,6 +178,12 @@ const CadastroPF = () => {
                 {isLoading ? 'Cadastrando...' : 'Criar Conta'}
               </Button>
             </form>
+            
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+              <p className="text-sm text-blue-700">
+                📧 Após o cadastro, você receberá um email de confirmação. Clique no link para ativar sua conta.
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>

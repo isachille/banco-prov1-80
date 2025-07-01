@@ -7,11 +7,13 @@ import { User } from '@supabase/supabase-js';
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireActive?: boolean;
+  adminOnly?: boolean;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
-  requireActive = true 
+  requireActive = true,
+  adminOnly = false
 }) => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
@@ -28,7 +30,22 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
       setUser(session.user);
 
-      if (requireActive) {
+      // Verificar se é rota admin
+      if (adminOnly) {
+        const { data: userData, error } = await supabase
+          .from('users')
+          .select('is_admin')
+          .eq('id', session.user.id)
+          .single();
+
+        if (error || !userData?.is_admin) {
+          console.error('Acesso negado - não é admin:', error);
+          navigate('/login');
+          return;
+        }
+      }
+
+      if (requireActive && !adminOnly) {
         // Verificar status do usuário
         const { data: userData, error } = await supabase
           .from('users')
@@ -75,7 +92,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
 
     return () => subscription.unsubscribe();
-  }, [navigate, requireActive]);
+  }, [navigate, requireActive, adminOnly]);
 
   if (loading) {
     return (

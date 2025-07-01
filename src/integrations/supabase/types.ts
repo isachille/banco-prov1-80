@@ -529,7 +529,7 @@ export type Database = {
       usuarios_pendentes: {
         Row: {
           cpf: string | null
-          criado_em: string | null
+          created_at: string | null
           email: string | null
           id: string | null
           nome: string | null
@@ -537,7 +537,7 @@ export type Database = {
         }
         Insert: {
           cpf?: string | null
-          criado_em?: string | null
+          created_at?: string | null
           email?: string | null
           id?: string | null
           nome?: string | null
@@ -545,7 +545,7 @@ export type Database = {
         }
         Update: {
           cpf?: string | null
-          criado_em?: string | null
+          created_at?: string | null
           email?: string | null
           id?: string | null
           nome?: string | null

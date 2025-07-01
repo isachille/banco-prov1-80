@@ -25,7 +25,7 @@ const ContaRecusada = () => {
           <CardContent className="space-y-6">
             <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-gray-700 leading-relaxed">
-                Sua conta foi recusada. Em caso de dúvidas, entre em contato com suporte@bancopro.com.br ou (61) 98208-4279.
+                Sua conta foi recusada. Em caso de dúvidas, entre em contato pelo WhatsApp (61) 98208-4279 ou suporte@bancopro.com.br.
               </p>
             </div>
             
@@ -33,8 +33,9 @@ const ContaRecusada = () => {
               <h3 className="font-semibold text-gray-800">Possíveis motivos:</h3>
               <ul className="text-sm text-gray-600 space-y-2">
                 <li>• Documentação incompleta ou inválida</li>
-                <li>• Dados inconsistentes</li>
+                <li>• Dados inconsistentes nas informações fornecidas</li>
                 <li>• Não atendimento aos critérios de aprovação</li>
+                <li>• Problemas na verificação de identidade</li>
               </ul>
             </div>
 
@@ -54,19 +55,10 @@ const ContaRecusada = () => {
                 <Button 
                   variant="outline" 
                   className="w-full justify-start"
-                  onClick={() => window.location.href = 'tel:+5561982084279'}
-                >
-                  <Phone className="h-4 w-4 mr-2" />
-                  (61) 98208-4279
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
                   onClick={() => window.open('https://wa.me/5561982084279', '_blank')}
                 >
                   <MessageCircle className="h-4 w-4 mr-2" />
-                  WhatsApp
+                  WhatsApp: (61) 98208-4279
                 </Button>
               </div>
             </div>

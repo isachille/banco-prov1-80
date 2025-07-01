@@ -77,7 +77,9 @@ const Login = () => {
       if (error) {
         console.error('Erro no login:', error);
         if (error.message === 'Invalid login credentials') {
-          toast.error('Email ou senha incorretos. Verifique se você já se cadastrou.');
+          toast.error('Email ou senha incorretos.');
+        } else if (error.message === 'Email not confirmed') {
+          toast.error('Por favor, confirme seu email antes de fazer login. Verifique sua caixa de entrada.');
         } else {
           toast.error('Erro no login: ' + error.message);
         }
@@ -87,9 +89,12 @@ const Login = () => {
       if (data.user && data.session) {
         console.log('Login bem-sucedido:', data);
         
-        // Salvar token e user_id globalmente no localStorage
-        localStorage.setItem('token', data.session.access_token);
-        localStorage.setItem('user_id', data.user.id);
+        // Verificar se o email foi confirmado
+        if (!data.user.email_confirmed_at) {
+          toast.error('Por favor, confirme seu email antes de fazer login.');
+          await supabase.auth.signOut();
+          return;
+        }
         
         toast.success('Login realizado com sucesso!');
         
@@ -161,20 +166,12 @@ const Login = () => {
           </CardContent>
         </Card>
 
-        {/* Card de ajuda para teste */}
-        <Card className="bg-yellow-50 border-yellow-200">
+        {/* Card informativo sobre confirmação de email */}
+        <Card className="bg-blue-50 border-blue-200">
           <CardContent className="p-4">
-            <p className="text-sm text-yellow-800">
-              <strong>Para testar:</strong> Vá em Configurações → Área de Desenvolvimento e clique em "Cadastrar Teste" primeiro!
+            <p className="text-sm text-blue-800">
+              <strong>📧 Confirme seu email:</strong> Após se cadastrar, verifique sua caixa de entrada e clique no link de confirmação para ativar sua conta.
             </p>
-            <Button
-              onClick={() => navigate('/configuracoes')}
-              variant="outline"
-              size="sm"
-              className="mt-2 w-full"
-            >
-              Ir para Configurações
-            </Button>
           </CardContent>
         </Card>
       </div>

@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Clock, Mail, Phone } from 'lucide-react';
+import { Clock, Mail, Phone, MessageCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const AguardandoAprovacao = () => {
   return (
@@ -18,36 +19,47 @@ const AguardandoAprovacao = () => {
             </div>
             <CardTitle className="text-2xl font-bold text-[#0057FF] flex items-center justify-center gap-2">
               <Clock className="h-6 w-6" />
-              Conta em Análise
+              Aguardando Aprovação
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
               <p className="text-gray-700 leading-relaxed">
-                Sua conta está em análise. Assim que for aprovada, você receberá um aviso e poderá movimentar saldos normalmente.
+                Sua conta está aguardando aprovação manual por nossa equipe. Você será notificado assim que ela for validada.
               </p>
             </div>
             
             <div className="space-y-3">
-              <h3 className="font-semibold text-gray-800">Próximos passos:</h3>
+              <h3 className="font-semibold text-gray-800">O que acontece agora:</h3>
               <ul className="text-sm text-gray-600 space-y-2">
-                <li>• Aguarde a análise dos nossos especialistas</li>
+                <li>• Nossa equipe está analisando seus dados</li>
                 <li>• Você receberá uma notificação por email</li>
-                <li>• O processo pode levar até 24 horas</li>
+                <li>• O processo pode levar até 24 horas úteis</li>
+                <li>• Após aprovação, terá acesso completo à plataforma</li>
               </ul>
             </div>
 
-            <div className="pt-4 border-t border-gray-200">
-              <p className="text-sm text-gray-500 mb-2">Precisa de ajuda?</p>
-              <div className="flex justify-center space-x-4 text-sm">
-                <div className="flex items-center gap-1 text-[#0057FF]">
-                  <Mail className="h-4 w-4" />
-                  <span>suporte@bancopro.com.br</span>
-                </div>
-                <div className="flex items-center gap-1 text-[#0057FF]">
-                  <Phone className="h-4 w-4" />
-                  <span>(61) 98208-4279</span>
-                </div>
+            <div className="pt-4 border-t border-gray-200 space-y-4">
+              <p className="text-sm text-gray-800 font-medium">Precisa de ajuda?</p>
+              
+              <div className="space-y-2">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => window.location.href = 'mailto:suporte@bancopro.com.br'}
+                >
+                  <Mail className="h-4 w-4 mr-2" />
+                  suporte@bancopro.com.br
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => window.open('https://wa.me/5561982084279', '_blank')}
+                >
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  WhatsApp: (61) 98208-4279
+                </Button>
               </div>
             </div>
           </CardContent>

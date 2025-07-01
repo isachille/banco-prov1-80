@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -5,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Layout from "./components/Layout";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Index from "./pages/Index";
 import Splash from "./pages/Splash";
 import Login from "./pages/Login";
@@ -56,22 +58,142 @@ const App = () => (
             <Route path="/conta-analise" element={<ContaAnalise />} />
             <Route path="/aguardando-aprovacao" element={<AguardandoAprovacao />} />
             <Route path="/conta-recusada" element={<ContaRecusada />} />
-            <Route path="/painel-admin" element={<PainelAdmin />} />
-            <Route path="/transacoes-globais" element={<TransacoesGlobais />} />
-            <Route path="/realocacao-fundos" element={<RealocacaoFundos />} />
-            <Route path="/auditoria" element={<Auditoria />} />
-            <Route path="/home" element={<Layout><Home /></Layout>} />
-            <Route path="/cartoes" element={<Layout><Cartoes /></Layout>} />
-            <Route path="/transferir" element={<Layout><Transferir /></Layout>} />
-            <Route path="/pagar" element={<Layout><Pagar /></Layout>} />
-            <Route path="/investir" element={<Layout><Investir /></Layout>} />
-            <Route path="/configuracoes" element={<Layout><Configuracoes /></Layout>} />
-            <Route path="/ajuda" element={<Layout><Ajuda /></Layout>} />
-            <Route path="/pix" element={<Layout><Pix /></Layout>} />
-            <Route path="/ted" element={<Layout><Ted /></Layout>} />
-            <Route path="/cobranca" element={<Layout><Cobranca /></Layout>} />
-            <Route path="/extrato" element={<Layout><Extrato /></Layout>} />
-            <Route path="/perfil" element={<Layout><Perfil /></Layout>} />
+            
+            {/* Rota protegida para Admin */}
+            <Route 
+              path="/painel-admin" 
+              element={
+                <ProtectedRoute adminOnly={true} requireActive={false}>
+                  <PainelAdmin />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Rotas protegidas que requerem usuário ativo */}
+            <Route 
+              path="/home" 
+              element={
+                <ProtectedRoute>
+                  <Layout><Home /></Layout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/cartoes" 
+              element={
+                <ProtectedRoute>
+                  <Layout><Cartoes /></Layout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/transferir" 
+              element={
+                <ProtectedRoute>
+                  <Layout><Transferir /></Layout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/pagar" 
+              element={
+                <ProtectedRoute>
+                  <Layout><Pagar /></Layout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/investir" 
+              element={
+                <ProtectedRoute>
+                  <Layout><Investir /></Layout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/configuracoes" 
+              element={
+                <ProtectedRoute>
+                  <Layout><Configuracoes /></Layout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/ajuda" 
+              element={
+                <ProtectedRoute>
+                  <Layout><Ajuda /></Layout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/pix" 
+              element={
+                <ProtectedRoute>
+                  <Layout><Pix /></Layout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/ted" 
+              element={
+                <ProtectedRoute>
+                  <Layout><Ted /></Layout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/cobranca" 
+              element={
+                <ProtectedRoute>
+                  <Layout><Cobranca /></Layout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/extrato" 
+              element={
+                <ProtectedRoute>
+                  <Layout><Extrato /></Layout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/perfil" 
+              element={
+                <ProtectedRoute>
+                  <Layout><Perfil /></Layout>
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Rotas especiais protegidas */}
+            <Route 
+              path="/transacoes-globais" 
+              element={
+                <ProtectedRoute adminOnly={true} requireActive={false}>
+                  <TransacoesGlobais />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/realocacao-fundos" 
+              element={
+                <ProtectedRoute adminOnly={true} requireActive={false}>
+                  <RealocacaoFundos />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/auditoria" 
+              element={
+                <ProtectedRoute adminOnly={true} requireActive={false}>
+                  <Auditoria />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Rotas sem proteção específica */}
             <Route path="/financiamento" element={<Financiamento />} />
             <Route path="/gift-cards" element={<GiftCards />} />
             <Route path="/open-finance" element={<OpenFinance />} />
