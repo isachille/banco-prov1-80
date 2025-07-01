@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -57,7 +56,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
                 telefone: session.user.user_metadata?.telefone || '',
                 tipo: 'cliente',
                 status: 'pendente',
-                role: 'cliente' // Mudança aqui: usar 'cliente' em vez de 'usuario'
+                role: 'usuario' // Usando 'usuario' que deve ser permitido pela constraint
               });
             
             if (!insertError) {

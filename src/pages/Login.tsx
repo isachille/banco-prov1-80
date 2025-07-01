@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -61,7 +60,7 @@ const Login = () => {
             telefone: authUser.user.user_metadata?.telefone || '',
             tipo: 'cliente',
             status: 'pendente',
-            role: 'cliente' // Mudança aqui: usar 'cliente' em vez de 'usuario'
+            role: 'usuario' // Usando 'usuario' que deve ser permitido pela constraint
           };
 
           console.log('Tentando inserir usuário com dados:', newUserData);
