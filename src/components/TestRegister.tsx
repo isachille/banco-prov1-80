@@ -48,50 +48,68 @@ const TestRegister = () => {
         return;
       }
 
-      if (data.user) {
+      if (data.user && data.session) {
         console.log('Cadastro realizado:', data);
         
-        // Inserir dados na tabela users
-        const { error: insertError } = await supabase
-          .from('users')
-          .insert([
-            {
-              id: data.user.id,
-              email: formData.email,
-              nome_completo: formData.nome_completo,
-              cpf_cnpj: formData.cpf_cnpj,
-              tipo: formData.tipo,
-              is_admin: formData.email === 'isac.soares23@gmail.com',
-              status: 'ativo'
-            }
-          ]);
+        // Salvar token para usar na chamada REST
+        const token = data.session.access_token;
+        const userId = data.user.id;
+        
+        // Inserir dados na tabela users via REST API
+        const response = await fetch('https://hjcvpozwjyydbegrcskq.supabase.co/rest/v1/users', {
+          method: 'POST',
+          headers: {
+            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqY3Zwb3p3anl5ZGJlZ3Jjc2txIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyNDU1NzYsImV4cCI6MjA2NjgyMTU3Nn0.ndEdb2KTe0LfPfFis41H4hU4mNBnlvizcHhYtIBkeUE',
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            id: userId,
+            email: formData.email,
+            nome_completo: formData.nome_completo,
+            cpf_cnpj: formData.cpf_cnpj,
+            tipo: formData.tipo,
+            is_admin: formData.email === 'isac.soares23@gmail.com',
+            status: 'ativo'
+          })
+        });
 
-        if (insertError) {
-          console.error('Erro ao inserir dados do usuário:', insertError);
-          toast.error('Erro ao salvar dados: ' + insertError.message);
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('Erro ao inserir dados do usuário:', errorData);
+          toast.error('Erro ao salvar dados: ' + JSON.stringify(errorData));
           return;
         }
+
+        console.log('Dados do usuário salvos via REST API');
 
         // Criar carteira para o usuário
-        const { error: walletError } = await supabase
-          .from('wallets')
-          .insert([
-            {
-              user_id: data.user.id,
-              saldo: 1000,
-              status: 'ativa'
-            }
-          ]);
+        const walletResponse = await fetch('https://hjcvpozwjyydbegrcskq.supabase.co/rest/v1/wallets', {
+          method: 'POST',
+          headers: {
+            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqY3Zwb3p3anl5ZGJlZ3Jjc2txIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyNDU1NzYsImV4cCI6MjA2NjgyMTU3Nn0.ndEdb2KTe0LfPfFis41H4hU4mNBnlvizcHhYtIBkeUE',
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            user_id: userId,
+            saldo: 1000,
+            status: 'ativa'
+          })
+        });
 
-        if (walletError) {
-          console.error('Erro ao criar carteira:', walletError);
-          toast.error('Erro ao criar carteira: ' + walletError.message);
+        if (!walletResponse.ok) {
+          const walletErrorData = await walletResponse.json();
+          console.error('Erro ao criar carteira:', walletErrorData);
+          toast.error('Erro ao criar carteira: ' + JSON.stringify(walletErrorData));
           return;
         }
 
+        console.log('Carteira criada via REST API');
+
         toast.success('Usuário de teste criado com sucesso!');
-        console.log('Token de acesso:', data.session?.access_token);
-        console.log('User ID:', data.user.id);
+        console.log('Token de acesso:', token);
+        console.log('User ID:', userId);
       }
     } catch (error) {
       console.error('Erro no cadastro:', error);
