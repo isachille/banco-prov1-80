@@ -44,62 +44,110 @@ const Login = () => {
         const { data: authUser } = await supabase.auth.getUser();
         
         if (authUser.user) {
+          console.log('Dados do auth user:', {
+            id: authUser.user.id,
+            email: authUser.user.email,
+            metadata: authUser.user.user_metadata
+          });
+
+          const newUserData = {
+            id: authUser.user.id,
+            email: authUser.user.email || '',
+            nome: authUser.user.user_metadata?.nome || '',
+            nome_completo: authUser.user.user_metadata?.nome_completo || '',
+            cpf_cnpj: authUser.user.user_metadata?.cpf_cnpj || '',
+            telefone: authUser.user.user_metadata?.telefone || '',
+            tipo: 'cliente',
+            status: 'pendente',
+            role: 'usuario'
+          };
+
+          console.log('Tentando inserir usuário com dados:', newUserData);
+
           const { error: insertError } = await supabase
             .from('users')
-            .insert({
-              id: authUser.user.id,
-              email: authUser.user.email || '',
-              nome: authUser.user.user_metadata?.nome || '',
-              nome_completo: authUser.user.user_metadata?.nome_completo || '',
-              cpf_cnpj: authUser.user.user_metadata?.cpf_cnpj || '',
-              telefone: authUser.user.user_metadata?.telefone || '',
-              tipo: 'cliente',
-              status: 'pendente',
-              role: 'usuario'
-            });
+            .insert(newUserData);
           
           if (insertError) {
-            console.error('Erro ao criar usuário:', insertError);
-            toast.error('Erro ao criar dados do usuário');
-            return;
+            console.error('Erro detalhado ao criar usuário:', {
+              code: insertError.code,
+              message: insertError.message,
+              details: insertError.details,
+              hint: insertError.hint
+            });
+            
+            // Verificar se é erro de duplicação
+            if (insertError.code === '23505') {
+              console.log('Usuário já existe, tentando buscar novamente...');
+              // Tentar buscar o usuário novamente
+              const { data: existingUser, error: fetchError } = await supabase
+                .from('users')
+                .select('status, is_admin, role')
+                .eq('id', userId)
+                .maybeSingle();
+              
+              if (fetchError) {
+                console.error('Erro ao buscar usuário existente:', fetchError);
+                toast.error('Erro ao verificar dados do usuário existente');
+                return;
+              }
+              
+              if (existingUser) {
+                console.log('Usuário existente encontrado:', existingUser);
+                // Continuar com a lógica de redirecionamento
+                redirectBasedOnUserData(existingUser);
+                return;
+              }
+            } else {
+              toast.error('Erro ao criar dados do usuário: ' + insertError.message);
+              return;
+            }
           }
           
-          console.log('Usuário criado com status pendente');
+          console.log('Usuário criado com sucesso, redirecionando para aguardando-aprovacao');
           navigate('/aguardando-aprovacao');
+          return;
+        } else {
+          console.error('Não foi possível obter dados do usuário autenticado');
+          toast.error('Erro ao obter dados do usuário');
           return;
         }
       }
 
-      console.log('Dados do usuário:', userData);
+      console.log('Dados do usuário encontrados:', userData);
+      redirectBasedOnUserData(userData);
 
-      // Verificar se é admin/gerente primeiro
-      if (userData.is_admin || userData.role === 'admin' || userData.role === 'gerente' || userData.role === 'dono') {
-        console.log('Usuário é admin, redirecionando para painel-admin');
-        navigate('/painel-admin');
-        return;
-      }
-
-      // Redirecionar baseado no status para usuários normais
-      switch (userData.status) {
-        case 'ativo':
-          console.log('Status ativo, redirecionando para home');
-          navigate('/home');
-          break;
-        case 'pendente':
-          console.log('Status pendente, redirecionando para aguardando-aprovacao');
-          navigate('/aguardando-aprovacao');
-          break;
-        case 'recusado':
-          console.log('Status recusado, redirecionando para conta-recusada');
-          navigate('/conta-recusada');
-          break;
-        default:
-          console.log('Status desconhecido, redirecionando para aguardando-aprovacao');
-          navigate('/aguardando-aprovacao');
-      }
     } catch (error) {
-      console.error('Erro ao verificar status:', error);
+      console.error('Erro geral ao verificar status:', error);
       toast.error('Erro interno ao verificar status da conta');
+    }
+  };
+
+  const redirectBasedOnUserData = (userData: any) => {
+    // Verificar se é admin/gerente primeiro
+    if (userData.is_admin || userData.role === 'admin' || userData.role === 'gerente' || userData.role === 'dono') {
+      console.log('Usuário é admin, redirecionando para painel-admin');
+      navigate('/painel-admin');
+      return;
+    }
+
+    // Redirecionar baseado no status para usuários normais
+    switch (userData.status) {
+      case 'ativo':
+        console.log('Status ativo, redirecionando para home');
+        navigate('/home');
+        break;
+      case 'pendente':
+        console.log('Status pendente, redirecionando para aguardando-aprovacao');
+        navigate('/aguardando-aprovacao');
+        break;
+      case 'recusado':
+        console.log('Status recusado, redirecionando para conta-recusada');
+        navigate('/conta-recusada');
+        break;
+      default:
+        console.log('Status desconhecido, redirecionando para aguardando-aprovacao');
+        navigate('/aguardando-aprovacao');
     }
   };
 
