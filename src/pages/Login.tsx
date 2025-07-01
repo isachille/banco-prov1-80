@@ -24,26 +24,29 @@ const Login = () => {
 
   const redirectUserByStatus = async () => {
     try {
-      // 1. Verificar se o email foi confirmado
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      // Verificar sessão e dados do usuário
+      const { data: { user }, error: sessionError } = await supabase.auth.getUser();
       
-      if (userError || !user) {
-        console.error('Erro ao obter usuário:', userError);
+      if (sessionError || !user) {
+        console.error('Erro ao obter usuário:', sessionError);
         toast.error('Erro ao verificar usuário');
         return;
       }
 
-      console.log('Usuário autenticado:', user.id);
+      console.log('Usuário logado:', user.id);
       console.log('Email confirmado em:', user.email_confirmed_at);
 
-      // 2. Se email não foi confirmado, redirecionar para confirmar email
+      // Verificar se email foi confirmado
       if (!user.email_confirmed_at) {
         console.log('Email não confirmado, redirecionando para confirme-email');
         navigate('/confirme-email');
         return;
       }
 
-      // 3. Buscar dados do usuário na tabela users
+      // Aguardar um pouco para garantir que os dados estão sincronizados
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Buscar dados do usuário na tabela users
       const { data: userData, error } = await supabase
         .from('users')
         .select('status, is_admin, role')
@@ -58,29 +61,26 @@ const Login = () => {
 
       console.log('Dados do usuário encontrados:', userData);
 
-      // 4. Se não encontrou o usuário, o trigger ainda não rodou
+      // Se usuário não foi encontrado na tabela, pode estar em processo de criação
       if (!userData) {
         console.log('Usuário não encontrado na tabela users, redirecionando para confirme-email');
         navigate('/confirme-email');
         return;
       }
 
-      // 5. Verificar se é admin/gerente/dono primeiro - PRIORIDADE MÁXIMA
+      // Verificar se é admin/gerente/dono primeiro
       const isAdminUser = userData.is_admin === true || 
                          userData.role === 'admin' || 
                          userData.role === 'gerente' || 
                          userData.role === 'dono';
       
-      console.log('É usuário admin/gerente/dono?', isAdminUser);
-      
       if (isAdminUser) {
-        console.log('REDIRECIONANDO PARA PAINEL ADMIN - Usuário é:', userData.role);
+        console.log('Redirecionando admin para painel-admin');
         navigate('/painel-admin');
         return;
       }
 
-      // 6. Redirecionar baseado no status para usuários normais
-      console.log('Usuário normal, verificando status:', userData.status);
+      // Redirecionar baseado no status
       switch (userData.status) {
         case 'ativo':
           console.log('Status ativo, redirecionando para home');
@@ -95,12 +95,12 @@ const Login = () => {
           navigate('/conta-recusada');
           break;
         default:
-          console.log('Status desconhecido:', userData.status, 'redirecionando para aguardando-aprovacao');
+          console.log('Status desconhecido, redirecionando para aguardando-aprovacao');
           navigate('/aguardando-aprovacao');
       }
 
     } catch (error) {
-      console.error('Erro geral ao verificar status:', error);
+      console.error('Erro ao verificar status:', error);
       toast.error('Erro interno ao verificar status da conta');
     }
   };
@@ -110,10 +110,7 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      console.log('Tentativa de login:', formData.email);
-      
-      // Limpar qualquer sessão anterior
-      await supabase.auth.signOut();
+      console.log('Tentativa de login para:', formData.email);
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
@@ -137,7 +134,7 @@ const Login = () => {
         console.log('Login bem-sucedido:', data.user.id);
         toast.success('Login realizado com sucesso!');
         
-        // Aguardar um pouco para garantir que a sessão foi estabelecida
+        // Aguardar para garantir sessão estabelecida
         setTimeout(() => {
           redirectUserByStatus();
         }, 500);

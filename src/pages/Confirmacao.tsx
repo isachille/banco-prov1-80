@@ -3,48 +3,43 @@ import React, { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
+import { toast } from 'sonner';
 
 const Confirmacao = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    const verifyEmail = async () => {
-      // Pegar os tokens da URL
-      const access_token = searchParams.get('access_token');
-      const refresh_token = searchParams.get('refresh_token');
-      const token_hash = searchParams.get('token_hash');
-      const type = searchParams.get('type');
-      
-      console.log('Parâmetros recebidos:', { access_token, refresh_token, token_hash, type });
-
-      // Se não tiver os tokens necessários, redirecionar para login
-      if (!access_token && !token_hash) {
-        console.log("Tokens não encontrados, redirecionando para login");
-        navigate('/login');
-        return;
-      }
-
+    const handleEmailConfirmation = async () => {
       try {
+        // Pegar os parâmetros da URL
+        const access_token = searchParams.get('access_token');
+        const refresh_token = searchParams.get('refresh_token');
+        const token_hash = searchParams.get('token_hash');
+        const type = searchParams.get('type');
+
+        console.log('Parâmetros de confirmação:', { access_token, refresh_token, token_hash, type });
+
+        // Verificar se temos os tokens necessários
+        if (!access_token && !token_hash) {
+          console.log('Tokens não encontrados, redirecionando para login');
+          navigate('/login');
+          return;
+        }
+
         let result;
 
-        // Verificar se é confirmação de email (signup)
-        if (type === 'signup' || type === 'email') {
-          if (token_hash && type) {
-            // Usar verifyOtp para confirmação de email
-            result = await supabase.auth.verifyOtp({
-              token_hash,
-              type: 'email'
-            });
-          } else if (access_token) {
-            // Usar setSession como fallback
-            result = await supabase.auth.setSession({
-              access_token,
-              refresh_token: refresh_token || ''
-            });
-          }
-        } else if (access_token) {
-          // Para outros tipos, usar setSession
+        // Usar verifyOtp com token_hash se disponível
+        if (token_hash && type) {
+          console.log('Usando verifyOtp com token_hash');
+          result = await supabase.auth.verifyOtp({
+            token_hash,
+            type: type as any
+          });
+        } 
+        // Usar setSession com access_token se disponível
+        else if (access_token) {
+          console.log('Usando setSession com access_token');
           result = await supabase.auth.setSession({
             access_token,
             refresh_token: refresh_token || ''
@@ -53,24 +48,33 @@ const Confirmacao = () => {
 
         if (result?.error) {
           console.error('Erro na confirmação:', result.error);
-          throw result.error;
+          toast.error('Erro ao confirmar email: ' + result.error.message);
+          navigate('/login');
+          return;
         }
 
-        console.log("E-mail confirmado com sucesso!", result);
-        
-        // Aguardar um pouco para garantir que a sessão foi estabelecida
-        setTimeout(() => {
-          navigate('/email-confirmado');
-        }, 1000);
+        if (result?.data?.user) {
+          console.log('Email confirmado com sucesso!', result.data.user.id);
+          toast.success('Email confirmado com sucesso!');
+          
+          // Aguardar um pouco para garantir que a sessão foi estabelecida
+          setTimeout(() => {
+            navigate('/email-confirmado');
+          }, 1000);
+        } else {
+          console.log('Não foi possível confirmar o email');
+          toast.error('Não foi possível confirmar o email');
+          navigate('/login');
+        }
 
       } catch (error) {
-        console.error('Erro ao confirmar e-mail:', error);
+        console.error('Erro geral na confirmação:', error);
+        toast.error('Erro ao confirmar email');
         navigate('/login');
       }
     };
 
-    // Executa a verificação automaticamente quando a página carrega
-    verifyEmail();
+    handleEmailConfirmation();
   }, [searchParams, navigate]);
 
   return (
@@ -83,7 +87,7 @@ const Confirmacao = () => {
             className="h-16 w-auto mx-auto mb-6"
           />
           <h1 className="text-3xl font-bold text-[#0057FF] mb-4">
-            Verificando seu e-mail...
+            Confirmando seu e-mail...
           </h1>
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0057FF] mx-auto"></div>
           <p className="text-muted-foreground mt-4">

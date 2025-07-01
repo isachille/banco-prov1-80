@@ -9,25 +9,30 @@ import { toast } from 'sonner';
 
 const EmailConfirmado = () => {
   const navigate = useNavigate();
-  const [countdown, setCountdown] = useState(5);
+  const [countdown, setCountdown] = useState(3);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const setupUserAccount = async () => {
       try {
+        // Verificar sessão atual
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
+          console.log('Nenhuma sessão encontrada, redirecionando para login');
           navigate('/login');
           return;
         }
 
-        console.log('Sessão confirmada:', session.user.id);
+        console.log('Sessão confirmada para usuário:', session.user.id);
 
-        // Verificar se o usuário já existe na tabela users
+        // Aguardar um pouco para os triggers do banco processarem
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Verificar se o usuário existe na tabela users
         const { data: userData, error: userError } = await supabase
           .from('users')
-          .select('id, status')
+          .select('id, status, is_admin, role')
           .eq('id', session.user.id)
           .maybeSingle();
 
@@ -35,28 +40,35 @@ const EmailConfirmado = () => {
           console.error('Erro ao verificar usuário:', userError);
         }
 
-        // Se o usuário não existe, aguardar o trigger criar
+        console.log('Dados do usuário:', userData);
+
+        // Se usuário não existe ainda, aguardar mais um pouco
         if (!userData) {
-          console.log('Aguardando criação do usuário via trigger...');
-          // Aguardar 2 segundos para o trigger processar
-          setTimeout(async () => {
-            await setupUserAccount();
-          }, 2000);
-          return;
+          console.log('Usuário ainda não foi criado, aguardando mais...');
+          await new Promise(resolve => setTimeout(resolve, 3000));
+          
+          // Tentar novamente
+          const { data: userData2 } = await supabase
+            .from('users')
+            .select('id, status, is_admin, role')
+            .eq('id', session.user.id)
+            .maybeSingle();
+          
+          if (!userData2) {
+            console.log('Usuário ainda não foi criado após aguardar');
+            toast.error('Erro ao configurar conta. Tente fazer login novamente.');
+            navigate('/login');
+            return;
+          }
         }
 
-        // Verificar se já tem carteira
-        const { data: walletData, error: walletError } = await supabase
+        // Verificar/criar carteira
+        const { data: walletData } = await supabase
           .from('wallets')
           .select('id')
           .eq('user_id', session.user.id)
           .maybeSingle();
 
-        if (walletError) {
-          console.error('Erro ao verificar carteira:', walletError);
-        }
-
-        // Se não tem carteira, criar uma
         if (!walletData) {
           console.log('Criando carteira para o usuário...');
           const { error: createWalletError } = await supabase
@@ -64,7 +76,7 @@ const EmailConfirmado = () => {
             .insert({
               user_id: session.user.id,
               saldo: 0,
-              limite: 1000, // Limite inicial de R$ 1.000
+              limite: 1000,
               rendimento_mes: 0,
               status: 'ativa'
             });
@@ -74,7 +86,7 @@ const EmailConfirmado = () => {
             toast.error('Erro ao criar carteira');
           } else {
             console.log('Carteira criada com sucesso!');
-            toast.success('Carteira criada com sucesso!');
+            toast.success('Carteira digital ativada!');
           }
         }
 
@@ -94,7 +106,7 @@ const EmailConfirmado = () => {
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          navigate('/login');
+          navigate('/home');
           return 0;
         }
         return prev - 1;
@@ -105,7 +117,7 @@ const EmailConfirmado = () => {
   }, [navigate]);
 
   const handleContinue = () => {
-    navigate('/login');
+    navigate('/home');
   };
 
   if (loading) {
@@ -120,7 +132,7 @@ const EmailConfirmado = () => {
             />
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0057FF] mx-auto mb-4"></div>
             <p className="text-muted-foreground">
-              Configurando sua conta...
+              Ativando sua conta...
             </p>
           </CardContent>
         </Card>
@@ -152,7 +164,7 @@ const EmailConfirmado = () => {
               🎉 Parabéns!
             </CardTitle>
             <p className="text-xl font-semibold text-gray-800">
-              Sua conta foi verificada com sucesso!
+              Sua conta foi ativada com sucesso!
             </p>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -202,7 +214,7 @@ const EmailConfirmado = () => {
               </div>
               
               <p className="text-sm text-gray-600 font-medium">
-                Redirecionamento automático para login em {countdown} segundos...
+                Redirecionamento automático em {countdown} segundos...
               </p>
               
               <Button 
@@ -210,7 +222,7 @@ const EmailConfirmado = () => {
                 onClick={handleContinue}
               >
                 <ArrowRight className="h-5 w-5 mr-2" />
-                Fazer Login
+                Acessar Minha Conta
               </Button>
             </div>
           </CardContent>
