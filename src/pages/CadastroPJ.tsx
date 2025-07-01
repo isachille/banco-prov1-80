@@ -24,7 +24,6 @@ const CadastroPJ = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     
-    // Aplicar máscara para CNPJ
     if (name === 'cnpj') {
       const maskedValue = value
         .replace(/\D/g, '')
@@ -34,7 +33,6 @@ const CadastroPJ = () => {
         .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
       setFormData({ ...formData, [name]: maskedValue });
     }
-    // Aplicar máscara para telefone
     else if (name === 'telefone') {
       const maskedValue = value
         .replace(/\D/g, '')
@@ -64,14 +62,12 @@ const CadastroPJ = () => {
       return false;
     }
 
-    // Validar CNPJ (formato básico)
     const cnpjLimpo = formData.cnpj.replace(/\D/g, '');
     if (cnpjLimpo.length !== 14) {
       toast.error('CNPJ deve ter 14 dígitos');
       return false;
     }
 
-    // Validar email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       toast.error('Email inválido');
@@ -91,7 +87,7 @@ const CadastroPJ = () => {
     try {
       console.log('Iniciando cadastro PJ:', formData);
 
-      // Registrar no Supabase Auth com metadados
+      // Apenas Supabase Auth SignUp - triggers automáticos criarão os registros
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.senha,
@@ -120,7 +116,7 @@ const CadastroPJ = () => {
 
       console.log('Cadastro PJ realizado:', data);
       toast.success('Cadastro realizado! Verifique seu email para confirmar a conta.');
-      navigate('/login');
+      navigate('/confirme-email');
 
     } catch (error) {
       console.error('Erro no cadastro:', error);
@@ -243,15 +239,6 @@ const CadastroPJ = () => {
                 Já tem conta? Faça login
               </button>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Card informativo */}
-        <Card className="bg-blue-50 border-blue-200">
-          <CardContent className="p-4">
-            <p className="text-sm text-blue-800">
-              <strong>📧 Confirme seu email:</strong> Após o cadastro, verifique sua caixa de entrada e clique no link de confirmação para ativar sua conta.
-            </p>
           </CardContent>
         </Card>
       </div>

@@ -24,7 +24,6 @@ const CadastroPF = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     
-    // Aplicar máscara para CPF
     if (name === 'cpf') {
       const maskedValue = value
         .replace(/\D/g, '')
@@ -33,7 +32,6 @@ const CadastroPF = () => {
         .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
       setFormData({ ...formData, [name]: maskedValue });
     }
-    // Aplicar máscara para telefone
     else if (name === 'telefone') {
       const maskedValue = value
         .replace(/\D/g, '')
@@ -63,14 +61,12 @@ const CadastroPF = () => {
       return false;
     }
 
-    // Validar CPF (formato básico)
     const cpfLimpo = formData.cpf.replace(/\D/g, '');
     if (cpfLimpo.length !== 11) {
       toast.error('CPF deve ter 11 dígitos');
       return false;
     }
 
-    // Validar email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       toast.error('Email inválido');
@@ -88,9 +84,9 @@ const CadastroPF = () => {
     setIsLoading(true);
 
     try {
-      console.log('Iniciando cadastro:', formData);
+      console.log('Iniciando cadastro PF:', formData);
 
-      // Registrar no Supabase Auth com metadados
+      // Apenas Supabase Auth SignUp - triggers automáticos criarão os registros
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.senha,
@@ -119,7 +115,7 @@ const CadastroPF = () => {
 
       console.log('Cadastro realizado:', data);
       toast.success('Cadastro realizado! Verifique seu email para confirmar a conta.');
-      navigate('/login');
+      navigate('/confirme-email');
 
     } catch (error) {
       console.error('Erro no cadastro:', error);
@@ -242,15 +238,6 @@ const CadastroPF = () => {
                 Já tem conta? Faça login
               </button>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Card informativo */}
-        <Card className="bg-blue-50 border-blue-200">
-          <CardContent className="p-4">
-            <p className="text-sm text-blue-800">
-              <strong>📧 Confirme seu email:</strong> Após o cadastro, verifique sua caixa de entrada e clique no link de confirmação para ativar sua conta.
-            </p>
           </CardContent>
         </Card>
       </div>

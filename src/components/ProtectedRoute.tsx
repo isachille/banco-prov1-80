@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,14 +8,12 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
   requireActive?: boolean;
   adminOnly?: boolean;
-  allowPendingForAdmin?: boolean;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
   requireActive = true,
-  adminOnly = false,
-  allowPendingForAdmin = false
+  adminOnly = false
 }) => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
@@ -34,42 +33,34 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         console.log('Sessão encontrada:', session.user.id);
         setUser(session.user);
 
+        // Verificar se o email foi confirmado
+        if (!session.user.email_confirmed_at) {
+          console.log('Email não confirmado, redirecionando para confirme-email');
+          navigate('/confirme-email');
+          return;
+        }
+
         // Buscar dados do usuário na tabela users
         const { data: userData, error } = await supabase
           .from('users')
           .select('status, is_admin, role')
           .eq('id', session.user.id)
-          .single();
+          .maybeSingle();
 
         if (error) {
           console.error('Erro ao verificar dados do usuário:', error);
-          // Se não encontrar o usuário, criar um registro básico
-          if (error.code === 'PGRST116') {
-            const { error: insertError } = await supabase
-              .from('users')
-              .insert({
-                id: session.user.id,
-                email: session.user.email || '',
-                nome: session.user.user_metadata?.nome || '',
-                nome_completo: session.user.user_metadata?.nome_completo || '',
-                cpf_cnpj: session.user.user_metadata?.cpf_cnpj || '',
-                telefone: session.user.user_metadata?.telefone || '',
-                tipo: 'cliente',
-                status: 'pendente',
-                role: 'usuario' // Usando 'usuario' que deve ser permitido pela constraint
-              });
-            
-            if (!insertError) {
-              navigate('/aguardando-aprovacao');
-              return;
-            }
-          }
           navigate('/login');
           return;
         }
 
+        // Se não encontrou o usuário, o trigger ainda não rodou
+        if (!userData) {
+          console.log('Usuário não encontrado na tabela users, redirecionando para confirme-email');
+          navigate('/confirme-email');
+          return;
+        }
+
         console.log('Dados do usuário na proteção:', userData);
-        console.log('AdminOnly:', adminOnly, 'RequireActive:', requireActive);
 
         // Verificar se é rota admin
         if (adminOnly) {
@@ -81,8 +72,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           console.log('Verificando se é admin:', { 
             isAdmin, 
             is_admin: userData?.is_admin, 
-            role: userData?.role,
-            userData 
+            role: userData?.role 
           });
           
           if (!isAdmin) {
@@ -102,12 +92,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
                              userData?.role === 'gerente' || 
                              userData?.role === 'dono';
           
-          console.log('Verificando status para usuário:', {
-            isAdminUser,
-            status: userData.status,
-            role: userData.role
-          });
-          
           if (!isAdminUser) {
             switch (userData.status) {
               case 'pendente':
@@ -120,7 +104,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
                 return;
               case 'ativo':
                 console.log('Status ativo, permitindo acesso');
-                // Continuar normalmente
                 break;
               default:
                 console.log('Status desconhecido, redirecionando para aguardando aprovação');
@@ -154,7 +137,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
 
     return () => subscription.unsubscribe();
-  }, [navigate, requireActive, adminOnly, allowPendingForAdmin]);
+  }, [navigate, requireActive, adminOnly]);
 
   if (loading) {
     return (
