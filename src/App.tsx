@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -35,6 +34,8 @@ import TransacoesGlobais from "./pages/TransacoesGlobais";
 import RealocacaoFundos from "./pages/RealocacaoFundos";
 import Auditoria from "./pages/Auditoria";
 import NotFound from "./pages/NotFound";
+import AguardandoAprovacao from "./pages/AguardandoAprovacao";
+import ContaRecusada from "./pages/ContaRecusada";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,8 @@ const App = () => (
             <Route path="/cadastro-pf" element={<CadastroPF />} />
             <Route path="/cadastro-pj" element={<CadastroPJ />} />
             <Route path="/conta-analise" element={<ContaAnalise />} />
+            <Route path="/aguardando-aprovacao" element={<AguardandoAprovacao />} />
+            <Route path="/conta-recusada" element={<ContaRecusada />} />
             <Route path="/painel-admin" element={<PainelAdmin />} />
             <Route path="/transacoes-globais" element={<TransacoesGlobais />} />
             <Route path="/realocacao-fundos" element={<RealocacaoFundos />} />

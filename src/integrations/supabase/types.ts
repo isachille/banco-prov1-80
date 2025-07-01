@@ -60,6 +60,27 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "cards_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_ativos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cards_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_pendentes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cards_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_recusados"
+            referencedColumns: ["id"]
+          },
         ]
       }
       contratos_aceitos: {
@@ -90,6 +111,27 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contratos_aceitos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_ativos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contratos_aceitos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_pendentes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contratos_aceitos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_recusados"
             referencedColumns: ["id"]
           },
         ]
@@ -127,6 +169,27 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "notificacoes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_ativos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notificacoes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_pendentes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notificacoes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_recusados"
+            referencedColumns: ["id"]
+          },
         ]
       }
       suporte: {
@@ -157,6 +220,27 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suporte_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_ativos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suporte_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_pendentes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suporte_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_recusados"
             referencedColumns: ["id"]
           },
         ]
@@ -240,10 +324,52 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "transactions_from_user_fkey"
+            columns: ["from_user"]
+            isOneToOne: false
+            referencedRelation: "usuarios_ativos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_from_user_fkey"
+            columns: ["from_user"]
+            isOneToOne: false
+            referencedRelation: "usuarios_pendentes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_from_user_fkey"
+            columns: ["from_user"]
+            isOneToOne: false
+            referencedRelation: "usuarios_recusados"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "transactions_to_user_fkey"
             columns: ["to_user"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_to_user_fkey"
+            columns: ["to_user"]
+            isOneToOne: false
+            referencedRelation: "usuarios_ativos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_to_user_fkey"
+            columns: ["to_user"]
+            isOneToOne: false
+            referencedRelation: "usuarios_pendentes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_to_user_fkey"
+            columns: ["to_user"]
+            isOneToOne: false
+            referencedRelation: "usuarios_recusados"
             referencedColumns: ["id"]
           },
           {
@@ -257,45 +383,60 @@ export type Database = {
       }
       users: {
         Row: {
+          cpf: string | null
           cpf_cnpj: string
+          created_at: string | null
           criado_em: string | null
           email: string
           id: string
           is_admin: boolean | null
           mae: string | null
           nascimento: string | null
+          nome: string | null
           nome_completo: string
           profissao: string | null
           role: string | null
+          senha: string | null
           status: string | null
+          telefone: string | null
           tipo: string
         }
         Insert: {
+          cpf?: string | null
           cpf_cnpj: string
+          created_at?: string | null
           criado_em?: string | null
           email: string
           id?: string
           is_admin?: boolean | null
           mae?: string | null
           nascimento?: string | null
+          nome?: string | null
           nome_completo: string
           profissao?: string | null
           role?: string | null
+          senha?: string | null
           status?: string | null
+          telefone?: string | null
           tipo: string
         }
         Update: {
+          cpf?: string | null
           cpf_cnpj?: string
+          created_at?: string | null
           criado_em?: string | null
           email?: string
           id?: string
           is_admin?: boolean | null
           mae?: string | null
           nascimento?: string | null
+          nome?: string | null
           nome_completo?: string
           profissao?: string | null
           role?: string | null
+          senha?: string | null
           status?: string | null
+          telefone?: string | null
           tipo?: string
         }
         Relationships: []
@@ -333,11 +474,112 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "wallets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_ativos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wallets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_pendentes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wallets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_recusados"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      usuarios_ativos: {
+        Row: {
+          cpf: string | null
+          criado_em: string | null
+          email: string | null
+          id: string | null
+          nome: string | null
+          telefone: string | null
+        }
+        Insert: {
+          cpf?: string | null
+          criado_em?: string | null
+          email?: string | null
+          id?: string | null
+          nome?: string | null
+          telefone?: string | null
+        }
+        Update: {
+          cpf?: string | null
+          criado_em?: string | null
+          email?: string | null
+          id?: string | null
+          nome?: string | null
+          telefone?: string | null
+        }
+        Relationships: []
+      }
+      usuarios_pendentes: {
+        Row: {
+          cpf: string | null
+          criado_em: string | null
+          email: string | null
+          id: string | null
+          nome: string | null
+          telefone: string | null
+        }
+        Insert: {
+          cpf?: string | null
+          criado_em?: string | null
+          email?: string | null
+          id?: string | null
+          nome?: string | null
+          telefone?: string | null
+        }
+        Update: {
+          cpf?: string | null
+          criado_em?: string | null
+          email?: string | null
+          id?: string | null
+          nome?: string | null
+          telefone?: string | null
+        }
+        Relationships: []
+      }
+      usuarios_recusados: {
+        Row: {
+          cpf: string | null
+          criado_em: string | null
+          email: string | null
+          id: string | null
+          nome: string | null
+          telefone: string | null
+        }
+        Insert: {
+          cpf?: string | null
+          criado_em?: string | null
+          email?: string | null
+          id?: string | null
+          nome?: string | null
+          telefone?: string | null
+        }
+        Update: {
+          cpf?: string | null
+          criado_em?: string | null
+          email?: string | null
+          id?: string | null
+          nome?: string | null
+          telefone?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never

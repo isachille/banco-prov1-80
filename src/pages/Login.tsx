@@ -22,6 +22,46 @@ const Login = () => {
     });
   };
 
+  const redirectUserByStatus = async (userId: string) => {
+    try {
+      const { data: userData, error } = await supabase
+        .from('users')
+        .select('status, is_admin')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.error('Erro ao buscar dados do usuário:', error);
+        toast.error('Erro ao verificar status da conta');
+        return;
+      }
+
+      // Verificar se é admin
+      if (userData.is_admin) {
+        navigate('/painel-admin');
+        return;
+      }
+
+      // Redirecionar baseado no status
+      switch (userData.status) {
+        case 'ativo':
+          navigate('/home');
+          break;
+        case 'pendente':
+          navigate('/aguardando-aprovacao');
+          break;
+        case 'recusado':
+          navigate('/conta-recusada');
+          break;
+        default:
+          navigate('/aguardando-aprovacao');
+      }
+    } catch (error) {
+      console.error('Erro ao verificar status:', error);
+      toast.error('Erro ao verificar status da conta');
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -29,7 +69,6 @@ const Login = () => {
     try {
       console.log('Tentativa de login:', formData);
       
-      // Fazer login usando Supabase
       const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.senha
@@ -52,44 +91,10 @@ const Login = () => {
         localStorage.setItem('token', data.session.access_token);
         localStorage.setItem('user_id', data.user.id);
         
-        // Buscar dados do usuário na tabela users
-        console.log('Buscando dados do usuário...');
-        try {
-          const { data: userData, error: userError } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', data.user.id)
-            .single();
-
-          if (userError) {
-            console.error('Erro ao buscar dados do usuário:', userError);
-            // Continuar mesmo se não conseguir buscar os dados do usuário
-            toast.success('Login realizado! (Dados do perfil não encontrados, mas você pode continuar)');
-          } else if (userData) {
-            console.log('Dados do usuário:', userData);
-            
-            // Salvar dados adicionais do usuário
-            localStorage.setItem('nome_completo', userData.nome_completo || '');
-            localStorage.setItem('cpf', userData.cpf_cnpj || '');
-            localStorage.setItem('tipo', userData.tipo || '');
-            localStorage.setItem('status', userData.status || '');
-            localStorage.setItem('is_admin', userData.is_admin ? 'true' : 'false');
-            
-            toast.success('Login realizado com sucesso!');
-          }
-        } catch (userFetchError) {
-          console.error('Erro ao buscar dados do usuário:', userFetchError);
-          toast.success('Login realizado! (Erro ao carregar perfil, mas você pode continuar)');
-        }
+        toast.success('Login realizado com sucesso!');
         
-        // Verificar se é o administrador principal
-        if (formData.email === 'isac.soares23@gmail.com') {
-          console.log('Admin login detectado, redirecionando para PainelAdmin');
-          navigate('/painel-admin');
-        } else {
-          console.log('Login de usuário regular, redirecionando para home');
-          navigate('/home');
-        }
+        // Redirecionar baseado no status
+        await redirectUserByStatus(data.user.id);
       }
     } catch (error) {
       console.error('Erro no login:', error);
