@@ -1,0 +1,214 @@
+
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+
+const TestRegister = () => {
+  const [formData, setFormData] = useState({
+    email: 'isac.soares23@gmail.com',
+    senha: 'a33776734',
+    nome_completo: 'Isac Soares',
+    cpf_cnpj: '12345678901',
+    tipo: 'PF'
+  });
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleTestRegister = async () => {
+    setIsLoading(true);
+    
+    try {
+      console.log('Iniciando cadastro de teste:', formData);
+      
+      // Fazer cadastro usando Supabase
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.senha,
+        options: {
+          data: {
+            nome_completo: formData.nome_completo,
+            cpf_cnpj: formData.cpf_cnpj,
+            tipo: formData.tipo
+          }
+        }
+      });
+
+      if (error) {
+        console.error('Erro no cadastro:', error);
+        toast.error('Erro no cadastro: ' + error.message);
+        return;
+      }
+
+      if (data.user) {
+        console.log('Cadastro realizado:', data);
+        
+        // Inserir dados na tabela users
+        const { error: insertError } = await supabase
+          .from('users')
+          .insert([
+            {
+              id: data.user.id,
+              email: formData.email,
+              nome_completo: formData.nome_completo,
+              cpf_cnpj: formData.cpf_cnpj,
+              tipo: formData.tipo,
+              is_admin: formData.email === 'isac.soares23@gmail.com',
+              status: 'ativo'
+            }
+          ]);
+
+        if (insertError) {
+          console.error('Erro ao inserir dados do usuário:', insertError);
+          toast.error('Erro ao salvar dados: ' + insertError.message);
+          return;
+        }
+
+        // Criar carteira para o usuário
+        const { error: walletError } = await supabase
+          .from('wallets')
+          .insert([
+            {
+              user_id: data.user.id,
+              saldo: 1000,
+              status: 'ativa'
+            }
+          ]);
+
+        if (walletError) {
+          console.error('Erro ao criar carteira:', walletError);
+          toast.error('Erro ao criar carteira: ' + walletError.message);
+          return;
+        }
+
+        toast.success('Usuário de teste criado com sucesso!');
+        console.log('Token de acesso:', data.session?.access_token);
+        console.log('User ID:', data.user.id);
+      }
+    } catch (error) {
+      console.error('Erro no cadastro:', error);
+      toast.error('Erro no cadastro. Tente novamente.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleTestLogin = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.senha
+      });
+
+      if (error) {
+        toast.error('Erro no login de teste: ' + error.message);
+        return;
+      }
+
+      if (data.session) {
+        toast.success('Login de teste realizado!');
+        console.log('Token:', data.session.access_token);
+        console.log('User ID:', data.user?.id);
+        
+        // Salvar no localStorage para teste
+        localStorage.setItem('token', data.session.access_token);
+        localStorage.setItem('user_id', data.user?.id || '');
+      }
+    } catch (error) {
+      console.error('Erro no login de teste:', error);
+      toast.error('Erro no login de teste');
+    }
+  };
+
+  return (
+    <Card className="w-full max-w-md">
+      <CardHeader>
+        <CardTitle className="text-lg font-semibold text-[#0057FF]">
+          Cadastro de Teste
+        </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Criar usuário de teste para validar token e funcionalidades
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <Input
+            type="email"
+            name="email"
+            placeholder="E-mail"
+            value={formData.email}
+            onChange={handleInputChange}
+            className="h-10"
+          />
+        </div>
+        <div>
+          <Input
+            type="password"
+            name="senha"
+            placeholder="Senha"
+            value={formData.senha}
+            onChange={handleInputChange}
+            className="h-10"
+          />
+        </div>
+        <div>
+          <Input
+            type="text"
+            name="nome_completo"
+            placeholder="Nome Completo"
+            value={formData.nome_completo}
+            onChange={handleInputChange}
+            className="h-10"
+          />
+        </div>
+        <div>
+          <Input
+            type="text"
+            name="cpf_cnpj"
+            placeholder="CPF"
+            value={formData.cpf_cnpj}
+            onChange={handleInputChange}
+            className="h-10"
+          />
+        </div>
+        
+        <div className="flex gap-2">
+          <Button
+            onClick={handleTestRegister}
+            className="flex-1 bg-[#0057FF] hover:bg-[#0047CC] text-white"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Cadastrando...' : 'Cadastrar Teste'}
+          </Button>
+          
+          <Button
+            onClick={handleTestLogin}
+            variant="outline"
+            className="flex-1"
+          >
+            Login Teste
+          </Button>
+        </div>
+        
+        <div className="mt-4 p-3 bg-gray-50 rounded-md">
+          <p className="text-xs text-gray-600">
+            <strong>Dados pré-definidos:</strong><br/>
+            Email: {formData.email}<br/>
+            Senha: {formData.senha}<br/>
+            Será criado como admin e com saldo inicial de R$ 1.000
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default TestRegister;
