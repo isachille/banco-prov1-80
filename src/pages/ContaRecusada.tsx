@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { XCircle, Mail, Phone, MessageCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const ContaRecusada = () => {
   return (
@@ -25,17 +25,17 @@ const ContaRecusada = () => {
           <CardContent className="space-y-6">
             <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-gray-700 leading-relaxed">
-                Sua conta foi recusada. Em caso de dúvidas, entre em contato pelo WhatsApp (61) 98208-4279 ou suporte@bancopro.com.br.
+                Sua conta foi recusada pela nossa equipe de análise. Em caso de dúvidas, entre em contato com nosso suporte.
               </p>
             </div>
             
             <div className="space-y-3">
-              <h3 className="font-semibold text-gray-800">Possíveis motivos:</h3>
+              <h3 className="font-semibold text-gray-800">O que você pode fazer:</h3>
               <ul className="text-sm text-gray-600 space-y-2">
-                <li>• Documentação incompleta ou inválida</li>
-                <li>• Dados inconsistentes nas informações fornecidas</li>
-                <li>• Não atendimento aos critérios de aprovação</li>
-                <li>• Problemas na verificação de identidade</li>
+                <li>• Entre em contato com nosso suporte</li>
+                <li>• Solicite esclarecimentos sobre a recusa</li>
+                <li>• Verifique se seus dados estavam corretos</li>
+                <li>• Considere tentar um novo cadastro com dados atualizados</li>
               </ul>
             </div>
 
@@ -45,7 +45,7 @@ const ContaRecusada = () => {
               <div className="space-y-2">
                 <Button 
                   variant="outline" 
-                  className="w-full justify-start"
+                  className="w-full justify-start border-red-200 hover:bg-red-50"
                   onClick={() => window.location.href = 'mailto:suporte@bancopro.com.br'}
                 >
                   <Mail className="h-4 w-4 mr-2" />
@@ -54,13 +54,23 @@ const ContaRecusada = () => {
                 
                 <Button 
                   variant="outline" 
-                  className="w-full justify-start"
+                  className="w-full justify-start border-red-200 hover:bg-red-50"
                   onClick={() => window.open('https://wa.me/5561982084279', '_blank')}
                 >
                   <MessageCircle className="h-4 w-4 mr-2" />
                   WhatsApp: (61) 98208-4279
                 </Button>
               </div>
+            </div>
+
+            <div className="pt-4">
+              <Button 
+                variant="outline"
+                className="w-full"
+                onClick={() => window.location.href = '/login'}
+              >
+                Voltar ao Login
+              </Button>
             </div>
           </CardContent>
         </Card>

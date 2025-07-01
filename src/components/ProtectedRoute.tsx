@@ -8,12 +8,14 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
   requireActive?: boolean;
   adminOnly?: boolean;
+  allowPendingForAdmin?: boolean;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
   requireActive = true,
-  adminOnly = false
+  adminOnly = false,
+  allowPendingForAdmin = false
 }) => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
@@ -30,53 +32,66 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
       setUser(session.user);
 
-      // Verificar se é rota admin
-      if (adminOnly) {
+      try {
+        // Buscar dados do usuário na tabela users
         const { data: userData, error } = await supabase
           .from('users')
-          .select('is_admin')
-          .eq('id', session.user.id)
-          .single();
-
-        if (error || !userData?.is_admin) {
-          console.error('Acesso negado - não é admin:', error);
-          navigate('/login');
-          return;
-        }
-      }
-
-      if (requireActive && !adminOnly) {
-        // Verificar status do usuário
-        const { data: userData, error } = await supabase
-          .from('users')
-          .select('status')
+          .select('status, is_admin, role')
           .eq('id', session.user.id)
           .single();
 
         if (error) {
-          console.error('Erro ao verificar status:', error);
+          console.error('Erro ao verificar dados do usuário:', error);
           navigate('/login');
           return;
         }
 
-        // Redirecionar baseado no status
-        switch (userData.status) {
-          case 'pendente':
-            navigate('/aguardando-aprovacao');
-            return;
-          case 'recusado':
-            navigate('/conta-recusada');
-            return;
-          case 'ativo':
-            // Continuar normalmente
-            break;
-          default:
-            navigate('/aguardando-aprovacao');
-            return;
-        }
-      }
+        console.log('Dados do usuário na proteção:', userData);
 
-      setLoading(false);
+        // Verificar se é rota admin
+        if (adminOnly) {
+          const isAdmin = userData?.is_admin || 
+                         userData?.role === 'admin' || 
+                         userData?.role === 'gerente' || 
+                         userData?.role === 'dono';
+          
+          if (!isAdmin) {
+            console.error('Acesso negado - não é admin');
+            navigate('/login');
+            return;
+          }
+
+          // Para admins, permitir acesso mesmo com status pendente se allowPendingForAdmin for true
+          if (!allowPendingForAdmin && userData.status !== 'ativo') {
+            navigate('/aguardando-aprovacao');
+            return;
+          }
+        }
+
+        // Para usuários normais, verificar status
+        if (requireActive && !adminOnly) {
+          switch (userData.status) {
+            case 'pendente':
+              navigate('/aguardando-aprovacao');
+              return;
+            case 'recusado':
+              navigate('/conta-recusada');
+              return;
+            case 'ativo':
+              // Continuar normalmente
+              break;
+            default:
+              navigate('/aguardando-aprovacao');
+              return;
+          }
+        }
+
+        setLoading(false);
+
+      } catch (error) {
+        console.error('Erro na verificação de autenticação:', error);
+        navigate('/login');
+      }
     };
 
     checkAuth();
@@ -92,7 +107,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
 
     return () => subscription.unsubscribe();
-  }, [navigate, requireActive, adminOnly]);
+  }, [navigate, requireActive, adminOnly, allowPendingForAdmin]);
 
   if (loading) {
     return (

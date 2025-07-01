@@ -445,7 +445,9 @@ export type Database = {
         Row: {
           atualizado_em: string | null
           id: string
+          limite: number | null
           motivo_bloq: string | null
+          rendimento_mes: number | null
           saldo: number | null
           status: string | null
           user_id: string | null
@@ -453,7 +455,9 @@ export type Database = {
         Insert: {
           atualizado_em?: string | null
           id?: string
+          limite?: number | null
           motivo_bloq?: string | null
+          rendimento_mes?: number | null
           saldo?: number | null
           status?: string | null
           user_id?: string | null
@@ -461,7 +465,9 @@ export type Database = {
         Update: {
           atualizado_em?: string | null
           id?: string
+          limite?: number | null
           motivo_bloq?: string | null
+          rendimento_mes?: number | null
           saldo?: number | null
           status?: string | null
           user_id?: string | null

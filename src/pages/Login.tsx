@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -26,7 +25,7 @@ const Login = () => {
     try {
       const { data: userData, error } = await supabase
         .from('users')
-        .select('status, is_admin')
+        .select('status, is_admin, role')
         .eq('id', userId)
         .single();
 
@@ -36,13 +35,15 @@ const Login = () => {
         return;
       }
 
-      // Verificar se é admin
-      if (userData.is_admin) {
+      console.log('Dados do usuário:', userData);
+
+      // Verificar se é admin/gerente primeiro
+      if (userData.is_admin || userData.role === 'admin' || userData.role === 'gerente' || userData.role === 'dono') {
         navigate('/painel-admin');
         return;
       }
 
-      // Redirecionar baseado no status
+      // Redirecionar baseado no status para usuários normais
       switch (userData.status) {
         case 'ativo':
           navigate('/home');
@@ -98,7 +99,7 @@ const Login = () => {
         
         toast.success('Login realizado com sucesso!');
         
-        // Redirecionar baseado no status
+        // Redirecionar baseado no status e role
         await redirectUserByStatus(data.user.id);
       }
     } catch (error) {
