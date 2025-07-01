@@ -38,6 +38,8 @@ const Login = () => {
         return;
       }
 
+      console.log('Dados do usuário encontrados:', userData);
+
       // Se o usuário não existe na tabela users, criar um registro
       if (!userData) {
         console.log('Usuário não encontrado na tabela users, criando registro...');
@@ -114,7 +116,6 @@ const Login = () => {
         }
       }
 
-      console.log('Dados do usuário encontrados:', userData);
       redirectBasedOnUserData(userData);
 
     } catch (error) {
@@ -125,15 +126,28 @@ const Login = () => {
 
   const redirectBasedOnUserData = (userData: any) => {
     console.log('Redirecionando baseado em dados do usuário:', userData);
+    console.log('Verificando condições de admin:', {
+      is_admin: userData.is_admin,
+      role: userData.role,
+      status: userData.status
+    });
     
-    // Verificar se é admin/gerente/dono primeiro - ORDEM IMPORTA
-    if (userData.is_admin || userData.role === 'admin' || userData.role === 'gerente' || userData.role === 'dono') {
-      console.log('Usuário é admin/gerente/dono, redirecionando para painel-admin');
+    // Verificar se é admin/gerente/dono primeiro - PRIORIDADE MÁXIMA
+    const isAdminUser = userData.is_admin === true || 
+                       userData.role === 'admin' || 
+                       userData.role === 'gerente' || 
+                       userData.role === 'dono';
+    
+    console.log('É usuário admin/gerente/dono?', isAdminUser);
+    
+    if (isAdminUser) {
+      console.log('REDIRECIONANDO PARA PAINEL ADMIN - Usuário é:', userData.role);
       navigate('/painel-admin');
       return;
     }
 
     // Redirecionar baseado no status para usuários normais
+    console.log('Usuário normal, verificando status:', userData.status);
     switch (userData.status) {
       case 'ativo':
         console.log('Status ativo, redirecionando para home');
