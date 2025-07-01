@@ -12,6 +12,9 @@ import Login from "./pages/Login";
 import Confirmacao from "./pages/Confirmacao";
 import ConfirmeEmail from "./pages/ConfirmeEmail";
 import EmailConfirmado from "./pages/EmailConfirmado";
+import Confirmado from "./pages/Confirmado";
+import Pendente from "./pages/Pendente";
+import Recusado from "./pages/Recusado";
 import CadastroTipo from "./pages/CadastroTipo";
 import CadastroPF from "./pages/CadastroPF";
 import CadastroPJ from "./pages/CadastroPJ";
@@ -53,8 +56,11 @@ const App = () => (
             <Route path="/" element={<Splash />} />
             <Route path="/login" element={<Login />} />
             <Route path="/confirmacao" element={<Confirmacao />} />
+            <Route path="/confirmado" element={<Confirmado />} />
             <Route path="/confirme-email" element={<ConfirmeEmail />} />
             <Route path="/email-confirmado" element={<EmailConfirmado />} />
+            <Route path="/pendente" element={<Pendente />} />
+            <Route path="/recusado" element={<Recusado />} />
             <Route path="/cadastro" element={<CadastroTipo />} />
             <Route path="/cadastro-pf" element={<CadastroPF />} />
             <Route path="/cadastro-pj" element={<CadastroPJ />} />
@@ -63,6 +69,14 @@ const App = () => (
             <Route path="/conta-recusada" element={<ContaRecusada />} />
             
             {/* Rota protegida para Admin */}
+            <Route 
+              path="/admin" 
+              element={
+                <ProtectedRoute adminOnly={true} requireActive={false}>
+                  <PainelAdmin />
+                </ProtectedRoute>
+              } 
+            />
             <Route 
               path="/painel-admin" 
               element={

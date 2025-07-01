@@ -592,6 +592,10 @@ export type Database = {
         Args: { user_id: string }
         Returns: boolean
       }
+      sync_all_users: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       upsert_usuario_admin: {
         Args: {
           p_email: string

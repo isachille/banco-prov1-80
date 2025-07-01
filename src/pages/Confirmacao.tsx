@@ -57,10 +57,8 @@ const Confirmacao = () => {
           console.log('Email confirmado com sucesso!', result.data.user.id);
           toast.success('Email confirmado com sucesso!');
           
-          // Aguardar um pouco para garantir que a sessão foi estabelecida
-          setTimeout(() => {
-            navigate('/email-confirmado');
-          }, 1000);
+          // Redirecionar para a página /confirmado
+          navigate('/confirmado');
         } else {
           console.log('Não foi possível confirmar o email');
           toast.error('Não foi possível confirmar o email');

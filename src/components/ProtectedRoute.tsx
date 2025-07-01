@@ -95,19 +95,19 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           if (!isAdminUser) {
             switch (userData.status) {
               case 'pendente':
-                console.log('Status pendente, redirecionando para aguardando aprovação');
-                navigate('/aguardando-aprovacao');
+                console.log('Status pendente, redirecionando para /pendente');
+                navigate('/pendente');
                 return;
               case 'recusado':
-                console.log('Status recusado, redirecionando para conta recusada');
-                navigate('/conta-recusada');
+                console.log('Status recusado, redirecionando para /recusado');
+                navigate('/recusado');
                 return;
               case 'ativo':
                 console.log('Status ativo, permitindo acesso');
                 break;
               default:
-                console.log('Status desconhecido, redirecionando para aguardando aprovação');
-                navigate('/aguardando-aprovacao');
+                console.log('Status desconhecido, redirecionando para /pendente');
+                navigate('/pendente');
                 return;
             }
           } else {

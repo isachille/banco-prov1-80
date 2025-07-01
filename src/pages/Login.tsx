@@ -75,28 +75,28 @@ const Login = () => {
                          userData.role === 'dono';
       
       if (isAdminUser) {
-        console.log('Redirecionando admin para painel-admin');
-        navigate('/painel-admin');
+        console.log('Redirecionando admin para /admin');
+        navigate('/admin');
         return;
       }
 
-      // Redirecionar baseado no status
+      // Redirecionar baseado no status usando as novas páginas
       switch (userData.status) {
         case 'ativo':
           console.log('Status ativo, redirecionando para home');
           navigate('/home');
           break;
         case 'pendente':
-          console.log('Status pendente, redirecionando para aguardando-aprovacao');
-          navigate('/aguardando-aprovacao');
+          console.log('Status pendente, redirecionando para /pendente');
+          navigate('/pendente');
           break;
         case 'recusado':
-          console.log('Status recusado, redirecionando para conta-recusada');
-          navigate('/conta-recusada');
+          console.log('Status recusado, redirecionando para /recusado');
+          navigate('/recusado');
           break;
         default:
-          console.log('Status desconhecido, redirecionando para aguardando-aprovacao');
-          navigate('/aguardando-aprovacao');
+          console.log('Status desconhecido, redirecionando para /pendente');
+          navigate('/pendente');
       }
 
     } catch (error) {
