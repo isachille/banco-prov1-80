@@ -2,7 +2,7 @@
 import React from 'react';
 import { BankingSidebar } from './BankingSidebar';
 import { BankingDashboard } from './BankingDashboard';
-import { BankingHeader } from './BankingHeader';
+import BankingHeader from './BankingHeader';
 
 export const BankingApp = () => {
   return (
