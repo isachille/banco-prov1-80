@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,19 @@ import { toast } from 'sonner';
 const ConfirmeEmail = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [emailConfirmed, setEmailConfirmed] = useState<boolean>(false);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserEmail(user.email);
+        setEmailConfirmed(!!user.email_confirmed_at);
+      }
+    };
+    checkUser();
+  }, []);
 
   const handleResendEmail = async () => {
     setLoading(true);
@@ -34,13 +47,13 @@ const ConfirmeEmail = () => {
 
       if (error) {
         console.error('Erro ao reenviar e-mail:', error);
-        toast.error('Erro ao reenviar e-mail: ' + error.message);
+        toast.error('❌ Erro ao reenviar e-mail. Tente novamente ou entre em contato com o suporte.');
       } else {
-        toast.success('E-mail de confirmação reenviado com sucesso!');
+        toast.success('✅ E-mail reenviado com sucesso. Verifique sua caixa de entrada.');
       }
     } catch (error) {
       console.error('Erro no reenvio:', error);
-      toast.error('Erro interno ao reenviar e-mail');
+      toast.error('❌ Erro ao reenviar e-mail. Tente novamente ou entre em contato com o suporte.');
     } finally {
       setLoading(false);
     }
@@ -84,14 +97,17 @@ const ConfirmeEmail = () => {
               <p className="text-sm text-gray-800 font-medium">Não recebeu o e-mail?</p>
               
               <div className="space-y-2">
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={handleResendEmail}
-                  disabled={loading}
-                >
-                  {loading ? 'Enviando...' : 'Reenviar E-mail'}
-                </Button>
+                {/* Mostrar botão apenas se o email não foi confirmado */}
+                {!emailConfirmed && (
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={handleResendEmail}
+                    disabled={loading}
+                  >
+                    {loading ? 'Enviando...' : 'Reenviar e-mail de confirmação'}
+                  </Button>
+                )}
                 
                 <Button 
                   variant="outline" 
