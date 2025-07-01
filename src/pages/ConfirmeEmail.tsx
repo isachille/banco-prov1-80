@@ -1,12 +1,50 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Mail, ArrowLeft } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const ConfirmeEmail = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  const handleResendEmail = async () => {
+    setLoading(true);
+    try {
+      // Pegar o email do usuário atual (se ainda estiver na sessão)
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user?.email) {
+        toast.error('Não foi possível encontrar o e-mail. Faça login novamente.');
+        navigate('/login');
+        return;
+      }
+
+      // Reenviar o e-mail de confirmação
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: user.email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/confirmacao`
+        }
+      });
+
+      if (error) {
+        console.error('Erro ao reenviar e-mail:', error);
+        toast.error('Erro ao reenviar e-mail: ' + error.message);
+      } else {
+        toast.success('E-mail de confirmação reenviado com sucesso!');
+      }
+    } catch (error) {
+      console.error('Erro no reenvio:', error);
+      toast.error('Erro interno ao reenviar e-mail');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-900 dark:to-blue-900 flex items-center justify-center p-4 transition-colors duration-300">
@@ -49,9 +87,10 @@ const ConfirmeEmail = () => {
                 <Button 
                   variant="outline" 
                   className="w-full"
-                  onClick={() => window.location.reload()}
+                  onClick={handleResendEmail}
+                  disabled={loading}
                 >
-                  Tentar Novamente
+                  {loading ? 'Enviando...' : 'Reenviar E-mail'}
                 </Button>
                 
                 <Button 

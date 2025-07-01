@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,6 +11,7 @@ import Splash from "./pages/Splash";
 import Login from "./pages/Login";
 import Confirmacao from "./pages/Confirmacao";
 import ConfirmeEmail from "./pages/ConfirmeEmail";
+import EmailConfirmado from "./pages/EmailConfirmado";
 import CadastroTipo from "./pages/CadastroTipo";
 import CadastroPF from "./pages/CadastroPF";
 import CadastroPJ from "./pages/CadastroPJ";
@@ -54,6 +54,7 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/confirmacao" element={<Confirmacao />} />
             <Route path="/confirme-email" element={<ConfirmeEmail />} />
+            <Route path="/email-confirmado" element={<EmailConfirmado />} />
             <Route path="/cadastro" element={<CadastroTipo />} />
             <Route path="/cadastro-pf" element={<CadastroPF />} />
             <Route path="/cadastro-pj" element={<CadastroPJ />} />

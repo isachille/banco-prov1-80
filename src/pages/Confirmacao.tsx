@@ -14,7 +14,7 @@ const Confirmacao = () => {
       const refresh_token = searchParams.get('refresh_token');
       
       if (!access_token) {
-        alert("❌ Token de acesso não encontrado.");
+        console.log("Token de acesso não encontrado, redirecionando para login");
         navigate('/login');
         return;
       }
@@ -30,11 +30,11 @@ const Confirmacao = () => {
           throw error;
         }
 
-        alert("✅ E-mail confirmado com sucesso!");
-        navigate('/login');
+        console.log("E-mail confirmado com sucesso!");
+        // Redirecionar para tela de sucesso
+        navigate('/email-confirmado');
       } catch (error) {
         console.error('Erro ao confirmar e-mail:', error);
-        alert("❌ Erro ao confirmar. Tente novamente.");
         navigate('/login');
       }
     };
