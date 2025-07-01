@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -39,6 +38,7 @@ import Auditoria from "./pages/Auditoria";
 import NotFound from "./pages/NotFound";
 import AguardandoAprovacao from "./pages/AguardandoAprovacao";
 import ContaRecusada from "./pages/ContaRecusada";
+import Confirmado from "./pages/Confirmado";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +54,7 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/pendente" element={<Pendente />} />
             <Route path="/recusado" element={<Recusado />} />
+            <Route path="/confirmado" element={<Confirmado />} />
             <Route path="/cadastro" element={<CadastroTipo />} />
             <Route path="/cadastro-pf" element={<CadastroPF />} />
             <Route path="/cadastro-pj" element={<CadastroPJ />} />
