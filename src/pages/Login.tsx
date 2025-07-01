@@ -48,6 +48,30 @@ const Login = () => {
         localStorage.setItem('token', data.session.access_token);
         localStorage.setItem('user_id', data.user.id);
         
+        // Buscar dados do usuário na tabela users
+        try {
+          const { data: userData, error: userError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', data.user.id)
+            .single();
+
+          if (userError) {
+            console.error('Erro ao buscar dados do usuário:', userError);
+          } else if (userData) {
+            console.log('Dados do usuário:', userData);
+            
+            // Salvar dados adicionais do usuário
+            localStorage.setItem('nome_completo', userData.nome_completo || '');
+            localStorage.setItem('cpf', userData.cpf_cnpj || '');
+            localStorage.setItem('tipo', userData.tipo || '');
+            localStorage.setItem('status', userData.status || '');
+            localStorage.setItem('is_admin', userData.is_admin ? 'true' : 'false');
+          }
+        } catch (userFetchError) {
+          console.error('Erro ao buscar dados do usuário:', userFetchError);
+        }
+        
         // Verificar se é o administrador principal
         if (formData.email === 'isac.soares23@gmail.com') {
           console.log('Admin login detectado, redirecionando para PainelAdmin');

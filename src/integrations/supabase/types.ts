@@ -9,32 +9,243 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      bandeiras_cartao: {
+        Row: {
+          id: number
+          nome: string | null
+        }
+        Insert: {
+          id?: number
+          nome?: string | null
+        }
+        Update: {
+          id?: number
+          nome?: string | null
+        }
+        Relationships: []
+      }
+      cards: {
+        Row: {
+          bandeira: string | null
+          id: string
+          limite: number | null
+          numero_final: string | null
+          status: string | null
+          tipo: string | null
+          user_id: string | null
+        }
+        Insert: {
+          bandeira?: string | null
+          id?: string
+          limite?: number | null
+          numero_final?: string | null
+          status?: string | null
+          tipo?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          bandeira?: string | null
+          id?: string
+          limite?: number | null
+          numero_final?: string | null
+          status?: string | null
+          tipo?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cards_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contratos_aceitos: {
+        Row: {
+          aceito_em: string | null
+          id: string
+          tipo: string | null
+          user_id: string | null
+          versao: string | null
+        }
+        Insert: {
+          aceito_em?: string | null
+          id?: string
+          tipo?: string | null
+          user_id?: string | null
+          versao?: string | null
+        }
+        Update: {
+          aceito_em?: string | null
+          id?: string
+          tipo?: string | null
+          user_id?: string | null
+          versao?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contratos_aceitos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notificacoes: {
+        Row: {
+          corpo: string | null
+          criado_em: string | null
+          id: string
+          lida: boolean | null
+          titulo: string | null
+          user_id: string | null
+        }
+        Insert: {
+          corpo?: string | null
+          criado_em?: string | null
+          id?: string
+          lida?: boolean | null
+          titulo?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          corpo?: string | null
+          criado_em?: string | null
+          id?: string
+          lida?: boolean | null
+          titulo?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificacoes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suporte: {
+        Row: {
+          criado_em: string | null
+          id: string
+          mensagem: string | null
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          criado_em?: string | null
+          id?: string
+          mensagem?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          criado_em?: string | null
+          id?: string
+          mensagem?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suporte_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      taxas: {
+        Row: {
+          descricao: string | null
+          id: number
+          percentual: number | null
+          tipo: string | null
+          valor_fixo: number | null
+        }
+        Insert: {
+          descricao?: string | null
+          id?: number
+          percentual?: number | null
+          tipo?: string | null
+          valor_fixo?: number | null
+        }
+        Update: {
+          descricao?: string | null
+          id?: number
+          percentual?: number | null
+          tipo?: string | null
+          valor_fixo?: number | null
+        }
+        Relationships: []
+      }
+      tipos_transacao: {
+        Row: {
+          id: number
+          nome: string | null
+        }
+        Insert: {
+          id?: number
+          nome?: string | null
+        }
+        Update: {
+          id?: number
+          nome?: string | null
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           criado_em: string | null
           descricao: string | null
+          from_user: string | null
           id: string
           tipo: string
+          to_user: string | null
           valor: number
           wallet_id: string | null
         }
         Insert: {
           criado_em?: string | null
           descricao?: string | null
+          from_user?: string | null
           id?: string
           tipo: string
+          to_user?: string | null
           valor: number
           wallet_id?: string | null
         }
         Update: {
           criado_em?: string | null
           descricao?: string | null
+          from_user?: string | null
           id?: string
           tipo?: string
+          to_user?: string | null
           valor?: number
           wallet_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "transactions_from_user_fkey"
+            columns: ["from_user"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_to_user_fkey"
+            columns: ["to_user"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "transactions_wallet_id_fkey"
             columns: ["wallet_id"]
@@ -50,6 +261,7 @@ export type Database = {
           criado_em: string | null
           email: string
           id: string
+          is_admin: boolean | null
           mae: string | null
           nascimento: string | null
           nome_completo: string
@@ -63,6 +275,7 @@ export type Database = {
           criado_em?: string | null
           email: string
           id?: string
+          is_admin?: boolean | null
           mae?: string | null
           nascimento?: string | null
           nome_completo: string
@@ -76,6 +289,7 @@ export type Database = {
           criado_em?: string | null
           email?: string
           id?: string
+          is_admin?: boolean | null
           mae?: string | null
           nascimento?: string | null
           nome_completo?: string
