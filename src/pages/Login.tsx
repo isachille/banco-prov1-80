@@ -55,7 +55,7 @@ const Login = () => {
               telefone: authUser.user.user_metadata?.telefone || '',
               tipo: 'cliente',
               status: 'pendente',
-              role: 'cliente'
+              role: 'usuario'
             });
           
           if (insertError) {
