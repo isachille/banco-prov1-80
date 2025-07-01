@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,10 +10,6 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Index from "./pages/Index";
 import Splash from "./pages/Splash";
 import Login from "./pages/Login";
-import Confirmacao from "./pages/Confirmacao";
-import ConfirmeEmail from "./pages/ConfirmeEmail";
-import EmailConfirmado from "./pages/EmailConfirmado";
-import Confirmado from "./pages/Confirmado";
 import Pendente from "./pages/Pendente";
 import Recusado from "./pages/Recusado";
 import CadastroTipo from "./pages/CadastroTipo";
@@ -55,10 +52,6 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Splash />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/confirmacao" element={<Confirmacao />} />
-            <Route path="/confirmado" element={<Confirmado />} />
-            <Route path="/confirme-email" element={<ConfirmeEmail />} />
-            <Route path="/email-confirmado" element={<EmailConfirmado />} />
             <Route path="/pendente" element={<Pendente />} />
             <Route path="/recusado" element={<Recusado />} />
             <Route path="/cadastro" element={<CadastroTipo />} />

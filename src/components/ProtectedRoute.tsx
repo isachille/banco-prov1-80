@@ -33,12 +33,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         console.log('Sessão encontrada:', session.user.id);
         setUser(session.user);
 
-        // Verificar se o email foi confirmado
-        if (!session.user.email_confirmed_at) {
-          console.log('Email não confirmado, redirecionando para confirme-email');
-          navigate('/confirme-email');
-          return;
-        }
+        // REMOVIDO: Verificação de email confirmado
+        // Agora permite acesso mesmo sem confirmação de email
 
         // Buscar dados do usuário na tabela users
         const { data: userData, error } = await supabase
@@ -53,11 +49,29 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           return;
         }
 
-        // Se não encontrou o usuário, o trigger ainda não rodou
+        // Se não encontrou o usuário, criar automaticamente
         if (!userData) {
-          console.log('Usuário não encontrado na tabela users, redirecionando para confirme-email');
-          navigate('/confirme-email');
-          return;
+          console.log('Usuário não encontrado na tabela users, criando...');
+          
+          // Criar usuário na tabela users
+          const { error: createError } = await supabase
+            .from('users')
+            .insert({
+              id: session.user.id,
+              email: session.user.email || '',
+              nome_completo: session.user.user_metadata?.nome_completo || session.user.email?.split('@')[0] || '',
+              cpf_cnpj: session.user.user_metadata?.cpf_cnpj || '000.000.000-00',
+              telefone: session.user.user_metadata?.telefone || '',
+              tipo: session.user.user_metadata?.tipo || 'PF',
+              status: 'ativo', // Definindo como ativo diretamente
+              role: 'usuario'
+            });
+
+          if (createError) {
+            console.error('Erro ao criar usuário:', createError);
+          } else {
+            console.log('Usuário criado com sucesso');
+          }
         }
 
         console.log('Dados do usuário na proteção:', userData);
@@ -81,11 +95,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
             return;
           }
 
-          console.log('Acesso autorizado para admin - role:', userData.role);
+          console.log('Acesso autorizado para admin - role:', userData?.role);
         }
 
         // Para usuários normais ou verificações de status
-        if (requireActive && !adminOnly) {
+        if (requireActive && !adminOnly && userData) {
           // Usuários dono/admin sempre passam na verificação de status
           const isAdminUser = userData?.is_admin === true || 
                              userData?.role === 'admin' || 
@@ -106,9 +120,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
                 console.log('Status ativo, permitindo acesso');
                 break;
               default:
-                console.log('Status desconhecido, redirecionando para /pendente');
-                navigate('/pendente');
-                return;
+                console.log('Status desconhecido, permitindo acesso como ativo');
+                break;
             }
           } else {
             console.log('Usuário admin/dono, ignorando verificação de status');

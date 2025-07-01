@@ -34,14 +34,9 @@ const Login = () => {
       }
 
       console.log('Usuário logado:', user.id);
-      console.log('Email confirmado em:', user.email_confirmed_at);
 
-      // Verificar se email foi confirmado
-      if (!user.email_confirmed_at) {
-        console.log('Email não confirmado, redirecionando para confirme-email');
-        navigate('/confirme-email');
-        return;
-      }
+      // REMOVIDO: Verificação de email confirmado
+      // Permite login mesmo sem confirmação de email
 
       // Aguardar um pouco para garantir que os dados estão sincronizados
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -61,10 +56,31 @@ const Login = () => {
 
       console.log('Dados do usuário encontrados:', userData);
 
-      // Se usuário não foi encontrado na tabela, pode estar em processo de criação
+      // Se usuário não foi encontrado na tabela, criar automaticamente
       if (!userData) {
-        console.log('Usuário não encontrado na tabela users, redirecionando para confirme-email');
-        navigate('/confirme-email');
+        console.log('Usuário não encontrado na tabela users, criando...');
+        
+        const { error: createError } = await supabase
+          .from('users')
+          .insert({
+            id: user.id,
+            email: user.email || '',
+            nome_completo: user.user_metadata?.nome_completo || user.email?.split('@')[0] || '',
+            cpf_cnpj: user.user_metadata?.cpf_cnpj || '000.000.000-00',
+            telefone: user.user_metadata?.telefone || '',
+            tipo: user.user_metadata?.tipo || 'PF',
+            status: 'ativo', // Definindo como ativo diretamente
+            role: 'usuario'
+          });
+
+        if (createError) {
+          console.error('Erro ao criar usuário:', createError);
+          toast.error('Erro ao criar dados do usuário');
+          return;
+        }
+
+        console.log('Usuário criado com status ativo');
+        navigate('/home');
         return;
       }
 
@@ -95,8 +111,8 @@ const Login = () => {
           navigate('/recusado');
           break;
         default:
-          console.log('Status desconhecido, redirecionando para /pendente');
-          navigate('/pendente');
+          console.log('Status desconhecido, redirecionando para home');
+          navigate('/home');
       }
 
     } catch (error) {
@@ -121,10 +137,8 @@ const Login = () => {
         console.error('Erro no login:', error);
         if (error.message === 'Invalid login credentials') {
           toast.error('Email ou senha incorretos.');
-        } else if (error.message === 'Email not confirmed') {
-          toast.error('Por favor, confirme seu email antes de fazer login.');
-          navigate('/confirme-email');
         } else {
+          // REMOVIDO: Tratamento específico para "Email not confirmed"
           toast.error('Erro no login: ' + error.message);
         }
         return;
