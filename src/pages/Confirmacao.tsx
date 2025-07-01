@@ -10,29 +10,59 @@ const Confirmacao = () => {
 
   useEffect(() => {
     const verifyEmail = async () => {
+      // Pegar os tokens da URL
       const access_token = searchParams.get('access_token');
       const refresh_token = searchParams.get('refresh_token');
+      const token_hash = searchParams.get('token_hash');
+      const type = searchParams.get('type');
       
-      if (!access_token) {
-        console.log("Token de acesso não encontrado, redirecionando para login");
+      console.log('Parâmetros recebidos:', { access_token, refresh_token, token_hash, type });
+
+      // Se não tiver os tokens necessários, redirecionar para login
+      if (!access_token && !token_hash) {
+        console.log("Tokens não encontrados, redirecionando para login");
         navigate('/login');
         return;
       }
 
       try {
-        // Set the session using the tokens from the URL
-        const { error } = await supabase.auth.setSession({
-          access_token,
-          refresh_token: refresh_token || ''
-        });
+        let result;
 
-        if (error) {
-          throw error;
+        // Verificar se é confirmação de email (signup)
+        if (type === 'signup' || type === 'email') {
+          if (token_hash && type) {
+            // Usar verifyOtp para confirmação de email
+            result = await supabase.auth.verifyOtp({
+              token_hash,
+              type: 'email'
+            });
+          } else if (access_token) {
+            // Usar setSession como fallback
+            result = await supabase.auth.setSession({
+              access_token,
+              refresh_token: refresh_token || ''
+            });
+          }
+        } else if (access_token) {
+          // Para outros tipos, usar setSession
+          result = await supabase.auth.setSession({
+            access_token,
+            refresh_token: refresh_token || ''
+          });
         }
 
-        console.log("E-mail confirmado com sucesso!");
-        // Redirecionar para tela de sucesso
-        navigate('/email-confirmado');
+        if (result?.error) {
+          console.error('Erro na confirmação:', result.error);
+          throw result.error;
+        }
+
+        console.log("E-mail confirmado com sucesso!", result);
+        
+        // Aguardar um pouco para garantir que a sessão foi estabelecida
+        setTimeout(() => {
+          navigate('/email-confirmado');
+        }, 1000);
+
       } catch (error) {
         console.error('Erro ao confirmar e-mail:', error);
         navigate('/login');

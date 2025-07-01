@@ -76,7 +76,7 @@ const ConfirmeEmail = () => {
                 <li>• Verifique sua caixa de entrada</li>
                 <li>• Procure também na pasta de spam</li>
                 <li>• Clique no link de confirmação</li>
-                <li>• Retorne para fazer login</li>
+                <li>• Aguarde o redirecionamento automático</li>
               </ul>
             </div>
 

@@ -94,7 +94,7 @@ const EmailConfirmado = () => {
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          handleContinue();
+          navigate('/login');
           return 0;
         }
         return prev - 1;
@@ -102,57 +102,10 @@ const EmailConfirmado = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [navigate]);
 
-  const handleContinue = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        navigate('/login');
-        return;
-      }
-
-      // Buscar dados do usuário na tabela users
-      const { data: userData, error } = await supabase
-        .from('users')
-        .select('status, role, is_admin')
-        .eq('id', session.user.id)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Erro ao buscar dados do usuário:', error);
-        navigate('/login');
-        return;
-      }
-
-      // Se não encontrou o usuário, aguardar o trigger
-      if (!userData) {
-        console.log('Usuário não encontrado na tabela users, aguardando trigger...');
-        setTimeout(() => {
-          navigate('/home');
-        }, 2000);
-        return;
-      }
-
-      // Verificar se é admin/gerente/dono
-      const isAdminUser = userData.is_admin === true || 
-                         userData.role === 'admin' || 
-                         userData.role === 'gerente' || 
-                         userData.role === 'dono';
-      
-      if (isAdminUser) {
-        navigate('/painel-admin');
-        return;
-      }
-
-      // Para usuários normais, redirecionar para home (independente do status)
-      navigate('/home');
-
-    } catch (error) {
-      console.error('Erro ao verificar status:', error);
-      navigate('/login');
-    }
+  const handleContinue = () => {
+    navigate('/login');
   };
 
   if (loading) {
@@ -217,7 +170,7 @@ const EmailConfirmado = () => {
             </div>
             
             <div className="space-y-3">
-              <h3 className="font-semibold text-gray-800">O que você pode fazer agora:</h3>
+              <h3 className="font-semibold text-gray-800">O que você pode fazer agora:</h3>  
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="flex items-center space-x-2 text-gray-600">
                   <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
@@ -249,7 +202,7 @@ const EmailConfirmado = () => {
               </div>
               
               <p className="text-sm text-gray-600 font-medium">
-                Redirecionamento automático em {countdown} segundos...
+                Redirecionamento automático para login em {countdown} segundos...
               </p>
               
               <Button 
@@ -257,7 +210,7 @@ const EmailConfirmado = () => {
                 onClick={handleContinue}
               >
                 <ArrowRight className="h-5 w-5 mr-2" />
-                Acessar Minha Conta
+                Fazer Login
               </Button>
             </div>
           </CardContent>
