@@ -61,7 +61,7 @@ const Login = () => {
             telefone: authUser.user.user_metadata?.telefone || '',
             tipo: 'cliente',
             status: 'pendente',
-            role: 'usuario'
+            role: 'cliente' // Mudança aqui: usar 'cliente' em vez de 'usuario'
           };
 
           console.log('Tentando inserir usuário com dados:', newUserData);
