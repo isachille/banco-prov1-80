@@ -23,16 +23,18 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        navigate('/login');
-        return;
-      }
-
-      setUser(session.user);
-
       try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          console.log('Nenhuma sessão encontrada, redirecionando para login');
+          navigate('/login');
+          return;
+        }
+
+        console.log('Sessão encontrada:', session.user.id);
+        setUser(session.user);
+
         // Buscar dados do usuário na tabela users
         const { data: userData, error } = await supabase
           .from('users')
@@ -42,6 +44,27 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
         if (error) {
           console.error('Erro ao verificar dados do usuário:', error);
+          // Se não encontrar o usuário, criar um registro básico
+          if (error.code === 'PGRST116') {
+            const { error: insertError } = await supabase
+              .from('users')
+              .insert({
+                id: session.user.id,
+                email: session.user.email || '',
+                nome: session.user.user_metadata?.nome || '',
+                nome_completo: session.user.user_metadata?.nome_completo || '',
+                cpf_cnpj: session.user.user_metadata?.cpf_cnpj || '',
+                telefone: session.user.user_metadata?.telefone || '',
+                tipo: 'cliente',
+                status: 'pendente',
+                role: 'cliente'
+              });
+            
+            if (!insertError) {
+              navigate('/aguardando-aprovacao');
+              return;
+            }
+          }
           navigate('/login');
           return;
         }
@@ -56,7 +79,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
                          userData?.role === 'dono';
           
           if (!isAdmin) {
-            console.error('Acesso negado - não é admin');
+            console.log('Acesso negado - não é admin');
             navigate('/login');
             return;
           }
@@ -98,6 +121,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id);
         if (event === 'SIGNED_OUT' || !session) {
           navigate('/login');
         } else {

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,8 @@ const Login = () => {
 
   const redirectUserByStatus = async (userId: string) => {
     try {
+      console.log('Buscando dados do usuário:', userId);
+      
       const { data: userData, error } = await supabase
         .from('users')
         .select('status, is_admin, role')
@@ -31,6 +34,30 @@ const Login = () => {
 
       if (error) {
         console.error('Erro ao buscar dados do usuário:', error);
+        // Se não encontrar o usuário na tabela users, criar um registro básico
+        if (error.code === 'PGRST116') {
+          const { data: authUser } = await supabase.auth.getUser();
+          if (authUser.user) {
+            const { error: insertError } = await supabase
+              .from('users')
+              .insert({
+                id: authUser.user.id,
+                email: authUser.user.email || '',
+                nome: authUser.user.user_metadata?.nome || '',
+                nome_completo: authUser.user.user_metadata?.nome_completo || '',
+                cpf_cnpj: authUser.user.user_metadata?.cpf_cnpj || '',
+                telefone: authUser.user.user_metadata?.telefone || '',
+                tipo: 'cliente',
+                status: 'pendente',
+                role: 'cliente'
+              });
+            
+            if (!insertError) {
+              navigate('/aguardando-aprovacao');
+              return;
+            }
+          }
+        }
         toast.error('Erro ao verificar status da conta');
         return;
       }
@@ -39,6 +66,7 @@ const Login = () => {
 
       // Verificar se é admin/gerente primeiro
       if (userData.is_admin || userData.role === 'admin' || userData.role === 'gerente' || userData.role === 'dono') {
+        console.log('Usuário é admin, redirecionando para painel-admin');
         navigate('/painel-admin');
         return;
       }
@@ -46,15 +74,19 @@ const Login = () => {
       // Redirecionar baseado no status para usuários normais
       switch (userData.status) {
         case 'ativo':
+          console.log('Status ativo, redirecionando para home');
           navigate('/home');
           break;
         case 'pendente':
+          console.log('Status pendente, redirecionando para aguardando-aprovacao');
           navigate('/aguardando-aprovacao');
           break;
         case 'recusado':
+          console.log('Status recusado, redirecionando para conta-recusada');
           navigate('/conta-recusada');
           break;
         default:
+          console.log('Status desconhecido, redirecionando para aguardando-aprovacao');
           navigate('/aguardando-aprovacao');
       }
     } catch (error) {
@@ -68,7 +100,10 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      console.log('Tentativa de login:', formData);
+      console.log('Tentativa de login:', formData.email);
+      
+      // Limpar qualquer sessão anterior
+      await supabase.auth.signOut();
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
@@ -88,7 +123,7 @@ const Login = () => {
       }
 
       if (data.user && data.session) {
-        console.log('Login bem-sucedido:', data);
+        console.log('Login bem-sucedido:', data.user.id);
         
         // Verificar se o email foi confirmado
         if (!data.user.email_confirmed_at) {
@@ -99,8 +134,10 @@ const Login = () => {
         
         toast.success('Login realizado com sucesso!');
         
-        // Redirecionar baseado no status e role
-        await redirectUserByStatus(data.user.id);
+        // Aguardar um pouco para garantir que a sessão foi estabelecida
+        setTimeout(() => {
+          redirectUserByStatus(data.user.id);
+        }, 500);
       }
     } catch (error) {
       console.error('Erro no login:', error);
