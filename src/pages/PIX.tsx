@@ -1,0 +1,131 @@
+
+import React, { useState } from 'react';
+import { ArrowLeft, Send } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+const PIX = () => {
+  const navigate = useNavigate();
+  const [chavePix, setChavePix] = useState('');
+  const [valor, setValor] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSendPix = async () => {
+    if (!chavePix || !valor) {
+      toast.error('Preencha todos os campos');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('Usuário não autenticado');
+        return;
+      }
+
+      const valorNumerico = parseFloat(valor.replace(',', '.'));
+
+      // Verificar saldo
+      const { data: walletData } = await supabase
+        .from('binance_wallets')
+        .select('balance')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!walletData || walletData.balance < valorNumerico) {
+        toast.error('Saldo insuficiente');
+        return;
+      }
+
+      // Registrar transação
+      const { error } = await supabase
+        .from('binance_transactions')
+        .insert({
+          user_id: user.id,
+          tipo: 'PIX_out',
+          valor: valorNumerico,
+          moeda: 'BRL',
+          chave_pix: chavePix,
+          status: 'concluido',
+          metadata: { chave_pix: chavePix }
+        });
+
+      if (error) throw error;
+
+      // Atualizar saldo
+      await supabase
+        .from('binance_wallets')
+        .update({ balance: walletData.balance - valorNumerico })
+        .eq('user_id', user.id);
+
+      toast.success('PIX enviado com sucesso!');
+      setChavePix('');
+      setValor('');
+    } catch (error) {
+      console.error('Erro ao enviar PIX:', error);
+      toast.error('Erro ao enviar PIX');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="p-6 space-y-6">
+      <div className="flex items-center space-x-4">
+        <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <h1 className="text-2xl font-bold">PIX</h1>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Send className="h-5 w-5" />
+            <span>Enviar PIX</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="chave-pix">Chave PIX</Label>
+            <Input
+              id="chave-pix"
+              placeholder="Digite a chave PIX (CPF, email, telefone ou chave aleatória)"
+              value={chavePix}
+              onChange={(e) => setChavePix(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="valor">Valor (R$)</Label>
+            <Input
+              id="valor"
+              type="number"
+              placeholder="0,00"
+              value={valor}
+              onChange={(e) => setValor(e.target.value)}
+              min="0"
+              step="0.01"
+            />
+          </div>
+
+          <Button 
+            className="w-full"
+            onClick={handleSendPix}
+            disabled={loading}
+          >
+            {loading ? 'Enviando...' : 'Enviar PIX'}
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default PIX;

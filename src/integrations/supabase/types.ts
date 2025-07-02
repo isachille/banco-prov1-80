@@ -94,6 +94,75 @@ export type Database = {
         }
         Relationships: []
       }
+      binance_transactions: {
+        Row: {
+          chave_pix: string | null
+          created_at: string | null
+          destinatario: string | null
+          id: string
+          metadata: Json | null
+          moeda: string | null
+          status: string | null
+          tipo: string
+          user_id: string | null
+          valor: number
+        }
+        Insert: {
+          chave_pix?: string | null
+          created_at?: string | null
+          destinatario?: string | null
+          id?: string
+          metadata?: Json | null
+          moeda?: string | null
+          status?: string | null
+          tipo: string
+          user_id?: string | null
+          valor: number
+        }
+        Update: {
+          chave_pix?: string | null
+          created_at?: string | null
+          destinatario?: string | null
+          id?: string
+          metadata?: Json | null
+          moeda?: string | null
+          status?: string | null
+          tipo?: string
+          user_id?: string | null
+          valor?: number
+        }
+        Relationships: []
+      }
+      binance_wallets: {
+        Row: {
+          balance: number | null
+          created_at: string | null
+          currency: string | null
+          id: string
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          balance?: number | null
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          balance?: number | null
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       cards: {
         Row: {
           bandeira: string | null
@@ -544,6 +613,36 @@ export type Database = {
           },
         ]
       }
+      giftcards: {
+        Row: {
+          codigo: string | null
+          created_at: string | null
+          id: string
+          nome: string
+          status: string | null
+          user_id: string | null
+          valor: number
+        }
+        Insert: {
+          codigo?: string | null
+          created_at?: string | null
+          id?: string
+          nome: string
+          status?: string | null
+          user_id?: string | null
+          valor: number
+        }
+        Update: {
+          codigo?: string | null
+          created_at?: string | null
+          id?: string
+          nome?: string
+          status?: string | null
+          user_id?: string | null
+          valor?: number
+        }
+        Relationships: []
+      }
       notificacoes: {
         Row: {
           corpo: string | null
@@ -689,6 +788,42 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      perfil_kyc: {
+        Row: {
+          cpf: string
+          created_at: string | null
+          data_nascimento: string
+          id: string
+          nome_completo: string
+          nome_mae: string
+          profissao: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          cpf: string
+          created_at?: string | null
+          data_nascimento: string
+          id?: string
+          nome_completo: string
+          nome_mae: string
+          profissao: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          cpf?: string
+          created_at?: string | null
+          data_nascimento?: string
+          id?: string
+          nome_completo?: string
+          nome_mae?: string
+          profissao?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
       pix: {
         Row: {
@@ -868,6 +1003,45 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      propostas_financiamento: {
+        Row: {
+          ano_veiculo: number
+          codigo_proposta: string
+          created_at: string | null
+          id: string
+          parcelas: number
+          status: string | null
+          user_id: string | null
+          valor_entrada: number
+          valor_parcela: number
+          veiculo: string
+        }
+        Insert: {
+          ano_veiculo: number
+          codigo_proposta: string
+          created_at?: string | null
+          id?: string
+          parcelas: number
+          status?: string | null
+          user_id?: string | null
+          valor_entrada: number
+          valor_parcela: number
+          veiculo: string
+        }
+        Update: {
+          ano_veiculo?: number
+          codigo_proposta?: string
+          created_at?: string | null
+          id?: string
+          parcelas?: number
+          status?: string | null
+          user_id?: string | null
+          valor_entrada?: number
+          valor_parcela?: number
+          veiculo?: string
+        }
+        Relationships: []
       }
       relatorios_gerados: {
         Row: {
@@ -1350,6 +1524,33 @@ export type Database = {
         }
         Relationships: []
       }
+      veiculos_pro_motors: {
+        Row: {
+          ano: number
+          ativo: boolean | null
+          id: string
+          marca: string
+          modelo: string
+          preco: number
+        }
+        Insert: {
+          ano: number
+          ativo?: boolean | null
+          id?: string
+          marca: string
+          modelo: string
+          preco: number
+        }
+        Update: {
+          ano?: number
+          ativo?: boolean | null
+          id?: string
+          marca?: string
+          modelo?: string
+          preco?: number
+        }
+        Relationships: []
+      }
       wallets: {
         Row: {
           atualizado_em: string | null
@@ -1507,6 +1708,36 @@ export type Database = {
       }
     }
     Views: {
+      extrato_binance: {
+        Row: {
+          data: string | null
+          id: string | null
+          moeda: string | null
+          status: string | null
+          tipo: string | null
+          user_id: string | null
+          valor: number | null
+        }
+        Insert: {
+          data?: string | null
+          id?: string | null
+          moeda?: string | null
+          status?: string | null
+          tipo?: string | null
+          user_id?: string | null
+          valor?: number | null
+        }
+        Update: {
+          data?: string | null
+          id?: string | null
+          moeda?: string | null
+          status?: string | null
+          tipo?: string | null
+          user_id?: string | null
+          valor?: number | null
+        }
+        Relationships: []
+      }
       usuarios_ativos: {
         Row: {
           cpf: string | null

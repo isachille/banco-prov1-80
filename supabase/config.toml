@@ -41,3 +41,12 @@ verify_jwt = false
 
 [functions.sync-binance-saldo]
 verify_jwt = false
+
+[functions.processar-pix]
+verify_jwt = false
+
+[functions.simular-financiamento]
+verify_jwt = false
+
+[functions.comprar-giftcard]
+verify_jwt = false

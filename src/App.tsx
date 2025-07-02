@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -6,6 +5,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import Layout from "./components/Layout";
 import AdminLayout from "./components/AdminLayout";
+import BankingNavigation from "./components/BankingNavigation";
+import ProtectedRoute from "./components/ProtectedRoute";
+
+// Existing pages
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import CadastroTipo from "./pages/CadastroTipo";
@@ -44,6 +47,16 @@ import Recusado from "./pages/Recusado";
 import GiftCards from "./pages/GiftCards";
 import NotFound from "./pages/NotFound";
 
+// New banking pages
+import Dashboard from "./pages/Dashboard";
+import PIX from "./pages/PIX";
+import Transferencias from "./pages/Transferencias";
+import ExtratoPage from "./pages/ExtratoPage";
+import FinancingPage from "./pages/FinancingPage";
+import GiftCardsPage from "./pages/GiftCardsPage";
+import Investimentos from "./pages/Investimentos";
+import AdminUsers from "./pages/AdminUsers";
+
 // Admin Pages
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminExtrato from "./pages/admin/AdminExtrato";
@@ -59,6 +72,14 @@ import AdminConta from "./pages/admin/AdminConta";
 import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
 
 const queryClient = new QueryClient();
+
+// Layout wrapper for banking pages
+const BankingLayout = ({ children }: { children: React.ReactNode }) => (
+  <div className="min-h-screen bg-gray-50">
+    {children}
+    <BankingNavigation />
+  </div>
+);
 
 function App() {
   return (
@@ -85,11 +106,77 @@ function App() {
               <Route path="/recusado" element={<Recusado />} />
               <Route path="/gift-cards" element={<GiftCards />} />
               
-              {/* Mobile Layout Routes */}
+              {/* Banking App Routes */}
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <BankingLayout>
+                    <Dashboard />
+                  </BankingLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/pix" element={
+                <ProtectedRoute>
+                  <BankingLayout>
+                    <PIX />
+                  </BankingLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/transferencias" element={
+                <ProtectedRoute>
+                  <BankingLayout>
+                    <Transferencias />
+                  </BankingLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/extrato-page" element={
+                <ProtectedRoute>
+                  <BankingLayout>
+                    <ExtratoPage />
+                  </BankingLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/financing-page" element={
+                <ProtectedRoute>
+                  <BankingLayout>
+                    <FinancingPage />
+                  </BankingLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/gift-cards-page" element={
+                <ProtectedRoute>
+                  <BankingLayout>
+                    <GiftCardsPage />
+                  </BankingLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/cofrinho" element={
+                <ProtectedRoute>
+                  <BankingLayout>
+                    <Cofrinho />
+                  </BankingLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/investimentos" element={
+                <ProtectedRoute>
+                  <BankingLayout>
+                    <Investimentos />
+                  </BankingLayout>
+                </ProtectedRoute>
+              } />
+
+              {/* Admin Banking Routes */}
+              <Route path="/admin/users" element={
+                <ProtectedRoute adminOnly>
+                  <BankingLayout>
+                    <AdminUsers />
+                  </BankingLayout>
+                </ProtectedRoute>
+              } />
+              
+              {/* Mobile Layout Routes (legacy) */}
               <Route path="/home" element={<Layout><Home /></Layout>} />
               <Route path="/extrato" element={<Layout><Extrato /></Layout>} />
               <Route path="/cartoes" element={<Layout><Cartoes /></Layout>} />
-              <Route path="/pix" element={<Layout><Pix /></Layout>} />
               <Route path="/ted" element={<Layout><Ted /></Layout>} />
               <Route path="/transferir" element={<Layout><Transferir /></Layout>} />
               <Route path="/cobranca" element={<Layout><Cobranca /></Layout>} />
@@ -100,16 +187,15 @@ function App() {
               <Route path="/realocacao-fundos" element={<Layout><RealocacaoFundos /></Layout>} />
               <Route path="/transacoes-globais" element={<Layout><TransacoesGlobais /></Layout>} />
               <Route path="/auditoria" element={<Layout><Auditoria /></Layout>} />
-              <Route path="/cofrinho" element={<Layout><Cofrinho /></Layout>} />
               <Route path="/perfil" element={<Layout><Perfil /></Layout>} />
               <Route path="/configuracoes" element={<Layout><Configuracoes /></Layout>} />
               <Route path="/ajuda" element={<Layout><Ajuda /></Layout>} />
               
-              {/* Admin Routes - Novo sistema de painel integrado */}
+              {/* Admin Routes - Painel integrado */}
               <Route path="/admin" element={<Admin />} />
               <Route path="/painel-admin" element={<PainelAdmin />} />
               
-              {/* Admin Layout Routes (páginas antigas mantidas) */}
+              {/* Admin Layout Routes (legacy) */}
               <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
               <Route path="/admin/extrato" element={<AdminLayout><AdminExtrato /></AdminLayout>} />
               <Route path="/admin/pix" element={<AdminLayout><AdminPix /></AdminLayout>} />
