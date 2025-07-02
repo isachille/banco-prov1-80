@@ -1429,6 +1429,82 @@ export type Database = {
           },
         ]
       }
+      wallets_cripto_binance: {
+        Row: {
+          atualizado_em: string | null
+          cotacao: number | null
+          id: string
+          moeda: string | null
+          saldo_crypto: number | null
+          saldo_em_brl: number | null
+          subaccount_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          atualizado_em?: string | null
+          cotacao?: number | null
+          id?: string
+          moeda?: string | null
+          saldo_crypto?: number | null
+          saldo_em_brl?: number | null
+          subaccount_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          atualizado_em?: string | null
+          cotacao?: number | null
+          id?: string
+          moeda?: string | null
+          saldo_crypto?: number | null
+          saldo_em_brl?: number | null
+          subaccount_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallets_cripto_binance_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wallets_cripto_binance_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_ativos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wallets_cripto_binance_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_pendentes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wallets_cripto_binance_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_recusados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wallets_cripto_binance_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_ativas"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "wallets_cripto_binance_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_com_usuarios"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
     }
     Views: {
       usuarios_ativos: {

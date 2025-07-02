@@ -1,136 +1,304 @@
 
-import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Check } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { 
+  Gift, 
+  CreditCard, 
+  Smartphone, 
+  ShoppingBag, 
+  Gamepad2, 
+  Music,
+  ArrowLeft,
+  RefreshCw
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const GiftCards = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { toast } = useToast();
-  const card = location.state?.card;
-  
-  const [selectedValue, setSelectedValue] = useState(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [userBalance, setUserBalance] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSyncingBinance, setIsSyncingBinance] = useState(false);
 
-  if (!card) {
-    navigate('/home');
-    return null;
-  }
+  useEffect(() => {
+    const getUserBalance = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: walletData } = await supabase
+          .from('wallets')
+          .select('saldo')
+          .eq('user_id', user.id)
+          .single();
 
-  const handlePurchase = async () => {
-    if (!selectedValue) {
-      toast({
-        title: "Erro",
-        description: "Selecione um valor para continuar",
-        variant: "destructive",
+        if (walletData) {
+          setUserBalance(walletData.saldo || 0);
+        }
+      }
+    };
+
+    getUserBalance();
+  }, []);
+
+  const syncBinanceBalance = async () => {
+    setIsSyncingBinance(true);
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('Usuário não autenticado');
+        return;
+      }
+
+      const response = await fetch('https://hjcvpozwjyydbegrcskq.functions.supabase.co/sync-binance-saldo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: user.id
+        })
       });
+
+      if (!response.ok) {
+        throw new Error('Erro na sincronização');
+      }
+
+      const result = await response.json();
+      
+      if (result.status === 'ok') {
+        // Atualizar o saldo local após sincronização
+        const { data: walletData } = await supabase
+          .from('wallets')
+          .select('saldo')
+          .eq('user_id', user.id)
+          .single();
+
+        if (walletData) {
+          setUserBalance(walletData.saldo || 0);
+        }
+
+        toast.success('Saldo Binance sincronizado com sucesso!');
+      } else {
+        toast.error('Falha na sincronização do saldo Binance');
+      }
+    } catch (error) {
+      console.error('Erro ao sincronizar saldo Binance:', error);
+      toast.error('Erro ao sincronizar saldo Binance');
+    } finally {
+      setIsSyncingBinance(false);
+    }
+  };
+
+  const giftCardCategories = [
+    {
+      icon: ShoppingBag,
+      title: 'E-commerce',
+      description: 'Amazon, Mercado Livre, Americanas',
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+      options: [
+        { name: 'Amazon', values: [50, 100, 200, 500] },
+        { name: 'Mercado Livre', values: [25, 50, 100, 250] },
+        { name: 'Americanas', values: [30, 75, 150, 300] }
+      ]
+    },
+    {
+      icon: Gamepad2,
+      title: 'Gaming',
+      description: 'Steam, PlayStation, Xbox, Nintendo',
+      color: 'text-green-600',
+      bgColor: 'bg-green-50',
+      options: [
+        { name: 'Steam', values: [20, 50, 100, 200] },
+        { name: 'PlayStation', values: [25, 50, 100, 150] },
+        { name: 'Xbox', values: [25, 50, 100, 150] }
+      ]
+    },
+    {
+      icon: Music,
+      title: 'Streaming',
+      description: 'Spotify, Netflix, Disney+, Amazon Prime',
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-50',
+      options: [
+        { name: 'Spotify', values: [15, 30, 60] },
+        { name: 'Netflix', values: [30, 60, 120] },
+        { name: 'Disney+', values: [25, 50, 100] }
+      ]
+    },
+    {
+      icon: Smartphone,
+      title: 'Mobile',
+      description: 'Google Play, App Store, Recarga',
+      color: 'text-orange-600',
+      bgColor: 'bg-orange-50',
+      options: [
+        { name: 'Google Play', values: [10, 25, 50, 100] },
+        { name: 'App Store', values: [10, 25, 50, 100] },
+        { name: 'Recarga Tim', values: [15, 25, 50] }
+      ]
+    }
+  ];
+
+  const handlePurchase = async (service: string, value: number) => {
+    if (userBalance < value) {
+      toast.error('Saldo insuficiente para esta compra');
       return;
     }
 
-    setIsProcessing(true);
+    setIsLoading(true);
     
-    // Simular processamento de pagamento
-    setTimeout(() => {
-      toast({
-        title: "Gift Card adquirido!",
-        description: `${card.name} de R$ ${selectedValue} foi adicionado à sua conta`,
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('Usuário não autenticado');
+        return;
+      }
+
+      const { data, error } = await supabase.rpc('comprar_giftcard', {
+        p_user: user.id,
+        p_servico: service,
+        p_valor: value
       });
-      setIsProcessing(false);
-      navigate('/home');
-    }, 2000);
+
+      if (error) throw error;
+
+      // Atualizar saldo local
+      setUserBalance(prev => prev - value);
+      
+      toast.success(`Gift Card ${service} de R$ ${value} comprado com sucesso!`);
+      
+    } catch (error) {
+      console.error('Erro na compra:', error);
+      toast.error('Erro ao processar a compra');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <div className="bg-[#0057FF] text-white p-6">
-        <div className="flex items-center space-x-4 mb-4">
-          <button
-            onClick={() => navigate('/home')}
-            className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <h1 className="text-xl font-bold">Gift Cards</h1>
-        </div>
-      </div>
-
-      <div className="p-6 -mt-4">
-        <Card className="mb-6">
-          <div className="relative">
-            <img 
-              src={card.image} 
-              alt={card.name}
-              className="w-full h-48 object-cover rounded-t-lg"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-t-lg" />
-            <div className="absolute bottom-0 left-0 p-6 text-white">
-              <h2 className="text-2xl font-bold">{card.name}</h2>
-              <p className="text-sm opacity-90">{card.description}</p>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/home')}
+              className="text-gray-600 hover:text-gray-900"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+                <Gift className="h-6 w-6 mr-2 text-purple-600" />
+                Gift Cards
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                Compre gift cards para suas lojas favoritas
+              </p>
             </div>
           </div>
-          
+        </div>
+
+        {/* Saldo e Sincronização Binance */}
+        <Card className="mb-6">
           <CardContent className="p-6">
-            <h3 className="text-lg font-semibold mb-4 text-foreground">Escolha o valor:</h3>
-            <div className="grid grid-cols-2 gap-3 mb-6">
-              {card.values.map((value) => (
-                <button
-                  key={value}
-                  onClick={() => setSelectedValue(value)}
-                  className={`p-4 rounded-lg border-2 transition-all ${
-                    selectedValue === value
-                      ? 'border-[#0057FF] bg-[#0057FF]/10 text-[#0057FF]'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-[#0057FF]/50'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-lg">R$ {value}</span>
-                    {selectedValue === value && (
-                      <Check className="w-5 h-5 text-[#0057FF]" />
-                    )}
-                  </div>
-                </button>
-              ))}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">Saldo disponível</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {formatCurrency(userBalance)}
+                </p>
+              </div>
+              <Button
+                onClick={syncBinanceBalance}
+                disabled={isSyncingBinance}
+                className="bg-yellow-600 hover:bg-yellow-700 text-white"
+              >
+                {isSyncingBinance ? (
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                )}
+                Sincronizar saldo cripto
+              </Button>
             </div>
-
-            {selectedValue && (
-              <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 mb-6">
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium text-foreground">Total a pagar:</span>
-                    <span className="text-xl font-bold text-[#0057FF]">R$ {selectedValue}</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    O valor será debitado do seu saldo disponível
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-
-            <Button
-              onClick={handlePurchase}
-              disabled={!selectedValue || isProcessing}
-              className="w-full bg-[#0057FF] hover:bg-[#0057FF]/90 text-white py-6 text-lg"
-            >
-              {isProcessing ? 'Processando...' : 'Comprar Gift Card'}
-            </Button>
           </CardContent>
         </Card>
 
-        <Card>
+        {/* Categorias de Gift Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {giftCardCategories.map((category, categoryIndex) => (
+            <Card key={categoryIndex} className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-3">
+                  <div className={`p-2 rounded-lg ${category.bgColor}`}>
+                    <category.icon className={`h-6 w-6 ${category.color}`} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold">{category.title}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {category.description}
+                    </p>
+                  </div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {category.options.map((option, optionIndex) => (
+                    <div key={optionIndex} className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-medium">{option.name}</h4>
+                        <Badge variant="secondary">Disponível</Badge>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {option.values.map((value, valueIndex) => (
+                          <Button
+                            key={valueIndex}
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePurchase(option.name, value)}
+                            disabled={isLoading || userBalance < value}
+                            className="text-sm"
+                          >
+                            {formatCurrency(value)}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Informações importantes */}
+        <Card className="mt-6">
           <CardHeader>
-            <CardTitle className="text-foreground">Como funciona?</CardTitle>
+            <CardTitle className="text-lg">ℹ️ Informações Importantes</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3 text-sm text-muted-foreground">
-              <p>• O gift card será enviado por e-mail em até 5 minutos</p>
-              <p>• Você pode presentear enviando o código para outra pessoa</p>
-              <p>• Os códigos têm validade de 12 meses</p>
-              <p>• Em caso de problemas, entre em contato com nosso suporte</p>
-            </div>
+            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+              <li>• Os gift cards são entregues instantaneamente por email</li>
+              <li>• Códigos válidos por 12 meses a partir da compra</li>
+              <li>• Não é possível cancelar ou reembolsar após a compra</li>
+              <li>• Valores em reais (BRL) - taxas já incluídas</li>
+              <li>• Suporte disponível 24/7 para questões técnicas</li>
+            </ul>
           </CardContent>
         </Card>
       </div>
