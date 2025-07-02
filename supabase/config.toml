@@ -38,3 +38,6 @@ enable_signup = true
 
 [functions.criar-subconta]
 verify_jwt = false
+
+[functions.sync-binance-saldo]
+verify_jwt = false
