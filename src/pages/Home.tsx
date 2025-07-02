@@ -2,10 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Eye, EyeOff, Wallet, TrendingUp, CreditCard, DollarSign, ArrowRight, FileText, Smartphone } from 'lucide-react';
+import { Eye, EyeOff, Wallet, TrendingUp, CreditCard, DollarSign, ArrowRight, FileText, Smartphone, Sun, Moon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '@/contexts/ThemeContext';
+import GiftCardModal from '@/components/GiftCardModal';
 
 interface WalletData {
   id: string;
@@ -22,12 +24,63 @@ interface UserData {
   tipo: string;
 }
 
+interface GiftCard {
+  id: string;
+  name: string;
+  image: string;
+  values: number[];
+  description: string;
+}
+
 const Home = () => {
   const [showBalance, setShowBalance] = useState(false);
   const [walletData, setWalletData] = useState<WalletData | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedGiftCard, setSelectedGiftCard] = useState<GiftCard | null>(null);
+  const [selectedValue, setSelectedValue] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
+
+  const giftCards: GiftCard[] = [
+    {
+      id: 'netflix',
+      name: 'Netflix',
+      image: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=64&h=64&fit=crop&crop=center',
+      values: [25, 50, 100],
+      description: 'Cartão presente Netflix para assinar ou renovar sua conta'
+    },
+    {
+      id: 'steam',
+      name: 'Steam',
+      image: 'https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=64&h=64&fit=crop&crop=center',
+      values: [20, 50, 100, 200],
+      description: 'Créditos Steam para comprar jogos e conteúdo'
+    },
+    {
+      id: 'ifood',
+      name: 'iFood',
+      image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=64&h=64&fit=crop&crop=center',
+      values: [25, 50, 75, 100],
+      description: 'Vale-refeição iFood para seus pedidos favoritos'
+    },
+    {
+      id: 'uber',
+      name: 'Uber',
+      image: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=64&h=64&fit=crop&crop=center',
+      values: [20, 40, 60, 100],
+      description: 'Créditos Uber para viagens e entregas'
+    },
+    {
+      id: 'spotify',
+      name: 'Spotify',
+      image: 'https://images.unsplash.com/photo-1611339555312-e607c8352fd7?w=64&h=64&fit=crop&crop=center',
+      values: [15, 30, 60],
+      description: 'Cartão presente Spotify Premium'
+    }
+  ];
 
   useEffect(() => {
     loadUserData();
@@ -91,6 +144,46 @@ const Home = () => {
     setShowBalance(!showBalance);
   };
 
+  const handleGiftCardClick = (giftCard: GiftCard) => {
+    setSelectedGiftCard(giftCard);
+    setSelectedValue(null);
+    setIsModalOpen(true);
+  };
+
+  const handleConfirmPurchase = async () => {
+    if (!selectedGiftCard || !selectedValue) return;
+
+    setIsProcessing(true);
+    
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Não autenticado');
+
+      const { data, error } = await supabase.rpc('comprar_giftcard', {
+        p_user: session.user.id,
+        p_servico: selectedGiftCard.name,
+        p_valor: selectedValue
+      });
+
+      if (error) throw error;
+
+      toast.success(`✅ ${selectedGiftCard.name} de ${formatCurrency(selectedValue)} adquirido com sucesso!`);
+      
+      // Recarregar dados da carteira
+      await loadUserData();
+      
+      // Fechar modal
+      setIsModalOpen(false);
+      setSelectedGiftCard(null);
+      setSelectedValue(null);
+
+    } catch (error: any) {
+      toast.error(error.message || 'Erro ao processar compra');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -101,7 +194,7 @@ const Home = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Header de boas-vindas */}
+      {/* Header de boas-vindas com botão de tema */}
       <div className="bg-gradient-to-r from-[#0057FF] to-[#0047CC] text-white p-8 rounded-2xl shadow-xl">
         <div className="flex items-center justify-between">
           <div>
@@ -124,12 +217,22 @@ const Home = () => {
               </span>
             </div>
           </div>
-          <div className="text-right opacity-80">
-            <div className="text-6xl font-bold">
-              {new Date().getDate()}
-            </div>
-            <div className="text-lg">
-              {new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+          <div className="flex flex-col items-end space-y-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleTheme}
+              className="text-white hover:bg-white/10"
+            >
+              {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+            </Button>
+            <div className="text-right opacity-80">
+              <div className="text-6xl font-bold">
+                {new Date().getDate()}
+              </div>
+              <div className="text-lg">
+                {new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+              </div>
             </div>
           </div>
         </div>
@@ -246,6 +349,39 @@ const Home = () => {
             </CardContent>
           </Card>
 
+          {/* Gift Cards e Serviços */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-xl">Gift Cards e Serviços</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                {giftCards.map((giftCard) => (
+                  <Card 
+                    key={giftCard.id} 
+                    className="cursor-pointer hover:shadow-lg transition-all duration-200 hover-scale"
+                    onClick={() => handleGiftCardClick(giftCard)}
+                  >
+                    <CardContent className="p-4 text-center">
+                      <img 
+                        src={giftCard.image} 
+                        alt={giftCard.name}
+                        className="w-12 h-12 mx-auto mb-3 rounded-lg object-cover"
+                      />
+                      <h3 className="font-semibold text-sm mb-2">{giftCard.name}</h3>
+                      <div className="text-xs text-muted-foreground mb-3">
+                        A partir de R$ {Math.min(...giftCard.values)}
+                      </div>
+                      <Button size="sm" className="w-full bg-[#0057FF] hover:bg-[#0057FF]/90">
+                        Comprar
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Cards de informações adicionais */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card className="hover-scale">
@@ -285,6 +421,17 @@ const Home = () => {
           </div>
         </>
       )}
+
+      {/* Modal de Gift Card */}
+      <GiftCardModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        giftCard={selectedGiftCard}
+        selectedValue={selectedValue}
+        onValueSelect={setSelectedValue}
+        onConfirmPurchase={handleConfirmPurchase}
+        isProcessing={isProcessing}
+      />
     </div>
   );
 };

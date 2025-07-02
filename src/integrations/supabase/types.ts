@@ -97,6 +97,73 @@ export type Database = {
           },
         ]
       }
+      compras: {
+        Row: {
+          data: string | null
+          id: string
+          servico: string | null
+          user_id: string | null
+          valor: number | null
+        }
+        Insert: {
+          data?: string | null
+          id?: string
+          servico?: string | null
+          user_id?: string | null
+          valor?: number | null
+        }
+        Update: {
+          data?: string | null
+          id?: string
+          servico?: string | null
+          user_id?: string | null
+          valor?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compras_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compras_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_ativos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compras_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_pendentes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compras_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_recusados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compras_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_ativas"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "compras_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_com_usuarios"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       contratos_aceitos: {
         Row: {
           aceito_em: string | null
@@ -737,6 +804,10 @@ export type Database = {
       }
     }
     Functions: {
+      comprar_giftcard: {
+        Args: { p_user: string; p_servico: string; p_valor: number }
+        Returns: string
+      }
       is_admin: {
         Args: { user_id: string }
         Returns: boolean
