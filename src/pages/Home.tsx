@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Eye, EyeOff, Send, ArrowRight, QrCode, Gift, Sun, Moon } from 'lucide-react';
+import { Eye, EyeOff, Send, ArrowRight, QrCode, Gift, Sun, Moon, TrendingUp, PiggyBank, CreditCard } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -272,7 +272,7 @@ const Home = () => {
             </CardContent>
           </Card>
 
-          {/* Ações Rápidas - Grid 2x2 */}
+          {/* Ações Rápidas - Grid 2x3 */}
           <div className="grid grid-cols-2 gap-4">
             <Button 
               variant="outline" 
@@ -309,7 +309,44 @@ const Home = () => {
               <Gift className="h-8 w-8" />
               <span className="text-sm font-semibold">Gift Cards</span>
             </Button>
+
+            <Button 
+              variant="outline" 
+              className="h-20 flex flex-col items-center justify-center space-y-2 rounded-xl border-2 hover:border-[#0047AB] hover:text-[#0047AB] transition-all"
+              onClick={() => navigate('/financiamento')}
+            >
+              <CreditCard className="h-8 w-8" />
+              <span className="text-sm font-semibold">Financiamento</span>
+            </Button>
+
+            <Button 
+              variant="outline" 
+              className="h-20 flex flex-col items-center justify-center space-y-2 rounded-xl border-2 hover:border-[#0047AB] hover:text-[#0047AB] transition-all"
+              onClick={() => navigate('/investir')}
+            >
+              <TrendingUp className="h-8 w-8" />
+              <span className="text-sm font-semibold">Investir</span>
+            </Button>
           </div>
+
+          {/* Cofrinho - Card especial */}
+          <Card className="rounded-2xl bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/20 dark:to-purple-900/20 border-pink-200 dark:border-pink-800">
+            <CardContent className="p-4">
+              <Button 
+                variant="ghost" 
+                className="w-full h-16 flex items-center justify-start space-x-4 hover:bg-pink-100 dark:hover:bg-pink-900/30 transition-all"
+                onClick={() => navigate('/cofrinho')}
+              >
+                <div className="bg-pink-500 p-3 rounded-full">
+                  <PiggyBank className="h-6 w-6 text-white" />
+                </div>
+                <div className="text-left">
+                  <h4 className="font-semibold text-pink-800 dark:text-pink-200">Cofrinho</h4>
+                  <p className="text-sm text-pink-600 dark:text-pink-300">Guarde seu dinheiro</p>
+                </div>
+              </Button>
+            </CardContent>
+          </Card>
 
           {/* Gift Cards em destaque */}
           <Card className="rounded-2xl">
