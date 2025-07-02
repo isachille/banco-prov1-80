@@ -70,28 +70,26 @@ function App() {
               <Route path="/recusado" element={<Recusado />} />
               <Route path="/gift-cards" element={<GiftCards />} />
               
-              <Route path="/" element={<Layout />}>
-                <Route path="home" element={<Home />} />
-                <Route path="admin" element={<Admin />} />
-                <Route path="painel-admin" element={<PainelAdmin />} />
-                <Route path="extrato" element={<Extrato />} />
-                <Route path="cartoes" element={<Cartoes />} />
-                <Route path="pix" element={<Pix />} />
-                <Route path="ted" element={<Ted />} />
-                <Route path="transferir" element={<Transferir />} />
-                <Route path="cobranca" element={<Cobranca />} />
-                <Route path="pagar" element={<Pagar />} />
-                <Route path="investir" element={<Investir />} />
-                <Route path="financiamento" element={<Financiamento />} />
-                <Route path="open-finance" element={<OpenFinance />} />
-                <Route path="realocacao-fundos" element={<RealocacaoFundos />} />
-                <Route path="transacoes-globais" element={<TransacoesGlobais />} />
-                <Route path="auditoria" element={<Auditoria />} />
-                <Route path="cofrinho" element={<Cofrinho />} />
-                <Route path="perfil" element={<Perfil />} />
-                <Route path="configuracoes" element={<Configuracoes />} />
-                <Route path="ajuda" element={<Ajuda />} />
-              </Route>
+              <Route path="/home" element={<Layout><Home /></Layout>} />
+              <Route path="/admin" element={<Layout><Admin /></Layout>} />
+              <Route path="/painel-admin" element={<Layout><PainelAdmin /></Layout>} />
+              <Route path="/extrato" element={<Layout><Extrato /></Layout>} />
+              <Route path="/cartoes" element={<Layout><Cartoes /></Layout>} />
+              <Route path="/pix" element={<Layout><Pix /></Layout>} />
+              <Route path="/ted" element={<Layout><Ted /></Layout>} />
+              <Route path="/transferir" element={<Layout><Transferir /></Layout>} />
+              <Route path="/cobranca" element={<Layout><Cobranca /></Layout>} />
+              <Route path="/pagar" element={<Layout><Pagar /></Layout>} />
+              <Route path="/investir" element={<Layout><Investir /></Layout>} />
+              <Route path="/financiamento" element={<Layout><Financiamento /></Layout>} />
+              <Route path="/open-finance" element={<Layout><OpenFinance /></Layout>} />
+              <Route path="/realocacao-fundos" element={<Layout><RealocacaoFundos /></Layout>} />
+              <Route path="/transacoes-globais" element={<Layout><TransacoesGlobais /></Layout>} />
+              <Route path="/auditoria" element={<Layout><Auditoria /></Layout>} />
+              <Route path="/cofrinho" element={<Layout><Cofrinho /></Layout>} />
+              <Route path="/perfil" element={<Layout><Perfil /></Layout>} />
+              <Route path="/configuracoes" element={<Layout><Configuracoes /></Layout>} />
+              <Route path="/ajuda" element={<Layout><Ajuda /></Layout>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
