@@ -103,30 +103,66 @@ const GiftCards = () => {
         return;
       }
 
-      const response = await fetch('https://hjcvpozwjyydbegrcskq.functions.supabase.co/criar-subconta', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          user_id: user.id
-        })
-      });
+      console.log('Tentando criar subconta para usuário:', user.id);
 
-      if (!response.ok) {
-        throw new Error('Erro na criação da subconta');
-      }
+      // Tentar usar o método do Supabase primeiro
+      try {
+        const { data, error } = await supabase.functions.invoke('criar-subconta', {
+          body: {
+            user_id: user.id
+          }
+        });
 
-      const result = await response.json();
-      
-      if (result.status === 'ok') {
-        toast.success('Subconta Binance criada com sucesso!');
-      } else {
-        toast.error(result.message || 'Erro na criação da subconta Binance');
+        if (error) {
+          console.error('Erro na função Supabase:', error);
+          throw error;
+        }
+
+        console.log('Resposta da função:', data);
+
+        if (data?.status === 'ok') {
+          toast.success('Subconta Binance criada com sucesso!');
+        } else {
+          toast.error(data?.message || 'Erro na criação da subconta Binance');
+        }
+      } catch (supabaseError) {
+        console.error('Erro ao usar supabase.functions.invoke:', supabaseError);
+        
+        // Fallback para fetch direto
+        console.log('Tentando fetch direto...');
+        
+        const response = await fetch('https://hjcvpozwjyydbegrcskq.functions.supabase.co/criar-subconta', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          },
+          body: JSON.stringify({
+            user_id: user.id
+          })
+        });
+
+        console.log('Status da resposta:', response.status);
+        console.log('Headers da resposta:', [...response.headers.entries()]);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Erro na resposta:', errorText);
+          throw new Error(`HTTP ${response.status}: ${errorText}`);
+        }
+
+        const result = await response.json();
+        console.log('Resultado:', result);
+        
+        if (result.status === 'ok') {
+          toast.success('Subconta Binance criada com sucesso!');
+        } else {
+          toast.error(result.message || 'Erro na criação da subconta Binance');
+        }
       }
     } catch (error) {
       console.error('Erro ao criar subconta Binance:', error);
-      toast.error('Erro ao criar subconta Binance');
+      toast.error(`Erro ao criar subconta Binance: ${error.message}`);
     } finally {
       setIsCreatingSubaccount(false);
     }
