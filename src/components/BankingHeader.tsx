@@ -3,17 +3,19 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { LogOut, User } from 'lucide-react';
+import { LogOut, User, Sun, Moon } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const BankingHeader = () => {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
       toast.success('Logout realizado com sucesso!');
-      navigate('/');
+      navigate('/login');
     } catch (error) {
       console.error('Erro no logout:', error);
       toast.error('Erro ao fazer logout');
@@ -33,6 +35,14 @@ const BankingHeader = () => {
         </div>
         
         <div className="flex items-center space-x-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleTheme}
+            className="text-gray-600 dark:text-gray-400"
+          >
+            {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </Button>
           <Button
             variant="ghost"
             size="sm"
