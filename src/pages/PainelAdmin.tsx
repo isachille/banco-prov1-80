@@ -1,13 +1,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Users, CheckCircle, XCircle, Clock, Search } from 'lucide-react';
+import { ArrowLeft, Users, CheckCircle, XCircle, Clock, Search, Shield, UserCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface Usuario {
   id: string;
@@ -18,39 +20,46 @@ interface Usuario {
   cpf_cnpj: string;
   telefone: string;
   tipo: string;
+  role: string;
+  status: string;
   created_at: string;
 }
 
 const PainelAdmin = () => {
   const navigate = useNavigate();
-  const [usuariosPendentes, setUsuariosPendentes] = useState<Usuario[]>([]);
-  const [usuariosFiltrados, setUsuariosFiltrados] = useState<Usuario[]>([]);
+  const queryClient = useQueryClient();
   const [filtro, setFiltro] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [updatingUsers, setUpdatingUsers] = useState<Set<string>>(new Set());
 
+  // Verificar permissão de acesso
   useEffect(() => {
-    carregarUsuariosPendentes();
-  }, []);
+    const checkUserPermission = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        navigate('/login');
+        return;
+      }
 
-  useEffect(() => {
-    // Filtrar usuários baseado no termo de busca
-    if (filtro.trim() === '') {
-      setUsuariosFiltrados(usuariosPendentes);
-    } else {
-      const termoBusca = filtro.toLowerCase();
-      const filtered = usuariosPendentes.filter(usuario => 
-        usuario.nome?.toLowerCase().includes(termoBusca) ||
-        usuario.nome_completo?.toLowerCase().includes(termoBusca) ||
-        usuario.email?.toLowerCase().includes(termoBusca) ||
-        usuario.cpf?.includes(filtro.replace(/\D/g, '')) ||
-        usuario.cpf_cnpj?.includes(filtro.replace(/\D/g, ''))
-      );
-      setUsuariosFiltrados(filtered);
-    }
-  }, [filtro, usuariosPendentes]);
+      const { data: userData } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single();
 
-  const carregarUsuariosPendentes = async () => {
-    try {
+      if (!userData || !['admin', 'dono'].includes(userData.role)) {
+        toast.error('Acesso negado. Você não tem permissão para acessar esta área.');
+        navigate('/home');
+        return;
+      }
+    };
+
+    checkUserPermission();
+  }, [navigate]);
+
+  // Buscar usuários pendentes com refetch automático
+  const { data: usuariosPendentes = [], isLoading, refetch } = useQuery({
+    queryKey: ['usuarios_pendentes'],
+    queryFn: async () => {
       console.log('Carregando usuários pendentes...');
       const { data, error } = await supabase
         .from('users')
@@ -60,61 +69,104 @@ const PainelAdmin = () => {
 
       if (error) {
         console.error('Erro ao carregar usuários pendentes:', error);
-        toast.error('Erro ao carregar usuários pendentes');
-        return;
+        throw error;
       }
 
       console.log('Usuários pendentes carregados:', data);
-      setUsuariosPendentes(data || []);
-    } catch (error) {
-      console.error('Erro ao carregar usuários:', error);
-      toast.error('Erro ao carregar usuários');
-    } finally {
-      setLoading(false);
-    }
-  };
+      return data as Usuario[];
+    },
+    refetchInterval: 5000, // Atualizar a cada 5 segundos
+  });
 
-  const aprovarUsuario = async (userId: string) => {
+  // Filtrar usuários baseado no termo de busca
+  const usuariosFiltrados = usuariosPendentes.filter(usuario => {
+    if (filtro.trim() === '') return true;
+    
+    const termoBusca = filtro.toLowerCase();
+    return (
+      usuario.nome_completo?.toLowerCase().includes(termoBusca) ||
+      usuario.email?.toLowerCase().includes(termoBusca) ||
+      usuario.cpf_cnpj?.includes(filtro.replace(/\D/g, ''))
+    );
+  });
+
+  const ativarUsuario = async (userId: string) => {
+    if (updatingUsers.has(userId)) return;
+    
+    setUpdatingUsers(prev => new Set(prev).add(userId));
+    
     try {
-      console.log('Aprovando usuário:', userId);
+      console.log('Ativando usuário:', userId);
       const { error } = await supabase
         .from('users')
         .update({ status: 'ativo' })
         .eq('id', userId);
 
       if (error) {
-        console.error('Erro ao aprovar usuário:', error);
-        toast.error('Erro ao aprovar usuário');
+        console.error('Erro ao ativar usuário:', error);
+        toast.error('Erro ao ativar conta');
         return;
       }
 
-      toast.success('Usuário aprovado com sucesso!');
-      carregarUsuariosPendentes();
+      toast.success('Conta ativada com sucesso!');
+      
+      // Invalidar e refetch da query para atualizar a lista
+      queryClient.invalidateQueries({ queryKey: ['usuarios_pendentes'] });
+      
+      // Refetch imediato
+      setTimeout(() => {
+        refetch();
+      }, 1000);
+      
     } catch (error) {
-      console.error('Erro ao aprovar usuário:', error);
-      toast.error('Erro ao aprovar usuário');
+      console.error('Erro ao ativar usuário:', error);
+      toast.error('Erro ao ativar conta');
+    } finally {
+      setUpdatingUsers(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(userId);
+        return newSet;
+      });
     }
   };
 
-  const recusarUsuario = async (userId: string) => {
+  const alterarPermissao = async (userId: string, novaRole: string) => {
+    if (updatingUsers.has(userId)) return;
+    
+    setUpdatingUsers(prev => new Set(prev).add(userId));
+    
     try {
-      console.log('Recusando usuário:', userId);
+      console.log('Alterando permissão do usuário:', userId, 'para:', novaRole);
       const { error } = await supabase
         .from('users')
-        .update({ status: 'recusado' })
+        .update({ role: novaRole })
         .eq('id', userId);
 
       if (error) {
-        console.error('Erro ao recusar usuário:', error);
-        toast.error('Erro ao recusar usuário');
+        console.error('Erro ao alterar permissão:', error);
+        toast.error('Erro ao alterar permissão');
         return;
       }
 
-      toast.success('Usuário recusado.');
-      carregarUsuariosPendentes();
+      toast.success(`Permissão atualizada para ${novaRole}`);
+      
+      // Invalidar e refetch da query para atualizar a lista
+      queryClient.invalidateQueries({ queryKey: ['usuarios_pendentes'] });
+      
+      // Refetch imediato
+      setTimeout(() => {
+        refetch();
+      }, 1000);
+      
     } catch (error) {
-      console.error('Erro ao recusar usuário:', error);
-      toast.error('Erro ao recusar usuário');
+      console.error('Erro ao alterar permissão:', error);
+      toast.error('Erro ao alterar permissão');
+    } finally {
+      setUpdatingUsers(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(userId);
+        return newSet;
+      });
     }
   };
 
@@ -135,6 +187,17 @@ const PainelAdmin = () => {
       return telefone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
     }
     return telefone;
+  };
+
+  const getRoleBadgeColor = (role: string) => {
+    switch (role) {
+      case 'dono': return 'bg-purple-100 text-purple-800';
+      case 'admin': return 'bg-red-100 text-red-800';
+      case 'gerente': return 'bg-blue-100 text-blue-800';
+      case 'analista': return 'bg-green-100 text-green-800';
+      case 'usuario': return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
   };
 
   return (
@@ -194,7 +257,7 @@ const PainelAdmin = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">Online</div>
-              <p className="text-xs text-muted-foreground">Sistema funcionando</p>
+              <p className="text-xs text-muted-foreground">Atualização automática ativa</p>
             </CardContent>
           </Card>
         </div>
@@ -209,7 +272,7 @@ const PainelAdmin = () => {
                   {usuariosFiltrados.length === 0 && filtro 
                     ? 'Nenhum usuário encontrado com os critérios de busca' 
                     : usuariosFiltrados.length === 0
-                    ? 'Nenhum usuário aguardando aprovação no momento'
+                    ? 'Nenhum usuário pendente no momento'
                     : `${usuariosFiltrados.length} usuário(s) ${filtro ? 'encontrado(s)' : 'aguardando aprovação'}`
                   }
                 </p>
@@ -238,7 +301,7 @@ const PainelAdmin = () => {
             </div>
           </CardHeader>
           <CardContent>
-            {loading ? (
+            {isLoading ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0057FF] mx-auto"></div>
                 <p className="mt-2 text-muted-foreground">Carregando usuários...</p>
@@ -256,13 +319,18 @@ const PainelAdmin = () => {
                   <div key={usuario.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                     <div className="flex-1">
                       <div className="flex items-center space-x-4">
-                        <div>
-                          <h4 className="font-medium">
-                            {usuario.nome || 'Nome não informado'}
-                            <Badge variant="secondary" className="ml-2">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h4 className="font-medium">
+                              {usuario.nome_completo || 'Nome não informado'}
+                            </h4>
+                            <Badge variant="secondary">
                               {usuario.tipo}
                             </Badge>
-                          </h4>
+                            <Badge className={getRoleBadgeColor(usuario.role)}>
+                              {usuario.role}
+                            </Badge>
+                          </div>
                           <p className="text-sm text-muted-foreground">{usuario.email}</p>
                           <div className="flex space-x-4 text-xs text-muted-foreground mt-1">
                             <span>
@@ -271,9 +339,6 @@ const PainelAdmin = () => {
                             <span>Tel: {formatarTelefone(usuario.telefone)}</span>
                           </div>
                           <p className="text-xs text-muted-foreground mt-1">
-                            Razão Social: {usuario.nome_completo || 'Não informado'}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
                             Cadastrado em: {new Date(usuario.created_at).toLocaleDateString('pt-BR')}
                           </p>
                         </div>
@@ -281,26 +346,44 @@ const PainelAdmin = () => {
                     </div>
                     
                     <div className="flex items-center space-x-2">
-                      <Badge variant="secondary">Pendente</Badge>
+                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                        Pendente
+                      </Badge>
+                      
+                      {/* Dropdown para alterar permissão */}
+                      <Select
+                        value={usuario.role}
+                        onValueChange={(value) => alterarPermissao(usuario.id, value)}
+                        disabled={updatingUsers.has(usuario.id)}
+                      >
+                        <SelectTrigger className="w-28">
+                          <Shield className="w-4 h-4 mr-1" />
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="dono">Dono</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                          <SelectItem value="gerente">Gerente</SelectItem>
+                          <SelectItem value="analista">Analista</SelectItem>
+                          <SelectItem value="usuario">Usuário</SelectItem>
+                        </SelectContent>
+                      </Select>
                       
                       <Button
                         size="sm"
                         variant="outline"
                         className="text-green-600 border-green-600 hover:bg-green-50"
-                        onClick={() => aprovarUsuario(usuario.id)}
+                        onClick={() => ativarUsuario(usuario.id)}
+                        disabled={updatingUsers.has(usuario.id)}
                       >
-                        <CheckCircle className="w-4 h-4 mr-1" />
-                        Aprovar
-                      </Button>
-                      
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="text-red-600 border-red-600 hover:bg-red-50"
-                        onClick={() => recusarUsuario(usuario.id)}
-                      >
-                        <XCircle className="w-4 h-4 mr-1" />
-                        Recusar
+                        {updatingUsers.has(usuario.id) ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
+                        ) : (
+                          <>
+                            <UserCheck className="w-4 h-4 mr-1" />
+                            Ativar Conta
+                          </>
+                        )}
                       </Button>
                     </div>
                   </div>
