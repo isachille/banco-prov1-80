@@ -1,357 +1,218 @@
-import React, { useState, useEffect } from 'react';
+
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Eye, EyeOff, ArrowUp, ArrowDown, 
-  CreditCard, Smartphone, Send, Receipt,
-  Settings, TrendingUp, Gift, Coins,
-  Globe, FileText, Building, HelpCircle,
-  Wrench, RefreshCw
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Wallet, Send, Gift, PiggyBank, FileText, Shield, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 const Home = () => {
   const navigate = useNavigate();
-  const [showBalance, setShowBalance] = useState(true);
-  const [userRole, setUserRole] = useState<string>('');
-  const [userName, setUserName] = useState<string>('');
-  const [userBalance, setUserBalance] = useState(0);
-  const [isActivatingCrypto, setIsActivatingCrypto] = useState(false);
-  const [hasCryptoAccount, setHasCryptoAccount] = useState(false);
 
-  useEffect(() => {
-    const getUserData = async () => {
+  // Fetch user data and wallet balance
+  const { data: user } = useQuery({
+    queryKey: ['user'],
+    queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: userData } = await supabase
-          .from('users')
-          .select('role, nome_completo')
-          .eq('id', user.id)
-          .single();
+      if (!user) return null;
 
-        if (userData) {
-          setUserRole(userData.role);
-          setUserName(userData.nome_completo || 'Usuário');
-        }
+      const { data: userData } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', user.id)
+        .single();
 
-        // Buscar saldo da wallet
-        const { data: walletData } = await supabase
-          .from('wallets')
-          .select('saldo')
-          .eq('user_id', user.id)
-          .single();
+      return { ...user, ...userData };
+    }
+  });
 
-        if (walletData) {
-          setUserBalance(walletData.saldo || 0);
-        }
+  const { data: wallet } = useQuery({
+    queryKey: ['wallet', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      
+      const { data } = await supabase
+        .from('binance_wallets')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+      
+      return data;
+    },
+    enabled: !!user?.id
+  });
 
-        // Verificar se já tem conta cripto
-        const { data: cryptoData } = await supabase
-          .from('wallets_cripto_binance')
-          .select('id')
-          .eq('user_id', user.id)
-          .maybeSingle();
+  const { data: cryptoWallet } = useQuery({
+    queryKey: ['crypto-wallet', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      
+      const { data } = await supabase
+        .from('wallets_cripto_binance')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+      
+      return data;
+    },
+    enabled: !!user?.id
+  });
 
-        setHasCryptoAccount(!!cryptoData);
-      }
-    };
-
-    getUserData();
-  }, []);
-
-  const activateCryptoAccount = async () => {
-    setIsActivatingCrypto(true);
-    
+  const handleSyncBinance = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error('Usuário não autenticado');
-        return;
-      }
-
-      console.log('Ativando conta cripto para usuário:', user.id);
-
-      // Tentar primeiro com supabase.functions.invoke
-      try {
-        console.log('Tentando via supabase.functions.invoke...');
-        const { data, error } = await supabase.functions.invoke('criar-subconta', {
-          body: {
-            user_id: user.id
-          }
-        });
-
-        if (error) {
-          console.error('Erro com supabase.functions.invoke:', error);
-          throw error;
-        }
-
-        console.log('Resposta da função:', data);
-
-        if (data?.status === 'ok') {
-          // Atualizar o saldo local após ativação
-          const { data: walletData } = await supabase
-            .from('wallets')
-            .select('saldo')
-            .eq('user_id', user.id)
-            .single();
-
-          if (walletData) {
-            setUserBalance(walletData.saldo || 0);
-          }
-
-          setHasCryptoAccount(true);
-          toast.success('Conta cripto ativada!');
-          return;
-        } else {
-          toast.error(data?.message || 'Erro na ativação da conta cripto');
-          return;
-        }
-      } catch (supabaseError) {
-        console.error('Erro ao usar supabase.functions.invoke:', supabaseError);
-        console.log('Tentando fetch direto como fallback...');
-      }
-
-      // Fallback para fetch direto
-      const session = await supabase.auth.getSession();
-      const accessToken = session.data.session?.access_token;
-
-      console.log('Fazendo requisição fetch com token:', !!accessToken);
-
-      const response = await fetch('https://hjcvpozwjyydbegrcskq.functions.supabase.co/criar-subconta', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqY3Zwb3p3anl5ZGJlZ3Jjc2txIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyNDU1NzYsImV4cCI6MjA2NjgyMTU3Nn0.ndEdb2KTe0LfPfFis41H4hU4mNBnlvizcHhYtIBkeUE'
-        },
-        body: JSON.stringify({
-          user_id: user.id
-        })
+      const { data, error } = await supabase.functions.invoke('sync-binance-saldo', {
+        body: { user_id: user?.id }
       });
-
-      console.log('Status da resposta fetch:', response.status);
-      console.log('Headers da resposta:', Object.fromEntries(response.headers.entries()));
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Erro na resposta fetch:', errorText);
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
-      }
-
-      const result = await response.json();
-      console.log('Resultado fetch:', result);
       
-      if (result.status === 'ok') {
-        // Atualizar o saldo local após ativação
-        const { data: walletData } = await supabase
-          .from('wallets')
-          .select('saldo')
-          .eq('user_id', user.id)
-          .single();
-
-        if (walletData) {
-          setUserBalance(walletData.saldo || 0);
-        }
-
-        setHasCryptoAccount(true);
-        toast.success('Conta cripto ativada!');
-      } else {
-        toast.error(result.message || 'Erro na ativação da conta cripto');
-      }
+      if (error) throw error;
+      
+      toast.success('Sincronização realizada com sucesso!');
     } catch (error) {
-      console.error('Erro geral ao ativar conta cripto:', error);
-      
-      // Fornecer mensagem de erro mais específica
-      let errorMessage = 'Erro desconhecido';
-      if (error instanceof Error) {
-        if (error.message.includes('Failed to fetch')) {
-          errorMessage = 'Falha na conexão. Verifique sua internet e tente novamente.';
-        } else if (error.message.includes('NetworkError')) {
-          errorMessage = 'Erro de rede. Verifique sua conexão.';
-        } else {
-          errorMessage = error.message;
-        }
-      }
-      
-      toast.error(`Erro ao ativar conta cripto: ${errorMessage}`);
-    } finally {
-      setIsActivatingCrypto(false);
+      console.error('Erro na sincronização:', error);
+      toast.error('Erro ao sincronizar com Binance');
     }
   };
 
-  const quickActions = [
-    { icon: Smartphone, label: 'Pix', path: '/pix', color: 'text-purple-600' },
-    { icon: Send, label: 'Transferir', path: '/transferir', color: 'text-blue-600' },
-    { icon: Receipt, label: 'Pagar', path: '/pagar', color: 'text-green-600' },
-    { icon: ArrowDown, label: 'Cobrança', path: '/cobranca', color: 'text-orange-600' },
+  const menuItems = [
+    {
+      titulo: "PIX",
+      icone: Send,
+      acao: () => navigate('/pix'),
+      bgColor: "bg-gradient-to-r from-blue-500 to-blue-600"
+    },
+    {
+      titulo: "Transferências",
+      icone: TrendingUp,
+      acao: () => navigate('/transferencias'),
+      bgColor: "bg-gradient-to-r from-green-500 to-green-600"
+    },
+    {
+      titulo: "Gift Cards",
+      icone: Gift,
+      acao: () => navigate('/gift-cards-page'),
+      bgColor: "bg-gradient-to-r from-pink-500 to-pink-600"
+    },
+    {
+      titulo: "Cofrinho",
+      icone: PiggyBank,
+      acao: () => navigate('/cofrinho'),
+      bgColor: "bg-gradient-to-r from-yellow-500 to-yellow-600"
+    },
+    {
+      titulo: "Financiamento",
+      icone: FileText,
+      acao: () => navigate('/financing-page'),
+      bgColor: "bg-gradient-to-r from-indigo-500 to-indigo-600"
+    }
   ];
 
-  const services = [
-    { icon: CreditCard, label: 'Cartões', path: '/cartoes' },
-    { icon: TrendingUp, label: 'Investir', path: '/investir' },
-    { icon: Building, label: 'Financiamento', path: '/financiamento' },
-    { icon: Gift, label: 'Gift Cards', path: '/gift-cards' },
-    { icon: Coins, label: 'Cofrinho', path: '/cofrinho' },
-    { icon: Globe, label: 'Open Finance', path: '/open-finance' },
-  ];
-
-  const adminServices = [
-    { icon: Globe, label: 'Transações Globais', path: '/transacoes-globais' },
-    { icon: FileText, label: 'Auditoria', path: '/auditoria' },
-    { icon: ArrowUp, label: 'Realocação de Fundos', path: '/realocacao-fundos' },
-  ];
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
-  };
+  // Add admin panel if user is 'dono'
+  if (user?.role === 'dono') {
+    menuItems.push({
+      titulo: "Painel Admin",
+      icone: Shield,
+      acao: () => navigate('/admin/users'),
+      bgColor: "bg-gradient-to-r from-red-500 to-red-600"
+    });
+  }
 
   return (
-    <div className="pb-20">
-      {/* Header com saldo */}
-      <Card className="bg-gradient-to-r from-[#0047AB] to-[#0056CC] text-white mb-6">
-        <CardContent className="p-6">
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <p className="text-blue-100 text-sm">Olá,</p>
-              <h2 className="text-xl font-bold">{userName}</h2>
-              {userRole && (
-                <Badge variant="secondary" className="mt-1 bg-white/20 text-white">
-                  {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
-                </Badge>
-              )}
-            </div>
-            
-            {/* Ícone do painel admin para dono/admin */}
-            {['dono', 'admin'].includes(userRole) && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/admin')}
-                className="text-white hover:bg-white/20"
-                title="Painel Administrativo"
-              >
-                <Wrench className="h-5 w-5" />
-              </Button>
-            )}
+    <div className="space-y-6 pb-20">
+      {/* Header com saudação */}
+      <div className="bg-gradient-to-r from-purple-600 to-purple-800 text-white p-6 rounded-b-3xl">
+        <h1 className="text-2xl font-bold">Olá, {user?.nome || 'Usuário'}!</h1>
+        <p className="text-purple-100 mt-1">Bem-vindo ao seu banco digital</p>
+      </div>
+
+      {/* Cartão de Saldo */}
+      <Card className="mx-4 bg-gradient-to-r from-gray-900 to-gray-800 text-white">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-lg">Minha Carteira</CardTitle>
+            <p className="text-gray-300 text-sm">Saldo disponível</p>
+          </div>
+          <Wallet className="h-8 w-8 text-gray-300" />
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div>
+            <p className="text-2xl font-bold">
+              R$ {wallet?.balance?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}
+            </p>
+            <p className="text-sm text-gray-300">Saldo em Real (BRL)</p>
           </div>
           
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-blue-100 text-sm">Saldo disponível</p>
-              <div className="flex items-center space-x-2">
-                <span className="text-2xl font-bold">
-                  {showBalance ? formatCurrency(userBalance) : '••••••'}
-                </span>
-                <button
-                  onClick={() => setShowBalance(!showBalance)}
-                  className="text-blue-100 hover:text-white"
-                >
-                  {showBalance ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Botão Ativar Conta Cripto */}
-          {!hasCryptoAccount && (
-            <div className="mt-4 pt-4 border-t border-white/20">
-              <Button
-                onClick={activateCryptoAccount}
-                disabled={isActivatingCrypto}
-                className="bg-orange-600 hover:bg-orange-700 text-white"
-              >
-                {isActivatingCrypto ? (
-                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Coins className="h-4 w-4 mr-2" />
-                )}
-                Ativar Conta Cripto
-              </Button>
+          {cryptoWallet && (
+            <div className="pt-2 border-t border-gray-600">
+              <p className="text-lg font-semibold">
+                {cryptoWallet.saldo_crypto || 0} USDT
+              </p>
+              <p className="text-sm text-gray-300">
+                ≈ R$ {(cryptoWallet.saldo_em_brl || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </p>
+              <p className="text-xs text-gray-400">
+                Cotação: R$ {cryptoWallet.cotacao || 0}
+              </p>
             </div>
           )}
+          
+          <Button 
+            onClick={handleSyncBinance}
+            variant="secondary" 
+            size="sm" 
+            className="w-full mt-3"
+          >
+            Sincronizar com Binance
+          </Button>
         </CardContent>
       </Card>
 
-      {/* Ações rápidas */}
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold mb-4">Ações rápidas</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {quickActions.map((action, index) => (
-            <Button
-              key={index}
-              variant="outline"
-              className="h-20 flex-col space-y-2 hover:shadow-md transition-shadow"
-              onClick={() => navigate(action.path)}
-            >
-              <action.icon className={`h-6 w-6 ${action.color}`} />
-              <span className="text-xs font-medium">{action.label}</span>
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      {/* Serviços */}
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold mb-4">Serviços</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-          {services.map((service, index) => (
-            <Button
-              key={index}
-              variant="outline"
-              className="h-16 flex-col space-y-1 hover:shadow-md transition-shadow"
-              onClick={() => navigate(service.path)}
-            >
-              <service.icon className="h-5 w-5 text-gray-600" />
-              <span className="text-xs">{service.label}</span>
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      {/* Serviços administrativos para dono/admin */}
-      {['dono', 'admin'].includes(userRole) && (
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-4">Administração</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {adminServices.map((service, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                className="h-16 flex-col space-y-1 hover:shadow-md transition-shadow border-orange-200 hover:border-orange-300"
-                onClick={() => navigate(service.path)}
+      {/* Menu de Ações */}
+      <div className="px-4">
+        <h2 className="text-lg font-semibold mb-4 text-gray-800">Ações Rápidas</h2>
+        <div className="grid grid-cols-2 gap-4">
+          {menuItems.map((item, index) => {
+            const IconComponent = item.icone;
+            return (
+              <Card 
+                key={index} 
+                className="cursor-pointer hover:shadow-lg transition-shadow"
+                onClick={item.acao}
               >
-                <service.icon className="h-5 w-5 text-orange-600" />
-                <span className="text-xs">{service.label}</span>
-              </Button>
-            ))}
-          </div>
+                <CardContent className="p-4 text-center">
+                  <div className={`w-12 h-12 ${item.bgColor} rounded-full flex items-center justify-center mx-auto mb-3`}>
+                    <IconComponent className="h-6 w-6 text-white" />
+                  </div>
+                  <p className="font-medium text-gray-800">{item.titulo}</p>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
-      )}
+      </div>
 
-      {/* Acesso rápido */}
-      <div className="grid grid-cols-2 gap-4">
-        <Button
-          variant="outline"
-          className="h-12 justify-start space-x-2"
-          onClick={() => navigate('/extrato')}
-        >
-          <FileText className="h-4 w-4 text-gray-600" />
-          <span>Extrato</span>
-        </Button>
-        <Button
-          variant="outline"
-          className="h-12 justify-start space-x-2"
-          onClick={() => navigate('/ajuda')}
-        >
-          <HelpCircle className="h-4 w-4 text-gray-600" />
-          <span>Ajuda</span>
-        </Button>
+      {/* Ações Rápidas Adicionais */}
+      <div className="px-4">
+        <h2 className="text-lg font-semibold mb-4 text-gray-800">Outros Serviços</h2>
+        <div className="space-y-3">
+          <Button 
+            variant="outline" 
+            className="w-full justify-start" 
+            onClick={() => navigate('/extrato-page')}
+          >
+            <FileText className="h-4 w-4 mr-2" />
+            Ver Extrato Completo
+          </Button>
+          <Button 
+            variant="outline" 
+            className="w-full justify-start" 
+            onClick={() => navigate('/investimentos')}
+          >
+            <TrendingUp className="h-4 w-4 mr-2" />
+            Investimentos
+          </Button>
+        </div>
       </div>
     </div>
   );

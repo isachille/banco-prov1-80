@@ -11,21 +11,17 @@ const BankingNavigation = () => {
   const location = useLocation();
 
   const navigationItems = [
-    { icon: Home, label: 'Dashboard', path: '/dashboard' },
+    { icon: Home, label: 'Home', path: '/home' },
     { icon: Send, label: 'PIX', path: '/pix' },
     { icon: CreditCard, label: 'Transferências', path: '/transferencias' },
     { icon: Receipt, label: 'Extrato', path: '/extrato-page' },
-    { icon: Car, label: 'Financiamento', path: '/financing-page' },
-    { icon: Gift, label: 'Gift Cards', path: '/gift-cards-page' },
-    { icon: PiggyBank, label: 'Cofrinho', path: '/cofrinho' },
-    { icon: TrendingUp, label: 'Investimentos', path: '/investimentos' },
-    { icon: Settings, label: 'Configurações', path: '/configuracoes' }
+    { icon: Gift, label: 'Gift Cards', path: '/gift-cards-page' }
   ];
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 z-50">
       <div className="flex justify-around items-center max-w-md mx-auto">
-        {navigationItems.slice(0, 5).map((item, index) => {
+        {navigationItems.map((item, index) => {
           const isActive = location.pathname === item.path;
           return (
             <button
@@ -33,8 +29,8 @@ const BankingNavigation = () => {
               onClick={() => navigate(item.path)}
               className={`flex flex-col items-center space-y-1 px-2 py-1 rounded-lg transition-colors ${
                 isActive 
-                  ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
+                  ? 'text-purple-600 bg-purple-50' 
+                  : 'text-gray-600 hover:text-purple-600 hover:bg-gray-50'
               }`}
             >
               <item.icon className="h-5 w-5" />

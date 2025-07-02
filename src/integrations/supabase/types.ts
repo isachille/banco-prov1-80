@@ -406,6 +406,76 @@ export type Database = {
           },
         ]
       }
+      compras_giftcard: {
+        Row: {
+          data: string | null
+          id: string
+          produto: string | null
+          status: string | null
+          user_id: string | null
+          valor: number | null
+        }
+        Insert: {
+          data?: string | null
+          id?: string
+          produto?: string | null
+          status?: string | null
+          user_id?: string | null
+          valor?: number | null
+        }
+        Update: {
+          data?: string | null
+          id?: string
+          produto?: string | null
+          status?: string | null
+          user_id?: string | null
+          valor?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compras_giftcard_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compras_giftcard_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_ativos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compras_giftcard_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_pendentes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compras_giftcard_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_recusados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compras_giftcard_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_ativas"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "compras_giftcard_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_com_usuarios"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       consultas_bureaux: {
         Row: {
           consultado_em: string | null
@@ -1464,6 +1534,36 @@ export type Database = {
           },
         ]
       }
+      transferencias_cripto: {
+        Row: {
+          criado_em: string | null
+          de_email: string | null
+          id: string
+          moeda: string | null
+          para_email: string | null
+          resultado: Json | null
+          valor: number | null
+        }
+        Insert: {
+          criado_em?: string | null
+          de_email?: string | null
+          id?: string
+          moeda?: string | null
+          para_email?: string | null
+          resultado?: Json | null
+          valor?: number | null
+        }
+        Update: {
+          criado_em?: string | null
+          de_email?: string | null
+          id?: string
+          moeda?: string | null
+          para_email?: string | null
+          resultado?: Json | null
+          valor?: number | null
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           cpf: string | null
@@ -1735,6 +1835,19 @@ export type Database = {
           tipo?: string | null
           user_id?: string | null
           valor?: number | null
+        }
+        Relationships: []
+      }
+      extrato_geral: {
+        Row: {
+          criado_em: string | null
+          de_email: string | null
+          id: string | null
+          moeda: string | null
+          nome_de: string | null
+          nome_para: string | null
+          para_email: string | null
+          valor: number | null
         }
         Relationships: []
       }
