@@ -74,22 +74,75 @@ const Home = () => {
 
       console.log('Ativando conta cripto para usuário:', user.id);
 
+      // Tentar primeiro com supabase.functions.invoke
+      try {
+        console.log('Tentando via supabase.functions.invoke...');
+        const { data, error } = await supabase.functions.invoke('criar-subconta', {
+          body: {
+            user_id: user.id
+          }
+        });
+
+        if (error) {
+          console.error('Erro com supabase.functions.invoke:', error);
+          throw error;
+        }
+
+        console.log('Resposta da função:', data);
+
+        if (data?.status === 'ok') {
+          // Atualizar o saldo local após ativação
+          const { data: walletData } = await supabase
+            .from('wallets')
+            .select('saldo')
+            .eq('user_id', user.id)
+            .single();
+
+          if (walletData) {
+            setUserBalance(walletData.saldo || 0);
+          }
+
+          setHasCryptoAccount(true);
+          toast.success('Conta cripto ativada!');
+          return;
+        } else {
+          toast.error(data?.message || 'Erro na ativação da conta cripto');
+          return;
+        }
+      } catch (supabaseError) {
+        console.error('Erro ao usar supabase.functions.invoke:', supabaseError);
+        console.log('Tentando fetch direto como fallback...');
+      }
+
+      // Fallback para fetch direto
+      const session = await supabase.auth.getSession();
+      const accessToken = session.data.session?.access_token;
+
+      console.log('Fazendo requisição fetch com token:', !!accessToken);
+
       const response = await fetch('https://hjcvpozwjyydbegrcskq.functions.supabase.co/criar-subconta', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqY3Zwb3p3anl5ZGJlZ3Jjc2txIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyNDU1NzYsImV4cCI6MjA2NjgyMTU3Nn0.ndEdb2KTe0LfPfFis41H4hU4mNBnlvizcHhYtIBkeUE'
         },
         body: JSON.stringify({
           user_id: user.id
         })
       });
 
+      console.log('Status da resposta fetch:', response.status);
+      console.log('Headers da resposta:', Object.fromEntries(response.headers.entries()));
+
       if (!response.ok) {
         const errorText = await response.text();
+        console.error('Erro na resposta fetch:', errorText);
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
 
       const result = await response.json();
+      console.log('Resultado fetch:', result);
       
       if (result.status === 'ok') {
         // Atualizar o saldo local após ativação
@@ -109,8 +162,21 @@ const Home = () => {
         toast.error(result.message || 'Erro na ativação da conta cripto');
       }
     } catch (error) {
-      console.error('Erro ao ativar conta cripto:', error);
-      toast.error(`Erro ao ativar conta cripto: ${error.message}`);
+      console.error('Erro geral ao ativar conta cripto:', error);
+      
+      // Fornecer mensagem de erro mais específica
+      let errorMessage = 'Erro desconhecido';
+      if (error instanceof Error) {
+        if (error.message.includes('Failed to fetch')) {
+          errorMessage = 'Falha na conexão. Verifique sua internet e tente novamente.';
+        } else if (error.message.includes('NetworkError')) {
+          errorMessage = 'Erro de rede. Verifique sua conexão.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      toast.error(`Erro ao ativar conta cripto: ${errorMessage}`);
     } finally {
       setIsActivatingCrypto(false);
     }
