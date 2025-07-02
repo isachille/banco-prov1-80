@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -9,7 +8,8 @@ import {
   Gamepad2, 
   Music,
   ArrowLeft,
-  RefreshCw
+  RefreshCw,
+  Plus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,6 +22,7 @@ const GiftCards = () => {
   const [userBalance, setUserBalance] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [isSyncingBinance, setIsSyncingBinance] = useState(false);
+  const [isCreatingSubaccount, setIsCreatingSubaccount] = useState(false);
 
   useEffect(() => {
     const getUserBalance = async () => {
@@ -89,6 +90,45 @@ const GiftCards = () => {
       toast.error('Erro ao sincronizar saldo Binance');
     } finally {
       setIsSyncingBinance(false);
+    }
+  };
+
+  const createBinanceSubaccount = async () => {
+    setIsCreatingSubaccount(true);
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('Usuário não autenticado');
+        return;
+      }
+
+      const response = await fetch('https://hjcvpozwjyydbegrcskq.functions.supabase.co/criar-subconta', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: user.id
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro na criação da subconta');
+      }
+
+      const result = await response.json();
+      
+      if (result.status === 'ok') {
+        toast.success('Subconta Binance criada com sucesso!');
+      } else {
+        toast.error(result.message || 'Erro na criação da subconta Binance');
+      }
+    } catch (error) {
+      console.error('Erro ao criar subconta Binance:', error);
+      toast.error('Erro ao criar subconta Binance');
+    } finally {
+      setIsCreatingSubaccount(false);
     }
   };
 
@@ -223,18 +263,32 @@ const GiftCards = () => {
                   {formatCurrency(userBalance)}
                 </p>
               </div>
-              <Button
-                onClick={syncBinanceBalance}
-                disabled={isSyncingBinance}
-                className="bg-yellow-600 hover:bg-yellow-700 text-white"
-              >
-                {isSyncingBinance ? (
-                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                )}
-                Sincronizar saldo cripto
-              </Button>
+              <div className="flex space-x-3">
+                <Button
+                  onClick={createBinanceSubaccount}
+                  disabled={isCreatingSubaccount}
+                  className="bg-orange-600 hover:bg-orange-700 text-white"
+                >
+                  {isCreatingSubaccount ? (
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Plus className="h-4 w-4 mr-2" />
+                  )}
+                  Criar Subconta Binance
+                </Button>
+                <Button
+                  onClick={syncBinanceBalance}
+                  disabled={isSyncingBinance}
+                  className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                >
+                  {isSyncingBinance ? (
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                  )}
+                  Sincronizar saldo cripto
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
