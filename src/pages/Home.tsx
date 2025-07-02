@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -6,12 +5,13 @@ import {
   CreditCard, Smartphone, Send, Receipt,
   Settings, TrendingUp, Gift, Coins,
   Globe, FileText, Building, HelpCircle,
-  Wrench
+  Wrench, RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -19,6 +19,8 @@ const Home = () => {
   const [userRole, setUserRole] = useState<string>('');
   const [userName, setUserName] = useState<string>('');
   const [userBalance, setUserBalance] = useState(0);
+  const [isActivatingCrypto, setIsActivatingCrypto] = useState(false);
+  const [hasCryptoAccount, setHasCryptoAccount] = useState(false);
 
   useEffect(() => {
     const getUserData = async () => {
@@ -45,11 +47,74 @@ const Home = () => {
         if (walletData) {
           setUserBalance(walletData.saldo || 0);
         }
+
+        // Verificar se já tem conta cripto
+        const { data: cryptoData } = await supabase
+          .from('wallets_cripto_binance')
+          .select('id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        setHasCryptoAccount(!!cryptoData);
       }
     };
 
     getUserData();
   }, []);
+
+  const activateCryptoAccount = async () => {
+    setIsActivatingCrypto(true);
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('Usuário não autenticado');
+        return;
+      }
+
+      console.log('Ativando conta cripto para usuário:', user.id);
+
+      const response = await fetch('https://hjcvpozwjyydbegrcskq.functions.supabase.co/criar-subconta', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: user.id
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.status === 'ok') {
+        // Atualizar o saldo local após ativação
+        const { data: walletData } = await supabase
+          .from('wallets')
+          .select('saldo')
+          .eq('user_id', user.id)
+          .single();
+
+        if (walletData) {
+          setUserBalance(walletData.saldo || 0);
+        }
+
+        setHasCryptoAccount(true);
+        toast.success('Conta cripto ativada!');
+      } else {
+        toast.error(result.message || 'Erro na ativação da conta cripto');
+      }
+    } catch (error) {
+      console.error('Erro ao ativar conta cripto:', error);
+      toast.error(`Erro ao ativar conta cripto: ${error.message}`);
+    } finally {
+      setIsActivatingCrypto(false);
+    }
+  };
 
   const quickActions = [
     { icon: Smartphone, label: 'Pix', path: '/pix', color: 'text-purple-600' },
@@ -126,6 +191,24 @@ const Home = () => {
               </div>
             </div>
           </div>
+
+          {/* Botão Ativar Conta Cripto */}
+          {!hasCryptoAccount && (
+            <div className="mt-4 pt-4 border-t border-white/20">
+              <Button
+                onClick={activateCryptoAccount}
+                disabled={isActivatingCrypto}
+                className="bg-orange-600 hover:bg-orange-700 text-white"
+              >
+                {isActivatingCrypto ? (
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Coins className="h-4 w-4 mr-2" />
+                )}
+                Ativar Conta Cripto
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
