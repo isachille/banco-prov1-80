@@ -1,24 +1,80 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, FileText, Smartphone, ArrowRightLeft, 
   CreditCard, Receipt, Archive, Users, Building2, 
-  BarChart3, User, Settings, Eye, Edit, Filter,
+  BarChart3, User, Settings, Send, 
   TrendingUp, TrendingDown, Calendar
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+
+interface WalletAtiva {
+  wallet_id: string;
+  user_id: string;
+  nome_completo: string;
+  email: string;
+  cpf: string;
+  telefone: string;
+  role: string;
+  tipo: string;
+  status: string;
+  saldo: number;
+  limite: number;
+  rendimento_mes: number;
+}
 
 const Admin = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [activeMenu, setActiveMenu] = useState('dashboard');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('all');
+  const [transferValues, setTransferValues] = useState<Record<string, string>>({});
+  const [transferDestinations, setTransferDestinations] = useState<Record<string, string>>({});
+
+  // Verificar permissão de acesso
+  useEffect(() => {
+    const checkUserPermission = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        navigate('/login');
+        return;
+      }
+
+      const { data: userData } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (!userData || (userData.role !== 'admin' && userData.role !== 'dono')) {
+        navigate('/home');
+        return;
+      }
+    };
+
+    checkUserPermission();
+  }, [navigate]);
+
+  // Buscar usuários ativos
+  const { data: walletsAtivas, isLoading, refetch } = useQuery({
+    queryKey: ['wallets_ativas'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('wallets_ativas')
+        .select('*')
+        .order('nome_completo');
+
+      if (error) throw error;
+      return data as WalletAtiva[];
+    }
+  });
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -59,66 +115,76 @@ const Admin = () => {
     },
   ];
 
-  const transactions = [
-    {
-      id: 1,
-      data: '01/07/2025',
-      nome: 'João Silva Santos',
-      tipo: 'PIX Recebido',
-      valor: 'R$ 2.500,00',
-      saldoAtualizado: 'R$ 1.500.673,45',
-      status: 'concluida'
-    },
-    {
-      id: 2,
-      data: '01/07/2025',
-      nome: 'Empresa ABC Ltda',
-      tipo: 'Cobrança Paga',
-      valor: 'R$ 15.000,00',
-      saldoAtualizado: 'R$ 1.498.173,45',
-      status: 'concluida'
-    },
-    {
-      id: 3,
-      data: '30/06/2025',
-      nome: 'Maria Oliveira',
-      tipo: 'TED Enviada',
-      valor: '- R$ 8.900,00',
-      saldoAtualizado: 'R$ 1.483.173,45',
-      status: 'processando'
-    },
-    {
-      id: 4,
-      data: '30/06/2025',
-      nome: 'Fornecedor XYZ',
-      tipo: 'Boleto Pago',
-      valor: '- R$ 3.450,00',
-      saldoAtualizado: 'R$ 1.492.073,45',
-      status: 'concluida'
-    },
-    {
-      id: 5,
-      data: '29/06/2025',
-      nome: 'Cliente Premium',
-      tipo: 'PIX Recebido',
-      valor: 'R$ 7.200,00',
-      saldoAtualizado: 'R$ 1.495.523,45',
-      status: 'concluida'
-    }
-  ];
+  const handleTransferencia = async (userId: string) => {
+    const valor = parseFloat(transferValues[userId]);
+    const destinatarioId = transferDestinations[userId];
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'concluida':
-        return <Badge className="bg-green-100 text-green-800">Concluída</Badge>;
-      case 'processando':
-        return <Badge className="bg-yellow-100 text-yellow-800">Processando</Badge>;
-      case 'pendente':
-        return <Badge className="bg-gray-100 text-gray-800">Pendente</Badge>;
-      default:
-        return <Badge>{status}</Badge>;
+    if (!valor || valor <= 0) {
+      toast({
+        title: "Erro",
+        description: "Valor deve ser maior que zero",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!destinatarioId) {
+      toast({
+        title: "Erro",
+        description: "Selecione um destinatário",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (destinatarioId === userId) {
+      toast({
+        title: "Erro",
+        description: "Não é possível transferir para a mesma conta",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.rpc('transferir_saldo', {
+        p_de: userId,
+        p_para: destinatarioId,
+        p_valor: valor
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "✅ Transferência realizada com sucesso",
+        description: `Valor: R$ ${valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      });
+
+      // Limpar campos
+      setTransferValues(prev => ({ ...prev, [userId]: '' }));
+      setTransferDestinations(prev => ({ ...prev, [userId]: '' }));
+
+      // Atualizar lista
+      refetch();
+    } catch (error: any) {
+      toast({
+        title: "Erro na transferência",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p>Carregando...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -177,7 +243,7 @@ const Admin = () => {
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-gray-900">Painel Administrativo</h1>
-            <p className="text-gray-600 mt-1">Visão geral das operações bancárias</p>
+            <p className="text-gray-600 mt-1">Gerenciamento de carteiras e transferências</p>
           </div>
 
           {/* Summary Cards */}
@@ -199,86 +265,107 @@ const Admin = () => {
             ))}
           </div>
 
-          {/* Filters and Search */}
-          <Card className="mb-6">
+          {/* Wallets Ativas */}
+          <Card>
             <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Extrato de Transações</span>
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <Input
-                      placeholder="Buscar por nome..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-64"
-                    />
-                    <Select value={filterType} onValueChange={setFilterType}>
-                      <SelectTrigger className="w-40">
-                        <SelectValue placeholder="Filtrar tipo" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Todos</SelectItem>
-                        <SelectItem value="pix">PIX</SelectItem>
-                        <SelectItem value="ted">TED</SelectItem>
-                        <SelectItem value="boleto">Boleto</SelectItem>
-                        <SelectItem value="cobranca">Cobrança</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button variant="outline" size="icon">
-                      <Filter className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
+              <CardTitle className="flex items-center">
+                <Users className="w-5 h-5 mr-2" />
+                Carteiras Ativas - Transferências
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Nome / Razão</TableHead>
-                      <TableHead>Tipo de Transação</TableHead>
-                      <TableHead className="text-right">Valor</TableHead>
-                      <TableHead className="text-right">Saldo Atualizado</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-center">Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {transactions.map((transaction) => (
-                      <TableRow key={transaction.id} className="hover:bg-gray-50">
-                        <TableCell className="font-medium">{transaction.data}</TableCell>
-                        <TableCell>{transaction.nome}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{transaction.tipo}</Badge>
-                        </TableCell>
-                        <TableCell className={`text-right font-semibold ${
-                          transaction.valor.startsWith('-') ? 'text-red-600' : 'text-green-600'
-                        }`}>
-                          {transaction.valor}
-                        </TableCell>
-                        <TableCell className="text-right font-medium">
-                          {transaction.saldoAtualizado}
-                        </TableCell>
-                        <TableCell>
-                          {getStatusBadge(transaction.status)}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center justify-center space-x-2">
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <Edit className="w-4 h-4" />
-                            </Button>
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                {walletsAtivas?.map((wallet) => (
+                  <Card key={wallet.user_id} className="border border-gray-200 hover:shadow-md transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="space-y-4">
+                        {/* Informações do usuário */}
+                        <div>
+                          <h3 className="font-semibold text-lg text-gray-900">{wallet.nome_completo}</h3>
+                          <p className="text-sm text-gray-600">{wallet.email}</p>
+                          <p className="text-sm text-gray-600">{wallet.telefone}</p>
+                          <div className="flex justify-between items-center mt-2">
+                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                              {wallet.role}
+                            </span>
+                            <span className="text-lg font-bold text-green-600">
+                              R$ {wallet.saldo?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}
+                            </span>
                           </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                        </div>
+
+                        {/* Campos de transferência */}
+                        <div className="space-y-3 pt-4 border-t border-gray-200">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Valor da Transferência
+                            </label>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              placeholder="0,00"
+                              value={transferValues[wallet.user_id] || ''}
+                              onChange={(e) =>
+                                setTransferValues(prev => ({
+                                  ...prev,
+                                  [wallet.user_id]: e.target.value
+                                }))
+                              }
+                              className="w-full"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Destinatário
+                            </label>
+                            <Select
+                              value={transferDestinations[wallet.user_id] || ''}
+                              onValueChange={(value) =>
+                                setTransferDestinations(prev => ({
+                                  ...prev,
+                                  [wallet.user_id]: value
+                                }))
+                              }
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Selecionar destinatário" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {walletsAtivas
+                                  ?.filter(w => w.user_id !== wallet.user_id)
+                                  .map((destinatario) => (
+                                    <SelectItem key={destinatario.user_id} value={destinatario.user_id}>
+                                      {destinatario.nome_completo}
+                                    </SelectItem>
+                                  ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <Button
+                            onClick={() => handleTransferencia(wallet.user_id)}
+                            className="w-full bg-[#0057FF] hover:bg-blue-700"
+                            disabled={!transferValues[wallet.user_id] || !transferDestinations[wallet.user_id]}
+                          >
+                            <Send className="w-4 h-4 mr-2" />
+                            Transferir Saldo
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
+
+              {!walletsAtivas?.length && (
+                <div className="text-center py-12">
+                  <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhuma carteira ativa encontrada</h3>
+                  <p className="text-gray-500">Não há usuários ativos no sistema no momento.</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

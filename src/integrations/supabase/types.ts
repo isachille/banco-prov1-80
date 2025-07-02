@@ -81,6 +81,20 @@ export type Database = {
             referencedRelation: "usuarios_recusados"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "cards_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_ativas"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "cards_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_com_usuarios"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       contratos_aceitos: {
@@ -133,6 +147,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "usuarios_recusados"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contratos_aceitos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_ativas"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "contratos_aceitos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_com_usuarios"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -190,6 +218,20 @@ export type Database = {
             referencedRelation: "usuarios_recusados"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "notificacoes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_ativas"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "notificacoes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_com_usuarios"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       suporte: {
@@ -242,6 +284,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "usuarios_recusados"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suporte_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_ativas"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "suporte_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_com_usuarios"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -345,6 +401,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "transactions_from_user_fkey"
+            columns: ["from_user"]
+            isOneToOne: false
+            referencedRelation: "wallets_ativas"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "transactions_from_user_fkey"
+            columns: ["from_user"]
+            isOneToOne: false
+            referencedRelation: "wallets_com_usuarios"
+            referencedColumns: ["user_id"]
+          },
+          {
             foreignKeyName: "transactions_to_user_fkey"
             columns: ["to_user"]
             isOneToOne: false
@@ -373,11 +443,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "transactions_to_user_fkey"
+            columns: ["to_user"]
+            isOneToOne: false
+            referencedRelation: "wallets_ativas"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "transactions_to_user_fkey"
+            columns: ["to_user"]
+            isOneToOne: false
+            referencedRelation: "wallets_com_usuarios"
+            referencedColumns: ["user_id"]
+          },
+          {
             foreignKeyName: "transactions_wallet_id_fkey"
             columns: ["wallet_id"]
             isOneToOne: false
             referencedRelation: "wallets"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_ativas"
+            referencedColumns: ["wallet_id"]
+          },
+          {
+            foreignKeyName: "transactions_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_com_usuarios"
+            referencedColumns: ["wallet_id"]
           },
         ]
       }
@@ -444,6 +542,7 @@ export type Database = {
       wallets: {
         Row: {
           atualizado_em: string | null
+          created_at: string | null
           id: string
           limite: number | null
           motivo_bloq: string | null
@@ -454,6 +553,7 @@ export type Database = {
         }
         Insert: {
           atualizado_em?: string | null
+          created_at?: string | null
           id?: string
           limite?: number | null
           motivo_bloq?: string | null
@@ -464,6 +564,7 @@ export type Database = {
         }
         Update: {
           atualizado_em?: string | null
+          created_at?: string | null
           id?: string
           limite?: number | null
           motivo_bloq?: string | null
@@ -500,6 +601,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "usuarios_recusados"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wallets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_ativas"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "wallets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_com_usuarios"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -586,6 +701,40 @@ export type Database = {
         }
         Relationships: []
       }
+      wallets_ativas: {
+        Row: {
+          cpf: string | null
+          email: string | null
+          limite: number | null
+          nome_completo: string | null
+          rendimento_mes: number | null
+          role: string | null
+          saldo: number | null
+          status: string | null
+          telefone: string | null
+          tipo: string | null
+          user_id: string | null
+          wallet_id: string | null
+        }
+        Relationships: []
+      }
+      wallets_com_usuarios: {
+        Row: {
+          cpf: string | null
+          email: string | null
+          limite: number | null
+          nome_completo: string | null
+          rendimento_mes: number | null
+          role: string | null
+          saldo: number | null
+          status: string | null
+          telefone: string | null
+          tipo: string | null
+          user_id: string | null
+          wallet_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       is_admin: {
@@ -595,6 +744,10 @@ export type Database = {
       sync_all_users: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      transferir_saldo: {
+        Args: { p_de: string; p_para: string; p_valor: number }
+        Returns: string
       }
       upsert_usuario_admin: {
         Args: {
