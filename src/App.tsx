@@ -43,6 +43,20 @@ import Recusado from "./pages/Recusado";
 import GiftCards from "./pages/GiftCards";
 import NotFound from "./pages/NotFound";
 
+// Admin Pages
+import AdminDashboard from "./pages/admin/Dashboard";
+import AdminExtrato from "./pages/admin/AdminExtrato";
+import AdminPix from "./pages/admin/AdminPix";
+import AdminTransferencias from "./pages/admin/AdminTransferencias";
+import AdminPagamentos from "./pages/admin/AdminPagamentos";
+import AdminCobrancas from "./pages/admin/AdminCobrancas";
+import AdminArquivos from "./pages/admin/AdminArquivos";
+import AdminCedentes from "./pages/admin/AdminCedentes";
+import AdminBureaux from "./pages/admin/AdminBureaux";
+import AdminRelatorios from "./pages/admin/AdminRelatorios";
+import AdminConta from "./pages/admin/AdminConta";
+import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
+
 const queryClient = new QueryClient();
 
 function App() {
@@ -90,6 +104,20 @@ function App() {
               <Route path="/perfil" element={<Layout><Perfil /></Layout>} />
               <Route path="/configuracoes" element={<Layout><Configuracoes /></Layout>} />
               <Route path="/ajuda" element={<Layout><Ajuda /></Layout>} />
+              
+              {/* New Admin Routes */}
+              <Route path="/admin/dashboard" element={<Layout><AdminDashboard /></Layout>} />
+              <Route path="/admin/extrato" element={<Layout><AdminExtrato /></Layout>} />
+              <Route path="/admin/pix" element={<Layout><AdminPix /></Layout>} />
+              <Route path="/admin/transferencias" element={<Layout><AdminTransferencias /></Layout>} />
+              <Route path="/admin/pagamentos" element={<Layout><AdminPagamentos /></Layout>} />
+              <Route path="/admin/cobrancas" element={<Layout><AdminCobrancas /></Layout>} />
+              <Route path="/admin/arquivos" element={<Layout><AdminArquivos /></Layout>} />
+              <Route path="/admin/cedentes" element={<Layout><AdminCedentes /></Layout>} />
+              <Route path="/admin/bureaux" element={<Layout><AdminBureaux /></Layout>} />
+              <Route path="/admin/relatorios" element={<Layout><AdminRelatorios /></Layout>} />
+              <Route path="/admin/conta" element={<Layout><AdminConta /></Layout>} />
+              <Route path="/admin/configuracoes" element={<Layout><AdminConfiguracoes /></Layout>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
