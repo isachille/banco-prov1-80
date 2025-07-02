@@ -1,17 +1,79 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Receipt, Search, Filter, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Receipt, Search, Filter, CheckCircle, XCircle, Clock, Plus } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const AdminPagamentos = () => {
+  const { toast } = useToast();
   const [filtros, setFiltros] = useState({
     status: '',
     periodo: '',
     busca: ''
   });
+  
+  const [novoPagamento, setNovoPagamento] = useState({
+    tipo: '',
+    descricao: '',
+    valor: '',
+    vencimento: ''
+  });
+  
+  const [loading, setLoading] = useState(false);
+  
+  const handleRegistrarPagamento = async () => {
+    if (!novoPagamento.tipo || !novoPagamento.descricao || !novoPagamento.valor || !novoPagamento.vencimento) {
+      toast({
+        title: "Erro",
+        description: "Preencha todos os campos obrigatórios",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data: authUser } = await supabase.auth.getUser();
+      if (!authUser.user) {
+        throw new Error('Usuário não autenticado');
+      }
+
+      const { data, error } = await supabase.rpc('registrar_pagamento', {
+        p_user: authUser.user.id,
+        p_tipo: novoPagamento.tipo,
+        p_descricao: novoPagamento.descricao,
+        p_valor: parseFloat(novoPagamento.valor),
+        p_vencimento: novoPagamento.vencimento
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: "Pagamento registrado com sucesso!"
+      });
+
+      // Limpar formulário
+      setNovoPagamento({
+        tipo: '',
+        descricao: '',
+        valor: '',
+        vencimento: ''
+      });
+    } catch (error) {
+      console.error('Erro ao registrar pagamento:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao registrar pagamento.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const pagamentos = [
     {
@@ -65,8 +127,75 @@ const AdminPagamentos = () => {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Pagamentos</h1>
-        <Button>Novo Pagamento</Button>
       </div>
+
+      {/* Novo Pagamento */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Plus className="h-5 w-5" />
+            Registrar Novo Pagamento
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Tipo</label>
+              <Select value={novoPagamento.tipo} onValueChange={(value) => setNovoPagamento({...novoPagamento, tipo: value})}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecionar tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="boleto">Boleto</SelectItem>
+                  <SelectItem value="pix">PIX</SelectItem>
+                  <SelectItem value="ted">TED</SelectItem>
+                  <SelectItem value="cartao">Cartão</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Descrição</label>
+              <Input
+                placeholder="Descrição do pagamento"
+                value={novoPagamento.descricao}
+                onChange={(e) => setNovoPagamento({...novoPagamento, descricao: e.target.value})}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Valor (R$)</label>
+              <Input
+                type="number"
+                step="0.01"
+                placeholder="0,00"
+                value={novoPagamento.valor}
+                onChange={(e) => setNovoPagamento({...novoPagamento, valor: e.target.value})}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Vencimento</label>
+              <Input
+                type="date"
+                value={novoPagamento.vencimento}
+                onChange={(e) => setNovoPagamento({...novoPagamento, vencimento: e.target.value})}
+              />
+            </div>
+          </div>
+          
+          <div className="mt-4">
+            <Button 
+              onClick={handleRegistrarPagamento}
+              disabled={loading}
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              {loading ? 'Registrando...' : 'Registrar Pagamento'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Resumo */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

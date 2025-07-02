@@ -1,18 +1,70 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Smartphone, Send, QrCode, History } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const AdminPix = () => {
+  const { toast } = useToast();
   const [pixData, setPixData] = useState({
     chave: '',
     valor: '',
     descricao: '',
     remetente: ''
   });
+  const [loading, setLoading] = useState(false);
+
+  const handleEnviarPix = async () => {
+    if (!pixData.remetente || !pixData.chave || !pixData.valor) {
+      toast({
+        title: "Erro",
+        description: "Preencha todos os campos obrigatórios",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data: authUser } = await supabase.auth.getUser();
+      if (!authUser.user) {
+        throw new Error('Usuário não autenticado');
+      }
+
+      const { data, error } = await supabase.rpc('enviar_pix', {
+        p_origem: authUser.user.id,
+        p_destino: pixData.chave, // Assumindo que chave é o ID do destinatário
+        p_valor: parseFloat(pixData.valor)
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: "Pix enviado com sucesso!"
+      });
+
+      // Limpar formulário
+      setPixData({
+        chave: '',
+        valor: '',
+        descricao: '',
+        remetente: ''
+      });
+    } catch (error) {
+      console.error('Erro ao enviar Pix:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao enviar Pix.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const pixRecentes = [
     {
@@ -92,9 +144,13 @@ const AdminPix = () => {
               />
             </div>
 
-            <Button className="w-full flex items-center gap-2">
+            <Button 
+              className="w-full flex items-center gap-2" 
+              onClick={handleEnviarPix}
+              disabled={loading}
+            >
               <Smartphone className="h-4 w-4" />
-              Enviar PIX
+              {loading ? 'Enviando...' : 'Enviar PIX'}
             </Button>
           </CardContent>
         </Card>

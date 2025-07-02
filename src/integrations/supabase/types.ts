@@ -9,6 +9,76 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      arquivos: {
+        Row: {
+          criado_em: string | null
+          id: string
+          nome: string | null
+          tipo: string | null
+          url: string | null
+          user_id: string | null
+        }
+        Insert: {
+          criado_em?: string | null
+          id?: string
+          nome?: string | null
+          tipo?: string | null
+          url?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          criado_em?: string | null
+          id?: string
+          nome?: string | null
+          tipo?: string | null
+          url?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "arquivos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "arquivos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_ativos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "arquivos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_pendentes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "arquivos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_recusados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "arquivos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_ativas"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "arquivos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_com_usuarios"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       bandeiras_cartao: {
         Row: {
           id: number
@@ -97,6 +167,109 @@ export type Database = {
           },
         ]
       }
+      cedentes_pagadores: {
+        Row: {
+          cpf_cnpj: string | null
+          criado_em: string | null
+          email: string | null
+          id: string
+          nome: string | null
+          telefone: string | null
+          tipo: string | null
+        }
+        Insert: {
+          cpf_cnpj?: string | null
+          criado_em?: string | null
+          email?: string | null
+          id?: string
+          nome?: string | null
+          telefone?: string | null
+          tipo?: string | null
+        }
+        Update: {
+          cpf_cnpj?: string | null
+          criado_em?: string | null
+          email?: string | null
+          id?: string
+          nome?: string | null
+          telefone?: string | null
+          tipo?: string | null
+        }
+        Relationships: []
+      }
+      cobrancas: {
+        Row: {
+          cliente_id: string | null
+          criado_em: string | null
+          descricao: string | null
+          id: string
+          status: string | null
+          valor: number | null
+          vencimento: string | null
+        }
+        Insert: {
+          cliente_id?: string | null
+          criado_em?: string | null
+          descricao?: string | null
+          id?: string
+          status?: string | null
+          valor?: number | null
+          vencimento?: string | null
+        }
+        Update: {
+          cliente_id?: string | null
+          criado_em?: string | null
+          descricao?: string | null
+          id?: string
+          status?: string | null
+          valor?: number | null
+          vencimento?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cobrancas_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cobrancas_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_ativos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cobrancas_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_pendentes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cobrancas_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_recusados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cobrancas_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_ativas"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "cobrancas_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_com_usuarios"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       compras: {
         Row: {
           data: string | null
@@ -157,6 +330,73 @@ export type Database = {
           },
           {
             foreignKeyName: "compras_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_com_usuarios"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      consultas_bureaux: {
+        Row: {
+          consultado_em: string | null
+          cpf_consultado: string | null
+          id: string
+          resultado: string | null
+          user_id: string | null
+        }
+        Insert: {
+          consultado_em?: string | null
+          cpf_consultado?: string | null
+          id?: string
+          resultado?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          consultado_em?: string | null
+          cpf_consultado?: string | null
+          id?: string
+          resultado?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultas_bureaux_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultas_bureaux_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_ativos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultas_bureaux_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_pendentes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultas_bureaux_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_recusados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultas_bureaux_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_ativas"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "consultas_bureaux_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "wallets_com_usuarios"
@@ -231,6 +471,79 @@ export type Database = {
           },
         ]
       }
+      faturamento_conta: {
+        Row: {
+          data_fim: string | null
+          data_inicio: string | null
+          id: string
+          plano: string | null
+          status: string | null
+          user_id: string | null
+          valor: number | null
+        }
+        Insert: {
+          data_fim?: string | null
+          data_inicio?: string | null
+          id?: string
+          plano?: string | null
+          status?: string | null
+          user_id?: string | null
+          valor?: number | null
+        }
+        Update: {
+          data_fim?: string | null
+          data_inicio?: string | null
+          id?: string
+          plano?: string | null
+          status?: string | null
+          user_id?: string | null
+          valor?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "faturamento_conta_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "faturamento_conta_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_ativos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "faturamento_conta_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_pendentes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "faturamento_conta_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_recusados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "faturamento_conta_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_ativas"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "faturamento_conta_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_com_usuarios"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       notificacoes: {
         Row: {
           corpo: string | null
@@ -295,6 +608,328 @@ export type Database = {
           {
             foreignKeyName: "notificacoes_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_com_usuarios"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      pagamentos: {
+        Row: {
+          criado_em: string | null
+          descricao: string | null
+          id: string
+          status: string | null
+          tipo: string | null
+          user_id: string | null
+          valor: number | null
+          vencimento: string | null
+        }
+        Insert: {
+          criado_em?: string | null
+          descricao?: string | null
+          id?: string
+          status?: string | null
+          tipo?: string | null
+          user_id?: string | null
+          valor?: number | null
+          vencimento?: string | null
+        }
+        Update: {
+          criado_em?: string | null
+          descricao?: string | null
+          id?: string
+          status?: string | null
+          tipo?: string | null
+          user_id?: string | null
+          valor?: number | null
+          vencimento?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pagamentos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pagamentos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_ativos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pagamentos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_pendentes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pagamentos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_recusados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pagamentos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_ativas"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pagamentos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_com_usuarios"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      pix: {
+        Row: {
+          criado_em: string | null
+          destino: string | null
+          id: string
+          origem: string | null
+          status: string | null
+          valor: number | null
+        }
+        Insert: {
+          criado_em?: string | null
+          destino?: string | null
+          id?: string
+          origem?: string | null
+          status?: string | null
+          valor?: number | null
+        }
+        Update: {
+          criado_em?: string | null
+          destino?: string | null
+          id?: string
+          origem?: string | null
+          status?: string | null
+          valor?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pix_destino_fkey"
+            columns: ["destino"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pix_destino_fkey"
+            columns: ["destino"]
+            isOneToOne: false
+            referencedRelation: "usuarios_ativos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pix_destino_fkey"
+            columns: ["destino"]
+            isOneToOne: false
+            referencedRelation: "usuarios_pendentes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pix_destino_fkey"
+            columns: ["destino"]
+            isOneToOne: false
+            referencedRelation: "usuarios_recusados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pix_destino_fkey"
+            columns: ["destino"]
+            isOneToOne: false
+            referencedRelation: "wallets_ativas"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pix_destino_fkey"
+            columns: ["destino"]
+            isOneToOne: false
+            referencedRelation: "wallets_com_usuarios"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pix_origem_fkey"
+            columns: ["origem"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pix_origem_fkey"
+            columns: ["origem"]
+            isOneToOne: false
+            referencedRelation: "usuarios_ativos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pix_origem_fkey"
+            columns: ["origem"]
+            isOneToOne: false
+            referencedRelation: "usuarios_pendentes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pix_origem_fkey"
+            columns: ["origem"]
+            isOneToOne: false
+            referencedRelation: "usuarios_recusados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pix_origem_fkey"
+            columns: ["origem"]
+            isOneToOne: false
+            referencedRelation: "wallets_ativas"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pix_origem_fkey"
+            columns: ["origem"]
+            isOneToOne: false
+            referencedRelation: "wallets_com_usuarios"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      preferencias_usuarios: {
+        Row: {
+          atualizado_em: string | null
+          id: string
+          notificacoes: boolean | null
+          tema: string | null
+          user_id: string | null
+        }
+        Insert: {
+          atualizado_em?: string | null
+          id?: string
+          notificacoes?: boolean | null
+          tema?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          atualizado_em?: string | null
+          id?: string
+          notificacoes?: boolean | null
+          tema?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "preferencias_usuarios_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "preferencias_usuarios_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_ativos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "preferencias_usuarios_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_pendentes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "preferencias_usuarios_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_recusados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "preferencias_usuarios_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_ativas"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "preferencias_usuarios_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "wallets_com_usuarios"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      relatorios_gerados: {
+        Row: {
+          gerado_em: string | null
+          gerado_por: string | null
+          id: string
+          tipo: string | null
+          url_pdf: string | null
+        }
+        Insert: {
+          gerado_em?: string | null
+          gerado_por?: string | null
+          id?: string
+          tipo?: string | null
+          url_pdf?: string | null
+        }
+        Update: {
+          gerado_em?: string | null
+          gerado_por?: string | null
+          id?: string
+          tipo?: string | null
+          url_pdf?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "relatorios_gerados_gerado_por_fkey"
+            columns: ["gerado_por"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "relatorios_gerados_gerado_por_fkey"
+            columns: ["gerado_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios_ativos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "relatorios_gerados_gerado_por_fkey"
+            columns: ["gerado_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios_pendentes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "relatorios_gerados_gerado_por_fkey"
+            columns: ["gerado_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios_recusados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "relatorios_gerados_gerado_por_fkey"
+            columns: ["gerado_por"]
+            isOneToOne: false
+            referencedRelation: "wallets_ativas"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "relatorios_gerados_gerado_por_fkey"
+            columns: ["gerado_por"]
             isOneToOne: false
             referencedRelation: "wallets_com_usuarios"
             referencedColumns: ["user_id"]
@@ -543,6 +1178,115 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "wallets_com_usuarios"
             referencedColumns: ["wallet_id"]
+          },
+        ]
+      }
+      transferencias: {
+        Row: {
+          criado_em: string | null
+          de_user: string | null
+          id: string
+          para_user: string | null
+          valor: number | null
+        }
+        Insert: {
+          criado_em?: string | null
+          de_user?: string | null
+          id?: string
+          para_user?: string | null
+          valor?: number | null
+        }
+        Update: {
+          criado_em?: string | null
+          de_user?: string | null
+          id?: string
+          para_user?: string | null
+          valor?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transferencias_de_user_fkey"
+            columns: ["de_user"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transferencias_de_user_fkey"
+            columns: ["de_user"]
+            isOneToOne: false
+            referencedRelation: "usuarios_ativos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transferencias_de_user_fkey"
+            columns: ["de_user"]
+            isOneToOne: false
+            referencedRelation: "usuarios_pendentes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transferencias_de_user_fkey"
+            columns: ["de_user"]
+            isOneToOne: false
+            referencedRelation: "usuarios_recusados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transferencias_de_user_fkey"
+            columns: ["de_user"]
+            isOneToOne: false
+            referencedRelation: "wallets_ativas"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "transferencias_de_user_fkey"
+            columns: ["de_user"]
+            isOneToOne: false
+            referencedRelation: "wallets_com_usuarios"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "transferencias_para_user_fkey"
+            columns: ["para_user"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transferencias_para_user_fkey"
+            columns: ["para_user"]
+            isOneToOne: false
+            referencedRelation: "usuarios_ativos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transferencias_para_user_fkey"
+            columns: ["para_user"]
+            isOneToOne: false
+            referencedRelation: "usuarios_pendentes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transferencias_para_user_fkey"
+            columns: ["para_user"]
+            isOneToOne: false
+            referencedRelation: "usuarios_recusados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transferencias_para_user_fkey"
+            columns: ["para_user"]
+            isOneToOne: false
+            referencedRelation: "wallets_ativas"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "transferencias_para_user_fkey"
+            columns: ["para_user"]
+            isOneToOne: false
+            referencedRelation: "wallets_com_usuarios"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -808,9 +1552,32 @@ export type Database = {
         Args: { p_user: string; p_servico: string; p_valor: number }
         Returns: string
       }
+      enviar_pix: {
+        Args: { p_origem: string; p_destino: string; p_valor: number }
+        Returns: string
+      }
       is_admin: {
         Args: { user_id: string }
         Returns: boolean
+      }
+      registrar_pagamento: {
+        Args: {
+          p_user: string
+          p_tipo: string
+          p_descricao: string
+          p_valor: number
+          p_vencimento: string
+        }
+        Returns: string
+      }
+      registrar_transacao: {
+        Args: {
+          p_user: string
+          p_tipo: string
+          p_descricao: string
+          p_valor: number
+        }
+        Returns: string
       }
       sync_all_users: {
         Args: Record<PropertyKey, never>
