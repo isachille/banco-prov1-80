@@ -47,18 +47,19 @@ const CadastroPF = () => {
     try {
       console.log('Iniciando cadastro PF:', formData);
 
-      // Cadastrar no Supabase Auth
+      // Cadastrar no Supabase Auth com redirect para confirmação
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.senha,
         options: {
+          emailRedirectTo: `${window.location.origin}/confirmacao`,
           data: {
             nome: formData.nome,
             nome_completo: formData.nome_completo,
             cpf: formData.cpf.replace(/\D/g, ''),
             cpf_cnpj: formData.cpf.replace(/\D/g, ''),
             telefone: formData.telefone.replace(/\D/g, ''),
-            tipo: 'PF'
+            tipo: 'cliente'
           }
         }
       });
@@ -76,12 +77,8 @@ const CadastroPF = () => {
       console.log('Cadastro realizado:', data);
       
       if (data.user) {
-        toast.success('Cadastro realizado com sucesso! Redirecionando...');
-        
-        // Redirecionar direto para login
-        setTimeout(() => {
-          navigate('/login');
-        }, 1000);
+        toast.success('Cadastro realizado! Verifique seu email para confirmar a conta.');
+        navigate('/confirme-email');
       }
 
     } catch (error) {

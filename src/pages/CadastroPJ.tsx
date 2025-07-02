@@ -87,7 +87,7 @@ const CadastroPJ = () => {
     try {
       console.log('Iniciando cadastro PJ:', formData);
 
-      // Apenas Supabase Auth SignUp - triggers automáticos criarão os registros
+      // Cadastrar no Supabase Auth com redirect para confirmação
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.senha,
@@ -99,7 +99,7 @@ const CadastroPJ = () => {
             cnpj: formData.cnpj.replace(/\D/g, ''),
             cpf_cnpj: formData.cnpj.replace(/\D/g, ''),
             telefone: formData.telefone.replace(/\D/g, ''),
-            tipo: 'PJ'
+            tipo: 'parceiro'
           }
         }
       });

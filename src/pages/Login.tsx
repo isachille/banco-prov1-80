@@ -24,7 +24,6 @@ const Login = () => {
 
   const redirectUserByStatus = async () => {
     try {
-      // Verificar sessão e dados do usuário
       const { data: { user }, error: sessionError } = await supabase.auth.getUser();
       
       if (sessionError || !user) {
@@ -35,8 +34,13 @@ const Login = () => {
 
       console.log('Usuário logado:', user.id);
 
-      // REMOVIDO: Verificação de email confirmado
-      // Permite login mesmo sem confirmação de email
+      // Verificar se o email foi confirmado
+      if (!user.email_confirmed_at) {
+        console.log('Email não confirmado, redirecionando para confirmação');
+        toast.error('Por favor, confirme seu email antes de fazer login');
+        navigate('/confirme-email');
+        return;
+      }
 
       // Aguardar um pouco para garantir que os dados estão sincronizados
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -56,31 +60,60 @@ const Login = () => {
 
       console.log('Dados do usuário encontrados:', userData);
 
-      // Se usuário não foi encontrado na tabela, criar automaticamente
+      // Se usuário não foi encontrado na tabela, aguardar processamento dos triggers
       if (!userData) {
-        console.log('Usuário não encontrado na tabela users, criando...');
+        console.log('Usuário não encontrado na tabela users, aguardando processamento...');
+        toast.info('Finalizando configuração da conta...');
         
-        const { error: createError } = await supabase
+        // Aguardar mais tempo para os triggers processarem
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        
+        // Tentar novamente
+        const { data: userData2 } = await supabase
           .from('users')
-          .insert({
-            id: user.id,
-            email: user.email || '',
-            nome_completo: user.user_metadata?.nome_completo || user.email?.split('@')[0] || '',
-            cpf_cnpj: user.user_metadata?.cpf_cnpj || '000.000.000-00',
-            telefone: user.user_metadata?.telefone || '',
-            tipo: user.user_metadata?.tipo || 'PF',
-            status: 'ativo', // Definindo como ativo diretamente
-            role: 'usuario'
-          });
-
-        if (createError) {
-          console.error('Erro ao criar usuário:', createError);
-          toast.error('Erro ao criar dados do usuário');
+          .select('status, is_admin, role')
+          .eq('id', user.id)
+          .maybeSingle();
+        
+        if (!userData2) {
+          console.log('Usuário ainda não foi processado após aguardar');
+          toast.error('Conta ainda em processamento. Tente novamente em alguns minutos.');
+          return;
+        }
+        
+        // Usar os dados encontrados na segunda tentativa
+        const finalUserData = userData2;
+        
+        // Verificar se é admin/gerente/dono primeiro
+        const isAdminUser = finalUserData.is_admin === true || 
+                           finalUserData.role === 'admin' || 
+                           finalUserData.role === 'gerente' || 
+                           finalUserData.role === 'dono';
+        
+        if (isAdminUser) {
+          console.log('Redirecionando admin para /admin');
+          navigate('/admin');
           return;
         }
 
-        console.log('Usuário criado com status ativo');
-        navigate('/home');
+        // Para usuários normais, verificar status
+        switch (finalUserData.status) {
+          case 'ativo':
+            console.log('Status ativo, redirecionando para home');
+            navigate('/home');
+            break;
+          case 'pendente':
+            console.log('Status pendente, redirecionando para /pendente');
+            navigate('/pendente');
+            break;
+          case 'recusado':
+            console.log('Status recusado, redirecionando para /recusado');
+            navigate('/recusado');
+            break;
+          default:
+            console.log('Status desconhecido, redirecionando para pendente');
+            navigate('/pendente');
+        }
         return;
       }
 
@@ -96,7 +129,7 @@ const Login = () => {
         return;
       }
 
-      // Redirecionar baseado no status usando as novas páginas
+      // Redirecionar baseado no status usando as páginas existentes
       switch (userData.status) {
         case 'ativo':
           console.log('Status ativo, redirecionando para home');
@@ -111,8 +144,8 @@ const Login = () => {
           navigate('/recusado');
           break;
         default:
-          console.log('Status desconhecido, redirecionando para home');
-          navigate('/home');
+          console.log('Status desconhecido, redirecionando para pendente');
+          navigate('/pendente');
       }
 
     } catch (error) {
@@ -137,8 +170,10 @@ const Login = () => {
         console.error('Erro no login:', error);
         if (error.message === 'Invalid login credentials') {
           toast.error('Email ou senha incorretos.');
+        } else if (error.message === 'Email not confirmed') {
+          toast.error('Email não confirmado. Verifique sua caixa de entrada.');
+          navigate('/confirme-email');
         } else {
-          // REMOVIDO: Tratamento específico para "Email not confirmed"
           toast.error('Erro no login: ' + error.message);
         }
         return;
