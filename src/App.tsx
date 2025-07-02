@@ -1,10 +1,10 @@
-
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import Layout from "./components/Layout";
+import AdminLayout from "./components/AdminLayout";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import CadastroTipo from "./pages/CadastroTipo";
@@ -84,9 +84,8 @@ function App() {
               <Route path="/recusado" element={<Recusado />} />
               <Route path="/gift-cards" element={<GiftCards />} />
               
+              {/* Mobile Layout Routes */}
               <Route path="/home" element={<Layout><Home /></Layout>} />
-              <Route path="/admin" element={<Layout><Admin /></Layout>} />
-              <Route path="/painel-admin" element={<Layout><PainelAdmin /></Layout>} />
               <Route path="/extrato" element={<Layout><Extrato /></Layout>} />
               <Route path="/cartoes" element={<Layout><Cartoes /></Layout>} />
               <Route path="/pix" element={<Layout><Pix /></Layout>} />
@@ -105,19 +104,21 @@ function App() {
               <Route path="/configuracoes" element={<Layout><Configuracoes /></Layout>} />
               <Route path="/ajuda" element={<Layout><Ajuda /></Layout>} />
               
-              {/* New Admin Routes */}
-              <Route path="/admin/dashboard" element={<Layout><AdminDashboard /></Layout>} />
-              <Route path="/admin/extrato" element={<Layout><AdminExtrato /></Layout>} />
-              <Route path="/admin/pix" element={<Layout><AdminPix /></Layout>} />
-              <Route path="/admin/transferencias" element={<Layout><AdminTransferencias /></Layout>} />
-              <Route path="/admin/pagamentos" element={<Layout><AdminPagamentos /></Layout>} />
-              <Route path="/admin/cobrancas" element={<Layout><AdminCobrancas /></Layout>} />
-              <Route path="/admin/arquivos" element={<Layout><AdminArquivos /></Layout>} />
-              <Route path="/admin/cedentes" element={<Layout><AdminCedentes /></Layout>} />
-              <Route path="/admin/bureaux" element={<Layout><AdminBureaux /></Layout>} />
-              <Route path="/admin/relatorios" element={<Layout><AdminRelatorios /></Layout>} />
-              <Route path="/admin/conta" element={<Layout><AdminConta /></Layout>} />
-              <Route path="/admin/configuracoes" element={<Layout><AdminConfiguracoes /></Layout>} />
+              {/* Admin Layout Routes */}
+              <Route path="/admin" element={<AdminLayout><Admin /></AdminLayout>} />
+              <Route path="/painel-admin" element={<AdminLayout><PainelAdmin /></AdminLayout>} />
+              <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
+              <Route path="/admin/extrato" element={<AdminLayout><AdminExtrato /></AdminLayout>} />
+              <Route path="/admin/pix" element={<AdminLayout><AdminPix /></AdminLayout>} />
+              <Route path="/admin/transferencias" element={<AdminLayout><AdminTransferencias /></AdminLayout>} />
+              <Route path="/admin/pagamentos" element={<AdminLayout><AdminPagamentos /></AdminLayout>} />
+              <Route path="/admin/cobrancas" element={<AdminLayout><AdminCobrancas /></AdminLayout>} />
+              <Route path="/admin/arquivos" element={<AdminLayout><AdminArquivos /></AdminLayout>} />
+              <Route path="/admin/cedentes" element={<AdminLayout><AdminCedentes /></AdminLayout>} />
+              <Route path="/admin/bureaux" element={<AdminLayout><AdminBureaux /></AdminLayout>} />
+              <Route path="/admin/relatorios" element={<AdminLayout><AdminRelatorios /></AdminLayout>} />
+              <Route path="/admin/conta" element={<AdminLayout><AdminConta /></AdminLayout>} />
+              <Route path="/admin/configuracoes" element={<AdminLayout><AdminConfiguracoes /></AdminLayout>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
