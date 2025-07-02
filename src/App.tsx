@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -104,9 +105,11 @@ function App() {
               <Route path="/configuracoes" element={<Layout><Configuracoes /></Layout>} />
               <Route path="/ajuda" element={<Layout><Ajuda /></Layout>} />
               
-              {/* Admin Layout Routes */}
-              <Route path="/admin" element={<AdminLayout><Admin /></AdminLayout>} />
-              <Route path="/painel-admin" element={<AdminLayout><PainelAdmin /></AdminLayout>} />
+              {/* Admin Routes - Novo sistema de painel integrado */}
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/painel-admin" element={<PainelAdmin />} />
+              
+              {/* Admin Layout Routes (páginas antigas mantidas) */}
               <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
               <Route path="/admin/extrato" element={<AdminLayout><AdminExtrato /></AdminLayout>} />
               <Route path="/admin/pix" element={<AdminLayout><AdminPix /></AdminLayout>} />

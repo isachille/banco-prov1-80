@@ -1,258 +1,294 @@
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Eye, EyeOff, LogIn, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
+// Função para limpar estado de autenticação
+const cleanupAuthState = () => {
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      localStorage.removeItem(key);
+    }
+  });
+  Object.keys(sessionStorage || {}).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      sessionStorage.removeItem(key);
+    }
+  });
+};
+
 const Login = () => {
   const navigate = useNavigate();
+  const [isLogin, setIsLogin] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
-    senha: ''
+    password: '',
+    confirmPassword: ''
   });
-  const [isLoading, setIsLoading] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const redirectUserByStatus = async () => {
-    try {
-      const { data: { user }, error: sessionError } = await supabase.auth.getUser();
-      
-      if (sessionError || !user) {
-        console.error('Erro ao obter usuário:', sessionError);
-        toast.error('Erro ao verificar usuário');
-        return;
-      }
-
-      console.log('Usuário logado:', user.id);
-
-      // Verificar se o email foi confirmado
-      if (!user.email_confirmed_at) {
-        console.log('Email não confirmado, redirecionando para confirmação');
-        toast.error('Por favor, confirme seu email antes de fazer login');
-        navigate('/confirme-email');
-        return;
-      }
-
-      // Aguardar um pouco para garantir que os dados estão sincronizados
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Buscar dados do usuário na tabela users
-      const { data: userData, error } = await supabase
-        .from('users')
-        .select('status, is_admin, role')
-        .eq('id', user.id)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Erro ao buscar dados do usuário:', error);
-        toast.error('Erro ao verificar dados do usuário');
-        return;
-      }
-
-      console.log('Dados do usuário encontrados:', userData);
-
-      // Se usuário não foi encontrado na tabela, aguardar processamento dos triggers
-      if (!userData) {
-        console.log('Usuário não encontrado na tabela users, aguardando processamento...');
-        toast.info('Finalizando configuração da conta...');
-        
-        // Aguardar mais tempo para os triggers processarem
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        
-        // Tentar novamente
-        const { data: userData2 } = await supabase
+  // Verificar se usuário já está logado
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        // Se já está logado, verificar role e redirecionar
+        const { data: userData } = await supabase
           .from('users')
-          .select('status, is_admin, role')
-          .eq('id', user.id)
-          .maybeSingle();
-        
-        if (!userData2) {
-          console.log('Usuário ainda não foi processado após aguardar');
-          toast.error('Conta ainda em processamento. Tente novamente em alguns minutos.');
-          return;
-        }
-        
-        // Usar os dados encontrados na segunda tentativa
-        const finalUserData = userData2;
-        
-        // Verificar se é admin/gerente/dono primeiro
-        const isAdminUser = finalUserData.is_admin === true || 
-                           finalUserData.role === 'admin' || 
-                           finalUserData.role === 'gerente' || 
-                           finalUserData.role === 'dono';
-        
-        if (isAdminUser) {
-          console.log('Redirecionando admin para /admin');
-          navigate('/admin');
-          return;
-        }
+          .select('role, status')
+          .eq('id', session.user.id)
+          .single();
 
-        // Para usuários normais, verificar status
-        switch (finalUserData.status) {
-          case 'ativo':
-            console.log('Status ativo, redirecionando para home');
+        if (userData) {
+          if (userData.status === 'ativo' || ['admin', 'dono'].includes(userData.role)) {
             navigate('/home');
-            break;
-          case 'pendente':
-            console.log('Status pendente, redirecionando para /pendente');
-            navigate('/pendente');
-            break;
-          case 'recusado':
-            console.log('Status recusado, redirecionando para /recusado');
-            navigate('/recusado');
-            break;
-          default:
-            console.log('Status desconhecido, redirecionando para pendente');
-            navigate('/pendente');
+          }
         }
-        return;
       }
+    };
+    checkUser();
+  }, [navigate]);
 
-      // Verificar se é admin/gerente/dono primeiro
-      const isAdminUser = userData.is_admin === true || 
-                         userData.role === 'admin' || 
-                         userData.role === 'gerente' || 
-                         userData.role === 'dono';
-      
-      if (isAdminUser) {
-        console.log('Redirecionando admin para /admin');
-        navigate('/admin');
-        return;
-      }
-
-      // Redirecionar baseado no status usando as páginas existentes
-      switch (userData.status) {
-        case 'ativo':
-          console.log('Status ativo, redirecionando para home');
-          navigate('/home');
-          break;
-        case 'pendente':
-          console.log('Status pendente, redirecionando para /pendente');
-          navigate('/pendente');
-          break;
-        case 'recusado':
-          console.log('Status recusado, redirecionando para /recusado');
-          navigate('/recusado');
-          break;
-        default:
-          console.log('Status desconhecido, redirecionando para pendente');
-          navigate('/pendente');
-      }
-
-    } catch (error) {
-      console.error('Erro ao verificar status:', error);
-      toast.error('Erro interno ao verificar status da conta');
-    }
+  const handleInputChange = (field: keyof typeof formData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setLoading(true);
 
     try {
-      console.log('Tentativa de login para:', formData.email);
+      // Limpar estado anterior
+      cleanupAuthState();
       
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continuar mesmo se falhar
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
-        password: formData.senha
+        password: formData.password,
       });
 
       if (error) {
-        console.error('Erro no login:', error);
-        if (error.message === 'Invalid login credentials') {
-          toast.error('Email ou senha incorretos.');
-        } else if (error.message === 'Email not confirmed') {
-          toast.error('Email não confirmado. Verifique sua caixa de entrada.');
-          navigate('/confirme-email');
-        } else {
-          toast.error('Erro no login: ' + error.message);
+        if (error.message.includes('Email not confirmed')) {
+          toast.error('Por favor, confirme seu email antes de fazer login. Verifique sua caixa de entrada.');
+          return;
         }
-        return;
+        throw error;
       }
 
-      if (data.user && data.session) {
-        console.log('Login bem-sucedido:', data.user.id);
-        toast.success('Login realizado com sucesso!');
+      if (data.user) {
+        // Verificar dados do usuário na tabela users
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('role, status, nome_completo')
+          .eq('id', data.user.id)
+          .single();
+
+        if (userError) {
+          console.error('Erro ao buscar dados do usuário:', userError);
+          toast.error('Erro ao verificar dados do usuário');
+          return;
+        }
+
+        if (!userData) {
+          toast.error('Usuário não encontrado no sistema');
+          return;
+        }
+
+        console.log('Dados do usuário:', userData);
+
+        if (userData.status === 'pendente' && !['admin', 'dono'].includes(userData.role)) {
+          toast.info('Sua conta está pendente de aprovação');
+          navigate('/pendente');
+          return;
+        }
+
+        if (userData.status === 'recusado') {
+          toast.error('Sua conta foi recusada');
+          navigate('/recusado');
+          return;
+        }
+
+        toast.success(`Bem-vindo, ${userData.nome_completo || 'usuário'}!`);
         
-        // Aguardar para garantir sessão estabelecida
-        setTimeout(() => {
-          redirectUserByStatus();
-        }, 500);
+        // Redirecionar baseado no role
+        if (['dono', 'admin'].includes(userData.role)) {
+          // Usuários admin/dono vão para home (com acesso ao painel)
+          navigate('/home');
+        } else {
+          // Usuários normais vão para home
+          navigate('/home');
+        }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro no login:', error);
-      toast.error('Erro no login. Verifique suas credenciais.');
+      toast.error(error.message || 'Erro ao fazer login');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
+    }
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error('As senhas não coincidem');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Limpar estado anterior
+      cleanupAuthState();
+      
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continuar mesmo se falhar
+      }
+
+      const redirectUrl = `${window.location.origin}/email-confirmado`;
+      
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          emailRedirectTo: redirectUrl
+        }
+      });
+
+      if (error) {
+        if (error.message.includes('User already registered')) {
+          toast.error('Este email já está cadastrado. Tente fazer login.');
+          return;
+        }
+        throw error;
+      }
+
+      if (data.user) {
+        toast.success('Cadastro realizado! Verifique seu email para confirmar a conta.');
+        navigate('/confirme-email');
+      }
+    } catch (error: any) {
+      console.error('Erro no cadastro:', error);
+      toast.error(error.message || 'Erro ao fazer cadastro');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-900 dark:to-blue-900 flex items-center justify-center p-4 transition-colors duration-300">
-      <div className="w-full max-w-md space-y-4">
-        <Card>
-          <CardHeader className="text-center">
+    <div className="min-h-screen bg-gradient-to-br from-[#001B3A] to-[#003F5C] flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <div className="flex justify-center mb-4">
             <img 
               src="/lovable-uploads/4712549c-a705-4aad-8498-4702dc3cdd8f.png" 
               alt="Banco Pro" 
-              className="h-16 w-auto mx-auto mb-4"
+              className="h-16 w-auto"
             />
-            <CardTitle className="text-2xl font-bold text-[#0057FF]">Banco Pro</CardTitle>
-            <p className="text-muted-foreground">Entre na sua conta</p>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <Input
-                  type="email"
-                  name="email"
-                  placeholder="E-mail"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                  className="h-12"
-                />
-              </div>
-              <div>
-                <Input
-                  type="password"
-                  name="senha"
-                  placeholder="Senha"
-                  value={formData.senha}
-                  onChange={handleInputChange}
-                  required
-                  className="h-12"
-                />
-              </div>
-              <Button
-                type="submit"
-                className="w-full h-12 bg-[#0057FF] hover:bg-[#0047CC] text-white font-medium"
-                disabled={isLoading}
-              >
-                {isLoading ? 'Entrando...' : 'Entrar'}
-              </Button>
-            </form>
-            
-            <div className="mt-6 text-center">
-              <button
-                onClick={() => navigate('/cadastro')}
-                className="text-[#0057FF] hover:underline"
-              >
-                Ainda não tem conta? Cadastre-se
-              </button>
+          </div>
+          <CardTitle className="text-2xl text-[#001B3A]">
+            {isLogin ? 'Entrar' : 'Criar Conta'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={isLogin ? handleLogin : handleSignUp} className="space-y-4">
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
+                required
+              />
             </div>
-          </CardContent>
-        </Card>
-      </div>
+            
+            <div>
+              <Label htmlFor="password">Senha</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={(e) => handleInputChange('password', e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            {!isLogin && (
+              <div>
+                <Label htmlFor="confirmPassword">Confirmar Senha</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={formData.confirmPassword}
+                  onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                  required
+                />
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              className="w-full bg-[#0057FF] hover:bg-[#0047CC]"
+              disabled={loading}
+            >
+              {loading ? (
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>{isLogin ? 'Entrando...' : 'Cadastrando...'}</span>
+                </div>
+              ) : (
+                <>
+                  {isLogin ? <LogIn className="w-4 h-4 mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />}
+                  {isLogin ? 'Entrar' : 'Criar Conta'}
+                </>
+              )}
+            </Button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <button
+              type="button"
+              onClick={() => setIsLogin(!isLogin)}
+              className="text-[#0057FF] hover:underline"
+            >
+              {isLogin ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Faça login'}
+            </button>
+          </div>
+
+          <div className="mt-4 text-center">
+            <Link
+              to="/cadastro"
+              className="text-sm text-gray-600 hover:text-[#0057FF] hover:underline"
+            >
+              Cadastro Completo (PF/PJ)
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

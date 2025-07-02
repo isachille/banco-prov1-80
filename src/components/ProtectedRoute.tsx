@@ -79,9 +79,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         // Verificar se é rota admin
         if (adminOnly) {
           const isAdmin = finalUserData?.is_admin === true || 
-                         finalUserData?.role === 'admin' || 
-                         finalUserData?.role === 'gerente' || 
-                         finalUserData?.role === 'dono';
+                         ['admin', 'gerente', 'dono'].includes(finalUserData?.role);
           
           console.log('Verificando se é admin:', { 
             isAdmin, 
@@ -91,7 +89,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           
           if (!isAdmin) {
             console.log('Acesso negado - não é admin/gerente/dono');
-            navigate('/login');
+            navigate('/home');
             return;
           }
 
@@ -102,9 +100,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         if (requireActive && !adminOnly && finalUserData) {
           // Usuários dono/admin sempre passam na verificação de status
           const isAdminUser = finalUserData?.is_admin === true || 
-                             finalUserData?.role === 'admin' || 
-                             finalUserData?.role === 'gerente' || 
-                             finalUserData?.role === 'dono';
+                             ['admin', 'gerente', 'dono'].includes(finalUserData?.role);
           
           if (!isAdminUser) {
             switch (finalUserData.status) {

@@ -1461,27 +1461,42 @@ export type Database = {
       usuarios_pendentes: {
         Row: {
           cpf: string | null
+          cpf_cnpj: string | null
           created_at: string | null
           email: string | null
           id: string | null
           nome: string | null
+          nome_completo: string | null
+          role: string | null
+          status: string | null
           telefone: string | null
+          tipo: string | null
         }
         Insert: {
           cpf?: string | null
+          cpf_cnpj?: string | null
           created_at?: string | null
           email?: string | null
           id?: string | null
           nome?: string | null
+          nome_completo?: string | null
+          role?: string | null
+          status?: string | null
           telefone?: string | null
+          tipo?: string | null
         }
         Update: {
           cpf?: string | null
+          cpf_cnpj?: string | null
           created_at?: string | null
           email?: string | null
           id?: string | null
           nome?: string | null
+          nome_completo?: string | null
+          role?: string | null
+          status?: string | null
           telefone?: string | null
+          tipo?: string | null
         }
         Relationships: []
       }

@@ -5,15 +5,27 @@ import {
   LayoutDashboard, FileText, Smartphone, ArrowRightLeft, 
   CreditCard, Receipt, Archive, Users, Building2, 
   BarChart3, User, Settings, Send, 
-  TrendingUp, TrendingDown, Calendar
+  TrendingUp, TrendingDown, Calendar, UserCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+
+interface Usuario {
+  id: string;
+  email: string;
+  nome_completo: string;
+  cpf_cnpj: string;
+  telefone: string;
+  role: string;
+  tipo: string;
+  status: string;
+  created_at: string;
+}
 
 interface WalletAtiva {
   wallet_id: string;
@@ -32,11 +44,12 @@ interface WalletAtiva {
 
 const Admin = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const queryClient = useQueryClient();
   const [activeMenu, setActiveMenu] = useState('dashboard');
   const [transferValues, setTransferValues] = useState<Record<string, string>>({});
   const [transferDestinations, setTransferDestinations] = useState<Record<string, string>>({});
+  const [updatingUsers, setUpdatingUsers] = useState<Set<string>>(new Set());
+  const [filtro, setFiltro] = useState('');
 
   // Verificar permissão de acesso
   useEffect(() => {
@@ -53,7 +66,8 @@ const Admin = () => {
         .eq('id', user.id)
         .single();
 
-      if (!userData || (userData.role !== 'admin' && userData.role !== 'dono')) {
+      if (!userData || !['admin', 'dono'].includes(userData.role)) {
+        toast.error('Acesso negado. Você não tem permissão para acessar esta área.');
         navigate('/home');
         return;
       }
@@ -62,8 +76,24 @@ const Admin = () => {
     checkUserPermission();
   }, [navigate]);
 
-  // Buscar usuários ativos
-  const { data: walletsAtivas, isLoading, refetch } = useQuery({
+  // Buscar usuários pendentes
+  const { data: usuariosPendentes = [], isLoading: loadingPendentes, refetch: refetchPendentes } = useQuery({
+    queryKey: ['usuarios_pendentes'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('status', 'pendente')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data as Usuario[];
+    },
+    refetchInterval: 5000,
+  });
+
+  // Buscar usuários ativos para transferências
+  const { data: walletsAtivas = [], isLoading: loadingWallets, refetch: refetchWallets } = useQuery({
     queryKey: ['wallets_ativas'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -78,14 +108,12 @@ const Admin = () => {
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'usuarios', label: 'Ativação de Usuários', icon: UserCheck },
     { id: 'extrato', label: 'Extrato', icon: FileText },
     { id: 'pix', label: 'Pix', icon: Smartphone },
     { id: 'transferencias', label: 'Transferências', icon: ArrowRightLeft },
     { id: 'pagamentos', label: 'Pagamentos', icon: CreditCard },
     { id: 'cobrancas', label: 'Cobranças', icon: Receipt },
-    { id: 'arquivos', label: 'Arquivos', icon: Archive },
-    { id: 'cedentes', label: 'Cedentes / Pagadores', icon: Users },
-    { id: 'bureaux', label: 'Bureaux', icon: Building2 },
     { id: 'relatorios', label: 'Relatórios', icon: BarChart3 },
     { id: 'conta', label: 'Conta / Faturamento', icon: User },
     { id: 'configuracoes', label: 'Configurações', icon: Settings },
@@ -93,56 +121,101 @@ const Admin = () => {
 
   const summaryCards = [
     {
-      title: 'Saldo disponível',
-      value: 'R$ 1.500.673,45',
+      title: 'Usuários Pendentes',
+      value: usuariosPendentes.length.toString(),
+      icon: UserCheck,
+      color: 'text-orange-600',
+      bgColor: 'bg-orange-50',
+    },
+    {
+      title: 'Saldo Total',
+      value: `R$ ${walletsAtivas.reduce((sum, w) => sum + (w.saldo || 0), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
       icon: TrendingUp,
       color: 'text-green-600',
       bgColor: 'bg-green-50',
     },
     {
-      title: 'Cobranças a vencer',
-      value: 'R$ 900.432,34',
-      icon: Calendar,
+      title: 'Usuários Ativos',
+      value: walletsAtivas.length.toString(),
+      icon: Users,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
     },
-    {
-      title: 'Cobranças vencidas',
-      value: 'R$ 2.234,67',
-      icon: TrendingDown,
-      color: 'text-red-600',
-      bgColor: 'bg-red-50',
-    },
   ];
+
+  const ativarUsuario = async (userId: string) => {
+    if (updatingUsers.has(userId)) return;
+    
+    setUpdatingUsers(prev => new Set(prev).add(userId));
+    
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({ status: 'ativo' })
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      toast.success('Conta ativada com sucesso!');
+      refetchPendentes();
+      refetchWallets();
+      
+    } catch (error: any) {
+      console.error('Erro ao ativar usuário:', error);
+      toast.error('Erro ao ativar conta');
+    } finally {
+      setUpdatingUsers(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(userId);
+        return newSet;
+      });
+    }
+  };
+
+  const alterarPermissao = async (userId: string, novaRole: string) => {
+    if (updatingUsers.has(userId)) return;
+    
+    setUpdatingUsers(prev => new Set(prev).add(userId));
+    
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({ role: novaRole })
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      toast.success(`Permissão atualizada para ${novaRole}`);
+      refetchPendentes();
+      
+    } catch (error: any) {
+      console.error('Erro ao alterar permissão:', error);
+      toast.error('Erro ao alterar permissão');
+    } finally {
+      setUpdatingUsers(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(userId);
+        return newSet;
+      });
+    }
+  };
 
   const handleTransferencia = async (userId: string) => {
     const valor = parseFloat(transferValues[userId]);
     const destinatarioId = transferDestinations[userId];
 
     if (!valor || valor <= 0) {
-      toast({
-        title: "Erro",
-        description: "Valor deve ser maior que zero",
-        variant: "destructive",
-      });
+      toast.error('Valor deve ser maior que zero');
       return;
     }
 
     if (!destinatarioId) {
-      toast({
-        title: "Erro",
-        description: "Selecione um destinatário",
-        variant: "destructive",
-      });
+      toast.error('Selecione um destinatário');
       return;
     }
 
     if (destinatarioId === userId) {
-      toast({
-        title: "Erro",
-        description: "Não é possível transferir para a mesma conta",
-        variant: "destructive",
-      });
+      toast.error('Não é possível transferir para a mesma conta');
       return;
     }
 
@@ -155,36 +228,319 @@ const Admin = () => {
 
       if (error) throw error;
 
-      toast({
-        title: "✅ Transferência realizada com sucesso",
-        description: `Valor: R$ ${valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-      });
+      toast.success(`Transferência de R$ ${valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} realizada com sucesso!`);
 
       // Limpar campos
       setTransferValues(prev => ({ ...prev, [userId]: '' }));
       setTransferDestinations(prev => ({ ...prev, [userId]: '' }));
 
       // Atualizar lista
-      refetch();
+      refetchWallets();
     } catch (error: any) {
-      toast({
-        title: "Erro na transferência",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message || 'Erro na transferência');
     }
   };
 
-  if (isLoading) {
+  const usuariosFiltrados = usuariosPendentes.filter(usuario => {
+    if (filtro.trim() === '') return true;
+    
+    const termoBusca = filtro.toLowerCase();
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p>Carregando...</p>
-        </div>
-      </div>
+      usuario.nome_completo?.toLowerCase().includes(termoBusca) ||
+      usuario.email?.toLowerCase().includes(termoBusca) ||
+      usuario.cpf_cnpj?.includes(filtro.replace(/\D/g, ''))
     );
-  }
+  });
+
+  const formatarDocumento = (documento: string, tipo: string) => {
+    if (!documento) return 'Não informado';
+    
+    if (tipo === 'PF' && documento.length === 11) {
+      return documento.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    } else if (tipo === 'PJ' && documento.length === 14) {
+      return documento.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+    }
+    return documento;
+  };
+
+  const getRoleBadgeColor = (role: string) => {
+    switch (role) {
+      case 'dono': return 'bg-purple-100 text-purple-800';
+      case 'admin': return 'bg-red-100 text-red-800';
+      case 'gerente': return 'bg-blue-100 text-blue-800';
+      case 'analista': return 'bg-green-100 text-green-800';
+      case 'usuario': return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const renderContent = () => {
+    switch (activeMenu) {
+      case 'usuarios':
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Ativação de Usuários</h2>
+              <div className="flex items-center space-x-2">
+                <Input
+                  placeholder="Buscar por nome, email ou documento..."
+                  value={filtro}
+                  onChange={(e) => setFiltro(e.target.value)}
+                  className="w-80"
+                />
+                {filtro && (
+                  <Button variant="outline" size="sm" onClick={() => setFiltro('')}>
+                    Limpar
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {loadingPendentes ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0057FF] mx-auto"></div>
+                <p className="mt-2">Carregando usuários...</p>
+              </div>
+            ) : usuariosFiltrados.length === 0 ? (
+              <div className="text-center py-8">
+                <UserCheck className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500">
+                  {filtro ? 'Nenhum usuário encontrado' : 'Nenhum usuário pendente no momento'}
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-4">
+                {usuariosFiltrados.map((usuario) => (
+                  <Card key={usuario.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex justify-between items-center">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-semibold text-lg">{usuario.nome_completo}</h4>
+                            <span className={`px-2 py-1 rounded-full text-xs ${getRoleBadgeColor(usuario.role)}`}>
+                              {usuario.role}
+                            </span>
+                          </div>
+                          <p className="text-gray-600">{usuario.email}</p>
+                          <p className="text-sm text-gray-500">
+                            {usuario.tipo === 'PF' ? 'CPF' : 'CNPJ'}: {formatarDocumento(usuario.cpf_cnpj, usuario.tipo)}
+                          </p>
+                          <p className="text-sm text-gray-500">Tel: {usuario.telefone}</p>
+                          <p className="text-xs text-gray-400">
+                            Cadastrado em: {new Date(usuario.created_at).toLocaleDateString('pt-BR')}
+                          </p>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <Select
+                            value={usuario.role}
+                            onValueChange={(value) => alterarPermissao(usuario.id, value)}
+                            disabled={updatingUsers.has(usuario.id)}
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="dono">Dono</SelectItem>
+                              <SelectItem value="admin">Admin</SelectItem>
+                              <SelectItem value="gerente">Gerente</SelectItem>
+                              <SelectItem value="analista">Analista</SelectItem>
+                              <SelectItem value="usuario">Usuário</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          
+                          <Button
+                            onClick={() => ativarUsuario(usuario.id)}
+                            disabled={updatingUsers.has(usuario.id)}
+                            className="bg-green-600 hover:bg-green-700"
+                          >
+                            {updatingUsers.has(usuario.id) ? (
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            ) : (
+                              'Ativar Conta'
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+
+      case 'transferencias':
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold">Transferências Administrativas</h2>
+            
+            {loadingWallets ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0057FF] mx-auto"></div>
+                <p className="mt-2">Carregando carteiras...</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                {walletsAtivas.map((wallet) => (
+                  <Card key={wallet.user_id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="space-y-4">
+                        <div>
+                          <h3 className="font-semibold text-lg">{wallet.nome_completo}</h3>
+                          <p className="text-sm text-gray-600">{wallet.email}</p>
+                          <p className="text-sm text-gray-600">{wallet.telefone}</p>
+                          <div className="flex justify-between items-center mt-2">
+                            <span className={`text-xs px-2 py-1 rounded-full ${getRoleBadgeColor(wallet.role)}`}>
+                              {wallet.role}
+                            </span>
+                            <span className="text-lg font-bold text-green-600">
+                              R$ {wallet.saldo?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3 pt-4 border-t">
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder="Valor da transferência"
+                            value={transferValues[wallet.user_id] || ''}
+                            onChange={(e) =>
+                              setTransferValues(prev => ({
+                                ...prev,
+                                [wallet.user_id]: e.target.value
+                              }))
+                            }
+                          />
+
+                          <Select
+                            value={transferDestinations[wallet.user_id] || ''}
+                            onValueChange={(value) =>
+                              setTransferDestinations(prev => ({
+                                ...prev,
+                                [wallet.user_id]: value
+                              }))
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecionar destinatário" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {walletsAtivas
+                                .filter(w => w.user_id !== wallet.user_id)
+                                .map((destinatario) => (
+                                  <SelectItem key={destinatario.user_id} value={destinatario.user_id}>
+                                    {destinatario.nome_completo}
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
+
+                          <Button
+                            onClick={() => handleTransferencia(wallet.user_id)}
+                            className="w-full"
+                            disabled={!transferValues[wallet.user_id] || !transferDestinations[wallet.user_id]}
+                          >
+                            <Send className="w-4 h-4 mr-2" />
+                            Transferir Saldo
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+
+      case 'pix':
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold">PIX Administrativo</h2>
+            <Card>
+              <CardContent className="p-6">
+                <p className="text-center text-gray-500 py-8">
+                  Funcionalidade PIX em desenvolvimento
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        );
+
+      case 'extrato':
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold">Extrato Administrativo</h2>
+            <Card>
+              <CardContent className="p-6">
+                <p className="text-center text-gray-500 py-8">
+                  Funcionalidade Extrato em desenvolvimento
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        );
+
+      default:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold">Dashboard Administrativo</h2>
+            
+            {/* Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {summaryCards.map((card, index) => (
+                <Card key={index} className="hover:shadow-lg transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600 mb-2">{card.title}</p>
+                        <p className={`text-2xl font-bold ${card.color}`}>{card.value}</p>
+                      </div>
+                      <div className={`w-12 h-12 ${card.bgColor} rounded-lg flex items-center justify-center`}>
+                        <card.icon className={`w-6 h-6 ${card.color}`} />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Resumo do Sistema</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                  <div>
+                    <p className="text-2xl font-bold text-blue-600">{walletsAtivas.length}</p>
+                    <p className="text-sm text-gray-600">Usuários Ativos</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-orange-600">{usuariosPendentes.length}</p>
+                    <p className="text-sm text-gray-600">Pendentes</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-green-600">
+                      R$ {walletsAtivas.reduce((sum, w) => sum + (w.saldo || 0), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </p>
+                    <p className="text-sm text-gray-600">Saldo Total</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-purple-600">
+                      {walletsAtivas.filter(w => ['admin', 'dono'].includes(w.role)).length}
+                    </p>
+                    <p className="text-sm text-gray-600">Administradores</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -195,7 +551,7 @@ const Admin = () => {
             <div className="w-8 h-8 bg-[#0057FF] rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">BP</span>
             </div>
-            <span className="text-xl font-bold text-[#0057FF]">Banco Pro</span>
+            <span className="text-xl font-bold text-[#0057FF]">Banco Pro Admin</span>
           </div>
         </div>
         
@@ -215,6 +571,16 @@ const Admin = () => {
             </button>
           ))}
         </nav>
+        
+        <div className="p-4 border-t">
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => navigate('/home')}
+          >
+            Voltar ao App
+          </Button>
+        </div>
       </div>
 
       {/* Mobile Bottom Navigation */}
@@ -240,134 +606,7 @@ const Admin = () => {
       {/* Main Content */}
       <div className="lg:pl-64 pb-20 lg:pb-0">
         <div className="px-4 sm:px-6 lg:px-8 py-8">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">Painel Administrativo</h1>
-            <p className="text-gray-600 mt-1">Gerenciamento de carteiras e transferências</p>
-          </div>
-
-          {/* Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            {summaryCards.map((card, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600 mb-2">{card.title}</p>
-                      <p className={`text-2xl font-bold ${card.color}`}>{card.value}</p>
-                    </div>
-                    <div className={`w-12 h-12 ${card.bgColor} rounded-lg flex items-center justify-center`}>
-                      <card.icon className={`w-6 h-6 ${card.color}`} />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {/* Wallets Ativas */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Users className="w-5 h-5 mr-2" />
-                Carteiras Ativas - Transferências
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                {walletsAtivas?.map((wallet) => (
-                  <Card key={wallet.user_id} className="border border-gray-200 hover:shadow-md transition-shadow">
-                    <CardContent className="p-6">
-                      <div className="space-y-4">
-                        {/* Informações do usuário */}
-                        <div>
-                          <h3 className="font-semibold text-lg text-gray-900">{wallet.nome_completo}</h3>
-                          <p className="text-sm text-gray-600">{wallet.email}</p>
-                          <p className="text-sm text-gray-600">{wallet.telefone}</p>
-                          <div className="flex justify-between items-center mt-2">
-                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                              {wallet.role}
-                            </span>
-                            <span className="text-lg font-bold text-green-600">
-                              R$ {wallet.saldo?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Campos de transferência */}
-                        <div className="space-y-3 pt-4 border-t border-gray-200">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Valor da Transferência
-                            </label>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              placeholder="0,00"
-                              value={transferValues[wallet.user_id] || ''}
-                              onChange={(e) =>
-                                setTransferValues(prev => ({
-                                  ...prev,
-                                  [wallet.user_id]: e.target.value
-                                }))
-                              }
-                              className="w-full"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Destinatário
-                            </label>
-                            <Select
-                              value={transferDestinations[wallet.user_id] || ''}
-                              onValueChange={(value) =>
-                                setTransferDestinations(prev => ({
-                                  ...prev,
-                                  [wallet.user_id]: value
-                                }))
-                              }
-                            >
-                              <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Selecionar destinatário" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {walletsAtivas
-                                  ?.filter(w => w.user_id !== wallet.user_id)
-                                  .map((destinatario) => (
-                                    <SelectItem key={destinatario.user_id} value={destinatario.user_id}>
-                                      {destinatario.nome_completo}
-                                    </SelectItem>
-                                  ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-
-                          <Button
-                            onClick={() => handleTransferencia(wallet.user_id)}
-                            className="w-full bg-[#0057FF] hover:bg-blue-700"
-                            disabled={!transferValues[wallet.user_id] || !transferDestinations[wallet.user_id]}
-                          >
-                            <Send className="w-4 h-4 mr-2" />
-                            Transferir Saldo
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-
-              {!walletsAtivas?.length && (
-                <div className="text-center py-12">
-                  <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhuma carteira ativa encontrada</h3>
-                  <p className="text-gray-500">Não há usuários ativos no sistema no momento.</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          {renderContent()}
         </div>
       </div>
     </div>
