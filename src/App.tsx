@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -21,7 +22,6 @@ import Admin from "./pages/Admin";
 import PainelAdmin from "./pages/PainelAdmin";
 import Extrato from "./pages/Extrato";
 import Cartoes from "./pages/Cartoes";
-import Pix from "./pages/Pix";
 import Ted from "./pages/Ted";
 import Transferir from "./pages/Transferir";
 import Cobranca from "./pages/Cobranca";
