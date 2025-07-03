@@ -86,27 +86,6 @@ const createPDFContent = (data: PDFData): string => {
         <p style="margin-top: 12px; color: #666; font-size: 15px;">Código da Proposta: <strong style="color: #1e40af;">${data.codigoProposta}</strong></p>
       </div>
 
-      <!-- Etapas -->
-      <div style="margin-bottom: 30px; background-color: #f8fafc; padding: 20px; border-radius: 10px;">
-        <h3 style="margin-top: 0; color: #1e40af; font-size: 16px;">Etapas do Financiamento</h3>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
-          <div style="text-align: center; flex: 1;">
-            <div style="width: 30px; height: 30px; border-radius: 50%; background-color: #22c55e; color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px; font-weight: bold;">1</div>
-            <span style="font-size: 12px; color: #22c55e;">Solicitação</span>
-          </div>
-          <div style="flex: 1; height: 2px; background-color: #22c55e; margin: 0 10px;"></div>
-          <div style="text-align: center; flex: 1;">
-            <div style="width: 30px; height: 30px; border-radius: 50%; background-color: ${data.status !== 'NEGADO' ? '#22c55e' : '#e5e7eb'}; color: ${data.status !== 'NEGADO' ? 'white' : '#9ca3af'}; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px; font-weight: bold;">2</div>
-            <span style="font-size: 12px; color: ${data.status !== 'NEGADO' ? '#22c55e' : '#9ca3af'};">Análise</span>
-          </div>
-          <div style="flex: 1; height: 2px; background-color: ${data.status === 'APROVADO' ? '#22c55e' : '#e5e7eb'}; margin: 0 10px;"></div>
-          <div style="text-align: center; flex: 1;">
-            <div style="width: 30px; height: 30px; border-radius: 50%; background-color: ${data.status === 'APROVADO' ? '#22c55e' : '#e5e7eb'}; color: ${data.status === 'APROVADO' ? 'white' : '#9ca3af'}; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px; font-weight: bold;">3</div>
-            <span style="font-size: 12px; color: ${data.status === 'APROVADO' ? '#22c55e' : '#9ca3af'};">Aprovação</span>
-          </div>
-        </div>
-      </div>
-
       <!-- Dados do Cliente -->
       <div style="margin-bottom: 25px;">
         <h3 style="color: #1e40af; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 15px;">Dados do Cliente</h3>
@@ -177,25 +156,6 @@ const createPDFContent = (data: PDFData): string => {
           <strong>${data.operador?.telefone || '(61) 98483-3965'}</strong>
         </div>
         
-        <!-- Info da Empresa -->
-        <div style="margin-top: 20px; background-color: #f8fafc; padding: 15px; border-radius: 8px; text-align: left;">
-          <h4 style="margin: 0 0 10px 0; color: #1e40af; text-align: center;">PRO MOTORS LTDA</h4>
-          <div style="font-size: 12px; color: #666; line-height: 1.4;">
-            <p style="margin: 5px 0;"><strong>CNPJ:</strong> 12.345.678/0001-90</p>
-            <p style="margin: 5px 0;"><strong>Endereço:</strong> SIA Trecho 1, Lote 123 - Guará, Brasília - DF</p>
-            <p style="margin: 5px 0;"><strong>Telefone:</strong> (61) 3333-4444</p>
-            <p style="margin: 5px 0;"><strong>E-mail:</strong> contato@promotors.com.br</p>
-          </div>
-        </div>
-
-        <!-- LGPD -->
-        <div style="margin-top: 15px; background-color: #fef3c7; padding: 10px; border-radius: 5px; border-left: 4px solid #f59e0b;">
-          <p style="margin: 0; font-size: 11px; color: #92400e; text-align: left;">
-            <strong>LGPD:</strong> Seus dados são tratados conforme a LGPD (Lei 13.709/2018). 
-            Para exercer seus direitos, entre em contato conosco.
-          </p>
-        </div>
-        
         <p style="margin: 15px 0 0 0; font-size: 12px; color: #999;">
           Documento gerado em ${new Date().toLocaleDateString('pt-BR')} - Pro Motors Financiamentos
         </p>
@@ -205,6 +165,8 @@ const createPDFContent = (data: PDFData): string => {
 };
 
 export const generateFinancingPDF = async (data: PDFData): Promise<Blob> => {
+  console.log('Iniciando geração do PDF com dados:', data);
+  
   const tempDiv = document.createElement('div');
   tempDiv.style.position = 'absolute';
   tempDiv.style.left = '-9999px';
@@ -216,8 +178,10 @@ export const generateFinancingPDF = async (data: PDFData): Promise<Blob> => {
   document.body.appendChild(tempDiv);
 
   try {
+    console.log('Aguardando renderização...');
     await new Promise(resolve => setTimeout(resolve, 1000));
 
+    console.log('Capturando canvas...');
     const canvas = await html2canvas(tempDiv, {
       scale: 2,
       useCORS: true,
@@ -229,6 +193,7 @@ export const generateFinancingPDF = async (data: PDFData): Promise<Blob> => {
       width: tempDiv.scrollWidth
     });
 
+    console.log('Canvas capturado, criando PDF...');
     const imgData = canvas.toDataURL('image/png', 1.0);
     const pdf = new jsPDF('p', 'mm', 'a4');
     
@@ -248,7 +213,11 @@ export const generateFinancingPDF = async (data: PDFData): Promise<Blob> => {
       heightLeft -= pageHeight;
     }
 
+    console.log('PDF gerado com sucesso!');
     return pdf.output('blob');
+  } catch (error) {
+    console.error('Erro ao gerar PDF:', error);
+    throw error;
   } finally {
     if (document.body.contains(tempDiv)) {
       document.body.removeChild(tempDiv);
