@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -234,13 +235,32 @@ const GiftCards = () => {
         return;
       }
 
-      const { data, error } = await supabase.rpc('comprar_giftcard', {
-        p_user: user.id,
-        p_servico: service,
-        p_valor: value
-      });
+      // Buscar saldo atual da carteira
+      const { data: walletData, error: walletError } = await supabase
+        .from('wallets')
+        .select('saldo')
+        .eq('user_id', user.id)
+        .single();
 
-      if (error) throw error;
+      if (walletError || !walletData) {
+        toast.error('Erro ao verificar saldo');
+        return;
+      }
+
+      if (walletData.saldo < value) {
+        toast.error('Saldo insuficiente');
+        return;
+      }
+
+      // Atualizar saldo na carteira
+      const { error: updateError } = await supabase
+        .from('wallets')
+        .update({ saldo: walletData.saldo - value })
+        .eq('user_id', user.id);
+
+      if (updateError) {
+        throw updateError;
+      }
 
       // Atualizar saldo local
       setUserBalance(prev => prev - value);

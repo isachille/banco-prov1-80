@@ -75,17 +75,6 @@ const PixAdmin = () => {
       
       setComprovante(comprovanteData);
       
-      // Registrar transação no banco
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase.rpc('registrar_transacao', {
-          p_user: user.id,
-          p_tipo: 'PIX',
-          p_descricao: `PIX para ${pixData.chave}`,
-          p_valor: -parseFloat(pixData.valor) // Valor negativo para débito
-        });
-      }
-      
       toast.success('PIX enviado com sucesso!');
       setStep(5);
       

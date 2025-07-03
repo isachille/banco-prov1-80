@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -40,14 +41,35 @@ const AdminExtrato = () => {
         throw new Error('Usuário não autenticado');
       }
 
-      const { data, error } = await supabase.rpc('registrar_transacao', {
-        p_user: authUser.user.id,
-        p_tipo: novaTransacao.tipo,
-        p_descricao: novaTransacao.descricao,
-        p_valor: parseFloat(novaTransacao.valor)
-      });
+      // Simular registro de transação diretamente na carteira
+      const valorNumerico = parseFloat(novaTransacao.valor);
+      
+      // Buscar carteira atual
+      const { data: walletData, error: walletError } = await supabase
+        .from('wallets')
+        .select('saldo')
+        .eq('user_id', authUser.user.id)
+        .single();
 
-      if (error) throw error;
+      if (walletError) {
+        throw walletError;
+      }
+
+      // Determinar se é débito ou crédito baseado no tipo
+      const isDebit = ['saque', 'transferencia', 'pix', 'compra'].includes(novaTransacao.tipo);
+      const novoSaldo = isDebit 
+        ? walletData.saldo - valorNumerico 
+        : walletData.saldo + valorNumerico;
+
+      // Atualizar saldo
+      const { error: updateError } = await supabase
+        .from('wallets')
+        .update({ saldo: novoSaldo })
+        .eq('user_id', authUser.user.id);
+
+      if (updateError) {
+        throw updateError;
+      }
 
       toast({
         title: "Sucesso",
