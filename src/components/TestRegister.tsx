@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,7 +23,7 @@ const TestRegister = () => {
   };
 
   // Chave API atualizada
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqY3Zwb3p3anl5ZGJlZ3Jjc2txIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyNDU1NzYsImV4cCI6MjA2NjgyMTU3Nn0.ndEdb2KTe0LfPfFis41H4hU4mNBnlvizcHhYtIBkeUE';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqY3Zwb3p3anl5ZGJlZ3Jjc2txIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzU5MjkxNDAsImV4cCI6MjA1MTUwNTE0MH0.Y1PMHB1fVlGnHXhcXCPa8J_X7r_5K5L8YEI4mPCE1aI';
 
   const handleTestRegister = async () => {
     setIsLoading(true);
