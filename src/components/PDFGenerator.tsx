@@ -31,33 +31,40 @@ interface PDFData {
   status: 'PRE_APROVADO' | 'APROVADO' | 'NEGADO';
 }
 
-export const generateFinancingPDF = async (data: PDFData): Promise<Blob> => {
-  // Criar elemento temporário para renderizar o PDF
-  const tempDiv = document.createElement('div');
-  tempDiv.style.position = 'absolute';
-  tempDiv.style.left = '-9999px';
-  tempDiv.style.width = '794px'; // A4 width in pixels
-  tempDiv.style.backgroundColor = 'white';
-  tempDiv.style.padding = '40px';
-  tempDiv.style.fontFamily = 'Arial, sans-serif';
-
+const createPDFContent = (data: PDFData): string => {
   const statusColor = data.status === 'APROVADO' ? '#22c55e' : 
                      data.status === 'PRE_APROVADO' ? '#f59e0b' : '#ef4444';
 
   const statusText = data.status === 'APROVADO' ? 'APROVADO' : 
                     data.status === 'PRE_APROVADO' ? 'PRÉ-APROVADO' : 'NEGADO';
 
-  tempDiv.innerHTML = `
+  return `
     <div style="max-width: 714px; margin: 0 auto; font-family: Arial, sans-serif;">
       <!-- Header com Logo -->
       <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #1e40af; padding-bottom: 20px;">
         <div style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 20px; border-radius: 10px; margin-bottom: 15px; position: relative;">
           <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
-            <img src="/lovable-uploads/4712549c-a705-4aad-8498-4702dc3cdd8f.png" alt="Pro Motors Logo" style="width: 60px; height: 60px; border-radius: 8px; background: white; padding: 5px;" />
+            <img src="/lovable-uploads/4712549c-a705-4aad-8498-4702dc3cdd8f.png" alt="Pro Motors Logo" style="width: 80px; height: 80px; border-radius: 8px; background: white; padding: 8px;" />
             <div>
-              <h1 style="margin: 0; font-size: 28px; font-weight: bold;">PRO MOTORS</h1>
-              <p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.9;">Financiamento Veicular</p>
+              <h1 style="margin: 0; font-size: 32px; font-weight: bold;">PRO MOTORS</h1>
+              <p style="margin: 5px 0 0 0; font-size: 16px; opacity: 0.9;">Financiamento Veicular</p>
             </div>
+          </div>
+        </div>
+        
+        <!-- Logos dos Bancos Parceiros -->
+        <div style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 15px; flex-wrap: wrap;">
+          <div style="text-align: center;">
+            <div style="width: 60px; height: 40px; background: #FF6600; color: white; display: flex; align-items: center; justify-content: center; border-radius: 5px; font-weight: bold; font-size: 12px;">ITAÚ</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="width: 60px; height: 40px; background: #FFED00; color: #333; display: flex; align-items: center; justify-content: center; border-radius: 5px; font-weight: bold; font-size: 10px;">BANCO DO BRASIL</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="width: 60px; height: 40px; background: #E31E24; color: white; display: flex; align-items: center; justify-content: center; border-radius: 5px; font-weight: bold; font-size: 10px;">SANTANDER</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="width: 60px; height: 40px; background: #00A859; color: white; display: flex; align-items: center; justify-content: center; border-radius: 5px; font-weight: bold; font-size: 12px;">SICREDI</div>
           </div>
         </div>
       </div>
@@ -169,12 +176,46 @@ export const generateFinancingPDF = async (data: PDFData): Promise<Blob> => {
         <div style="margin-top: 15px; background-color: #1e40af; color: white; padding: 10px; border-radius: 5px; display: inline-block;">
           <strong>${data.operador ? data.operador.telefone : '(61) 98483-3965'}</strong>
         </div>
+        
+        <!-- Informações da Empresa -->
+        <div style="margin-top: 20px; background-color: #f8fafc; padding: 15px; border-radius: 8px; text-align: left;">
+          <h4 style="margin: 0 0 10px 0; color: #1e40af; text-align: center;">PRO MOTORS LTDA</h4>
+          <div style="font-size: 12px; color: #666; line-height: 1.4;">
+            <p style="margin: 5px 0;"><strong>CNPJ:</strong> 12.345.678/0001-90</p>
+            <p style="margin: 5px 0;"><strong>Endereço:</strong> SIA Trecho 1, Lote 123 - Guará, Brasília - DF, CEP: 71200-000</p>
+            <p style="margin: 5px 0;"><strong>Telefone:</strong> (61) 3333-4444</p>
+            <p style="margin: 5px 0;"><strong>E-mail:</strong> contato@promotors.com.br</p>
+          </div>
+        </div>
+
+        <!-- LGPD -->
+        <div style="margin-top: 15px; background-color: #fef3c7; padding: 10px; border-radius: 5px; border-left: 4px solid #f59e0b;">
+          <p style="margin: 0; font-size: 11px; color: #92400e; text-align: left;">
+            <strong>LGPD - Lei Geral de Proteção de Dados:</strong> Seus dados pessoais são tratados em conformidade com a LGPD (Lei 13.709/2018). 
+            Utilizamos suas informações exclusivamente para processar sua solicitação de financiamento. Para exercer seus direitos ou obter mais informações 
+            sobre o tratamento de seus dados, entre em contato conosco através dos canais oficiais.
+          </p>
+        </div>
+        
         <p style="margin: 15px 0 0 0; font-size: 12px; color: #999;">
           Documento gerado em ${new Date().toLocaleDateString('pt-BR')} - Pro Motors Financiamentos
         </p>
       </div>
     </div>
   `;
+};
+
+export const generateFinancingPDF = async (data: PDFData): Promise<Blob> => {
+  // Criar elemento temporário para renderizar o PDF
+  const tempDiv = document.createElement('div');
+  tempDiv.style.position = 'absolute';
+  tempDiv.style.left = '-9999px';
+  tempDiv.style.width = '794px'; // A4 width in pixels
+  tempDiv.style.backgroundColor = 'white';
+  tempDiv.style.padding = '40px';
+  tempDiv.style.fontFamily = 'Arial, sans-serif';
+
+  tempDiv.innerHTML = createPDFContent(data);
 
   document.body.appendChild(tempDiv);
 
