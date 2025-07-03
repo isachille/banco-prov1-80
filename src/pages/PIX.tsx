@@ -31,38 +31,25 @@ const PIX = () => {
 
       const valorNumerico = parseFloat(valor.replace(',', '.'));
 
-      // Verificar saldo
+      // Verificar saldo na tabela wallets
       const { data: walletData } = await supabase
-        .from('binance_wallets')
-        .select('balance')
+        .from('wallets')
+        .select('saldo')
         .eq('user_id', user.id)
         .single();
 
-      if (!walletData || walletData.balance < valorNumerico) {
+      if (!walletData || walletData.saldo < valorNumerico) {
         toast.error('Saldo insuficiente');
         return;
       }
 
-      // Registrar transação
+      // Atualizar saldo na carteira
       const { error } = await supabase
-        .from('binance_transactions')
-        .insert({
-          user_id: user.id,
-          tipo: 'PIX_out',
-          valor: valorNumerico,
-          moeda: 'BRL',
-          chave_pix: chavePix,
-          status: 'concluido',
-          metadata: { chave_pix: chavePix }
-        });
+        .from('wallets')
+        .update({ saldo: walletData.saldo - valorNumerico })
+        .eq('user_id', user.id);
 
       if (error) throw error;
-
-      // Atualizar saldo
-      await supabase
-        .from('binance_wallets')
-        .update({ balance: walletData.balance - valorNumerico })
-        .eq('user_id', user.id);
 
       toast.success('PIX enviado com sucesso!');
       setChavePix('');

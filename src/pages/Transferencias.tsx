@@ -1,24 +1,22 @@
 
 import React, { useState } from 'react';
-import { ArrowLeft, Send } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 const Transferencias = () => {
   const navigate = useNavigate();
-  const [destinatario, setDestinatario] = useState('');
+  const [contaDestino, setContaDestino] = useState('');
   const [valor, setValor] = useState('');
-  const [moeda, setMoeda] = useState('BRL');
   const [loading, setLoading] = useState(false);
 
   const handleTransfer = async () => {
-    if (!destinatario || !valor) {
+    if (!contaDestino || !valor) {
       toast.error('Preencha todos os campos');
       return;
     }
@@ -33,44 +31,32 @@ const Transferencias = () => {
 
       const valorNumerico = parseFloat(valor.replace(',', '.'));
 
-      // Verificar saldo
+      // Verificar saldo na tabela wallets
       const { data: walletData } = await supabase
-        .from('binance_wallets')
-        .select('balance')
+        .from('wallets')
+        .select('saldo')
         .eq('user_id', user.id)
         .single();
 
-      if (!walletData || walletData.balance < valorNumerico) {
+      if (!walletData || walletData.saldo < valorNumerico) {
         toast.error('Saldo insuficiente');
         return;
       }
 
-      // Registrar transação
+      // Atualizar saldo na carteira
       const { error } = await supabase
-        .from('binance_transactions')
-        .insert({
-          user_id: user.id,
-          tipo: 'transferencia_out',
-          valor: valorNumerico,
-          moeda: moeda,
-          destinatario: destinatario,
-          status: 'concluido'
-        });
+        .from('wallets')
+        .update({ saldo: walletData.saldo - valorNumerico })
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
-      // Atualizar saldo
-      await supabase
-        .from('binance_wallets')
-        .update({ balance: walletData.balance - valorNumerico })
-        .eq('user_id', user.id);
-
       toast.success('Transferência realizada com sucesso!');
-      setDestinatario('');
+      setContaDestino('');
       setValor('');
     } catch (error) {
       console.error('Erro na transferência:', error);
-      toast.error('Erro na transferência');
+      toast.error('Erro ao realizar transferência');
     } finally {
       setLoading(false);
     }
@@ -88,23 +74,23 @@ const Transferencias = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Send className="h-5 w-5" />
+            <ArrowRight className="h-5 w-5" />
             <span>Nova Transferência</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="destinatario">Destinatário</Label>
+            <Label htmlFor="conta-destino">Conta de Destino</Label>
             <Input
-              id="destinatario"
-              placeholder="ID ou email do destinatário"
-              value={destinatario}
-              onChange={(e) => setDestinatario(e.target.value)}
+              id="conta-destino"
+              placeholder="Digite o número da conta ou CPF"
+              value={contaDestino}
+              onChange={(e) => setContaDestino(e.target.value)}
             />
           </div>
 
           <div>
-            <Label htmlFor="valor">Valor</Label>
+            <Label htmlFor="valor">Valor (R$)</Label>
             <Input
               id="valor"
               type="number"
@@ -114,20 +100,6 @@ const Transferencias = () => {
               min="0"
               step="0.01"
             />
-          </div>
-
-          <div>
-            <Label htmlFor="moeda">Moeda</Label>
-            <Select value={moeda} onValueChange={setMoeda}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="BRL">BRL - Real Brasileiro</SelectItem>
-                <SelectItem value="USDT">USDT - Tether</SelectItem>
-                <SelectItem value="BTC">BTC - Bitcoin</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           <Button 
