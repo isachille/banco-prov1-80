@@ -31,15 +31,15 @@ const Dashboard = () => {
           setUserName(userData.nome_completo || 'Usuário');
         }
 
-        // Buscar saldo na carteira Binance
+        // Buscar saldo na carteira
         const { data: walletData } = await supabase
-          .from('binance_wallets')
-          .select('balance')
+          .from('wallets')
+          .select('saldo')
           .eq('user_id', user.id)
           .single();
 
         if (walletData) {
-          setBalance(walletData.balance || 0);
+          setBalance(walletData.saldo || 0);
         }
       }
     };
@@ -58,7 +58,7 @@ const Dashboard = () => {
     { 
       icon: Receipt, 
       label: 'Ver Extrato', 
-      path: '/extrato',
+      path: '/extrato-page',
       color: 'text-blue-600' 
     },
     { 
@@ -76,13 +76,13 @@ const Dashboard = () => {
     { 
       icon: Car, 
       label: 'Financiar Veículo', 
-      path: '/financiamento',
+      path: '/financing-page',
       color: 'text-orange-600' 
     }
   ];
 
   const services = [
-    { icon: Gift, label: 'Gift Cards', path: '/gift-cards' },
+    { icon: Gift, label: 'Gift Cards', path: '/gift-cards-page' },
     { icon: PiggyBank, label: 'Cofrinho', path: '/cofrinho' },
     { icon: TrendingUp, label: 'Investimentos', path: '/investimentos' }
   ];
