@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Car, MessageCircle, Download, Share, FileText } from 'lucide-react';
+import { ArrowLeft, Users, MessageCircle, Download, Share, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,8 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { vehicleCategories, getAllVehicles, calculateVehiclePrice, operators, type Vehicle } from '@/data/vehicleCategories';
-import { generateFinancingPDF, shareWhatsApp } from '@/components/PDFGenerator';
+import { vehicleCategories, operators, type Vehicle } from '@/data/vehicleCategories';
 
 interface KYCData {
   nome_completo: string;
@@ -20,7 +19,7 @@ interface KYCData {
   profissao: string;
 }
 
-const FinancingPage = () => {
+const ConsorcioPage = () => {
   const navigate = useNavigate();
   const [kycData, setKycData] = useState<KYCData>({
     nome_completo: '',
@@ -33,11 +32,11 @@ const FinancingPage = () => {
   const [selectedVehicle, setSelectedVehicle] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
   const [selectedOperator, setSelectedOperator] = useState('');
-  const [valorEntrada, setValorEntrada] = useState('');
+  const [valorCredito, setValorCredito] = useState('');
   const [parcelas, setParcelas] = useState('');
+  const [valorLance, setValorLance] = useState('');
   const [proposal, setProposal] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [generatingPDF, setGeneratingPDF] = useState(false);
 
   const currentYear = new Date().getFullYear();
   const availableYears = Array.from({ length: 5 }, (_, i) => currentYear - i);
@@ -48,9 +47,6 @@ const FinancingPage = () => {
 
   const selectedVehicleData = filteredVehicles.find(v => v.id === selectedVehicle);
   const selectedOperatorData = operators.find(op => op.id === selectedOperator);
-  const vehiclePrice = selectedVehicleData && selectedYear 
-    ? calculateVehiclePrice(selectedVehicleData.precoBase, parseInt(selectedYear))
-    : 0;
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -78,7 +74,7 @@ const FinancingPage = () => {
   }, []);
 
   const handleSimulate = async () => {
-    if (!selectedCategory || !selectedVehicle || !selectedYear || !valorEntrada || !parcelas || !selectedOperator) {
+    if (!selectedCategory || !selectedVehicle || !selectedYear || !valorCredito || !parcelas || !selectedOperator) {
       toast.error('Preencha todos os campos');
       return;
     }
@@ -87,107 +83,46 @@ const FinancingPage = () => {
 
     setLoading(true);
     try {
-      const entrada = parseFloat(valorEntrada.replace(',', '.'));
+      const credito = parseFloat(valorCredito.replace(',', '.'));
       const numParcelas = parseInt(parcelas);
-      const valorVeiculo = vehiclePrice;
-      const valorFinanciado = valorVeiculo - entrada;
+      const lance = valorLance ? parseFloat(valorLance.replace(',', '.')) : 0;
       
-      if (entrada > valorVeiculo) {
-        toast.error('Valor da entrada não pode ser maior que o valor do veículo');
-        return;
-      }
+      // Taxa administrativa do consórcio (geralmente entre 15% e 25%)
+      const taxaAdministrativa = 0.20; // 20%
+      const valorTaxaAdm = credito * taxaAdministrativa;
+      const valorParcela = (credito + valorTaxaAdm) / numParcelas;
 
-      // Taxas de juros progressivas mais realistas
-      let taxaJuros: number;
-      if (numParcelas <= 12) taxaJuros = 0.021; // 2.1% a.m.
-      else if (numParcelas <= 24) taxaJuros = 0.023; // 2.3% a.m.
-      else if (numParcelas <= 36) taxaJuros = 0.025; // 2.5% a.m.
-      else if (numParcelas <= 48) taxaJuros = 0.027; // 2.7% a.m.
-      else taxaJuros = 0.029; // 2.9% a.m.
-
-      const valorParcela = (valorFinanciado * (1 + taxaJuros * numParcelas)) / numParcelas;
-
-      const codigoProposta = `PM-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+      const codigoProposta = `CON-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
       setProposal({
         codigo: codigoProposta,
+        tipo: 'consorcio',
         veiculo: `${selectedVehicleData.marca} ${selectedVehicleData.modelo} ${selectedYear}`,
         marca: selectedVehicleData.marca,
         modelo: selectedVehicleData.modelo,
         ano: parseInt(selectedYear),
-        valorVeiculo: valorVeiculo,
-        entrada: entrada,
+        valorCredito: credito,
         parcelas: numParcelas,
         valorParcela: valorParcela,
-        valorTotal: entrada + (valorParcela * numParcelas),
-        taxaJuros: taxaJuros * 100,
+        valorLance: lance,
+        taxaAdministrativa: taxaAdministrativa * 100,
+        valorTaxaAdm: valorTaxaAdm,
         operador: selectedOperatorData
       });
 
-      toast.success('Proposta gerada com sucesso!');
+      toast.success('Proposta de consórcio gerada com sucesso!');
     } catch (error) {
-      console.error('Erro ao simular financiamento:', error);
+      console.error('Erro ao simular consórcio:', error);
       toast.error('Erro ao gerar proposta');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGeneratePDF = async () => {
-    if (!proposal) return;
-
-    setGeneratingPDF(true);
-    try {
-      const pdfData = {
-        codigoProposta: proposal.codigo,
-        cliente: {
-          nome: kycData.nome_completo,
-          cpf: kycData.cpf,
-          nascimento: kycData.data_nascimento ? new Date(kycData.data_nascimento).toLocaleDateString('pt-BR') : 'Não informado',
-          mae: kycData.nome_mae,
-          profissao: kycData.profissao
-        },
-        veiculo: {
-          marca: proposal.marca,
-          modelo: proposal.modelo,
-          ano: proposal.ano,
-          valor: proposal.valorVeiculo
-        },
-        financiamento: {
-          entrada: proposal.entrada,
-          parcelas: proposal.parcelas,
-          valorParcela: proposal.valorParcela,
-          valorTotal: proposal.valorTotal
-        },
-        operador: proposal.operador,
-        status: 'PRE_APROVADO' as const
-      };
-
-      const pdfBlob = await generateFinancingPDF(pdfData);
-      
-      // Criar link para download
-      const url = URL.createObjectURL(pdfBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `Proposta_${proposal.codigo}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      toast.success('PDF gerado com sucesso!');
-    } catch (error) {
-      console.error('Erro ao gerar PDF:', error);
-      toast.error('Erro ao gerar PDF');
-    } finally {
-      setGeneratingPDF(false);
-    }
-  };
-
   const handleWhatsApp = () => {
     if (!proposal || !selectedOperatorData) return;
 
-    const message = `Olá ${selectedOperatorData.nome}! Gostaria de prosseguir com minha proposta de financiamento.
+    const message = `Olá ${selectedOperatorData.nome}! Gostaria de prosseguir com minha proposta de consórcio.
 
 Código da proposta: ${proposal.codigo}
 
@@ -198,16 +133,15 @@ Nome da mãe: ${kycData.nome_mae}
 Profissão: ${kycData.profissao}
 
 Veículo: ${proposal.veiculo}
-Valor do veículo: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.valorVeiculo)}
-Entrada: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.entrada)}
-Financiamento: ${proposal.parcelas}x de ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.valorParcela)}
+Valor do crédito: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.valorCredito)}
+Parcelas: ${proposal.parcelas}x de ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.valorParcela)}
+${proposal.valorLance > 0 ? `Lance ofertado: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.valorLance)}` : ''}
 
-Status: PRÉ-APROVADO
-
-Aguardo retorno. Obrigado!`;
+Aguardo retorno para dar continuidade ao processo de consórcio. Obrigado!`;
 
     const phoneNumber = selectedOperatorData.telefone.replace(/\D/g, '');
-    shareWhatsApp(message, `55${phoneNumber}`);
+    const encodedMessage = encodeURIComponent(message);
+    window.open(`https://wa.me/55${phoneNumber}?text=${encodedMessage}`, '_blank');
   };
 
   return (
@@ -216,15 +150,15 @@ Aguardo retorno. Obrigado!`;
         <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <h1 className="text-2xl font-bold">Financiamento Veicular</h1>
+        <h1 className="text-2xl font-bold">Consórcio Veicular</h1>
       </div>
 
       {!proposal ? (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <Car className="h-5 w-5" />
-              <span>Simulação de Financiamento</span>
+              <Users className="h-5 w-5" />
+              <span>Simulação de Consórcio</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -357,68 +291,59 @@ Aguardo retorno. Obrigado!`;
                   </Select>
                 </div>
               )}
-
-              {selectedVehicleData && selectedYear && (
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-blue-900">
-                    {selectedVehicleData.marca} {selectedVehicleData.modelo} {selectedYear}
-                  </h4>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(vehiclePrice)}
-                  </p>
-                  {parseInt(selectedYear) < currentYear && (
-                    <p className="text-sm text-gray-600">
-                      Valor ajustado pela idade do veículo
-                    </p>
-                  )}
-                </div>
-              )}
             </div>
 
-            {/* Condições de Financiamento */}
-            {vehiclePrice > 0 && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-800">Condições de Financiamento</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="entrada">Valor de Entrada (R$)</Label>
-                    <Input
-                      id="entrada"
-                      type="number"
-                      placeholder="0,00"
-                      value={valorEntrada}
-                      onChange={(e) => setValorEntrada(e.target.value)}
-                      max={vehiclePrice}
-                    />
-                    <p className="text-sm text-gray-500 mt-1">
-                      Mínimo: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(vehiclePrice * 0.2)} (20%)
-                    </p>
-                  </div>
-                  <div>
-                    <Label htmlFor="parcelas">Parcelamento</Label>
-                    <Select value={parcelas} onValueChange={setParcelas}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="12">12x (Taxa: 2,1% a.m.)</SelectItem>
-                        <SelectItem value="24">24x (Taxa: 2,3% a.m.)</SelectItem>
-                        <SelectItem value="36">36x (Taxa: 2,5% a.m.)</SelectItem>
-                        <SelectItem value="48">48x (Taxa: 2,7% a.m.)</SelectItem>
-                        <SelectItem value="60">60x (Taxa: 2,9% a.m.)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+            {/* Condições do Consórcio */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-800">Condições do Consórcio</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="credito">Valor do Crédito (R$)</Label>
+                  <Input
+                    id="credito"
+                    type="number"
+                    placeholder="0,00"
+                    value={valorCredito}
+                    onChange={(e) => setValorCredito(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="parcelas">Número de Parcelas</Label>
+                  <Select value={parcelas} onValueChange={setParcelas}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="36">36 meses</SelectItem>
+                      <SelectItem value="48">48 meses</SelectItem>
+                      <SelectItem value="60">60 meses</SelectItem>
+                      <SelectItem value="72">72 meses</SelectItem>
+                      <SelectItem value="84">84 meses</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="lance">Lance Ofertado (Opcional)</Label>
+                  <Input
+                    id="lance"
+                    type="number"
+                    placeholder="0,00"
+                    value={valorLance}
+                    onChange={(e) => setValorLance(e.target.value)}
+                  />
+                  <p className="text-sm text-gray-500 mt-1">
+                    Lance para acelerar a contemplação
+                  </p>
                 </div>
               </div>
-            )}
+            </div>
 
             <Button 
               className="w-full"
               onClick={handleSimulate}
-              disabled={loading || !vehiclePrice}
+              disabled={loading}
             >
-              {loading ? 'Simulando...' : 'Simular Financiamento'}
+              {loading ? 'Simulando...' : 'Simular Consórcio'}
             </Button>
           </CardContent>
         </Card>
@@ -426,33 +351,35 @@ Aguardo retorno. Obrigado!`;
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
-              <span>Proposta Gerada</span>
-              <div className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
-                PRÉ-APROVADO
+              <span>Proposta de Consórcio</span>
+              <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                EM ANÁLISE
               </div>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="bg-green-50 p-6 rounded-lg">
+            <div className="bg-blue-50 p-6 rounded-lg">
               <h3 className="font-semibold mb-4 text-lg">Código da Proposta: {proposal.codigo}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-3">
                   <h4 className="font-medium text-gray-800">Veículo Selecionado</h4>
                   <div className="bg-white p-4 rounded border">
                     <p className="font-semibold text-lg">{proposal.veiculo}</p>
-                    <p className="text-2xl font-bold text-blue-600">
-                      {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.valorVeiculo)}
+                    <p className="text-xl font-bold text-blue-600">
+                      Crédito: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.valorCredito)}
                     </p>
                   </div>
                 </div>
                 
                 <div className="space-y-3">
-                  <h4 className="font-medium text-gray-800">Condições do Financiamento</h4>
+                  <h4 className="font-medium text-gray-800">Condições do Consórcio</h4>
                   <div className="bg-white p-4 rounded border space-y-2">
-                    <p><strong>Entrada:</strong> {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.entrada)}</p>
                     <p><strong>Parcelas:</strong> {proposal.parcelas}x de {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.valorParcela)}</p>
-                    <p><strong>Total:</strong> {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.valorTotal)}</p>
-                    <p className="text-sm text-gray-600"><strong>Taxa:</strong> {proposal.taxaJuros.toFixed(1)}% a.m.</p>
+                    {proposal.valorLance > 0 && (
+                      <p><strong>Lance:</strong> {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.valorLance)}</p>
+                    )}
+                    <p><strong>Taxa Administrativa:</strong> {proposal.taxaAdministrativa}%</p>
+                    <p className="text-sm text-gray-600">Contemplação por sorteio mensal</p>
                   </div>
                 </div>
               </div>
@@ -466,22 +393,13 @@ Aguardo retorno. Obrigado!`;
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Button 
-                onClick={handleGeneratePDF}
-                disabled={generatingPDF}
-                className="flex items-center justify-center space-x-2"
-              >
-                <Download className="h-4 w-4" />
-                <span>{generatingPDF ? 'Gerando...' : 'Baixar PDF'}</span>
-              </Button>
-
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Button 
                 className="bg-green-600 hover:bg-green-700 flex items-center justify-center space-x-2"
                 onClick={handleWhatsApp}
               >
                 <MessageCircle className="h-4 w-4" />
-                <span>WhatsApp</span>
+                <span>Falar com Operador</span>
               </Button>
 
               <Button 
@@ -500,4 +418,4 @@ Aguardo retorno. Obrigado!`;
   );
 };
 
-export default FinancingPage;
+export default ConsorcioPage;

@@ -24,6 +24,10 @@ interface PDFData {
     valorParcela: number;
     valorTotal: number;
   };
+  operador?: {
+    nome: string;
+    telefone: string;
+  };
   status: 'PRE_APROVADO' | 'APROVADO' | 'NEGADO';
 }
 
@@ -47,9 +51,14 @@ export const generateFinancingPDF = async (data: PDFData): Promise<Blob> => {
     <div style="max-width: 714px; margin: 0 auto; font-family: Arial, sans-serif;">
       <!-- Header com Logo -->
       <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #1e40af; padding-bottom: 20px;">
-        <div style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 20px; border-radius: 10px; margin-bottom: 15px;">
-          <h1 style="margin: 0; font-size: 28px; font-weight: bold;">PRO MOTORS</h1>
-          <p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.9;">Financiamento Veicular</p>
+        <div style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 20px; border-radius: 10px; margin-bottom: 15px; position: relative;">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+            <img src="/lovable-uploads/4712549c-a705-4aad-8498-4702dc3cdd8f.png" alt="Pro Motors Logo" style="width: 60px; height: 60px; border-radius: 8px; background: white; padding: 5px;" />
+            <div>
+              <h1 style="margin: 0; font-size: 28px; font-weight: bold;">PRO MOTORS</h1>
+              <p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.9;">Financiamento Veicular</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -139,6 +148,17 @@ export const generateFinancingPDF = async (data: PDFData): Promise<Blob> => {
         </div>
       </div>
 
+      ${data.operador ? `
+      <!-- Operador Responsável -->
+      <div style="margin-bottom: 25px;">
+        <h3 style="color: #1e40af; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 15px;">Operador Responsável</h3>
+        <div style="background-color: #f1f5f9; padding: 15px; border-radius: 8px;">
+          <p style="margin: 0; font-size: 16px;"><strong>${data.operador.nome}</strong></p>
+          <p style="margin: 5px 0 0 0; color: #666;">${data.operador.telefone}</p>
+        </div>
+      </div>
+      ` : ''}
+
       <!-- Rodapé -->
       <div style="margin-top: 40px; text-align: center; border-top: 2px solid #e5e7eb; padding-top: 20px;">
         <p style="margin: 0; font-size: 14px; color: #666;">
@@ -147,7 +167,7 @@ export const generateFinancingPDF = async (data: PDFData): Promise<Blob> => {
             'Proposta não aprovada no momento. Entre em contato para mais informações.'}
         </p>
         <div style="margin-top: 15px; background-color: #1e40af; color: white; padding: 10px; border-radius: 5px; display: inline-block;">
-          <strong>WhatsApp: (61) 98483-3965</strong>
+          <strong>${data.operador ? data.operador.telefone : '(61) 98483-3965'}</strong>
         </div>
         <p style="margin: 15px 0 0 0; font-size: 12px; color: #999;">
           Documento gerado em ${new Date().toLocaleDateString('pt-BR')} - Pro Motors Financiamentos
@@ -190,7 +210,8 @@ export const generateFinancingPDF = async (data: PDFData): Promise<Blob> => {
   }
 };
 
-export const shareWhatsApp = (message: string) => {
+export const shareWhatsApp = (message: string, phone?: string) => {
+  const phoneNumber = phone || '5561984833965';
   const encodedMessage = encodeURIComponent(message);
-  window.open(`https://wa.me/5561984833965?text=${encodedMessage}`, '_blank');
+  window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
 };
