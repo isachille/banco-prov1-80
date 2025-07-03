@@ -23,6 +23,9 @@ const TestRegister = () => {
     });
   };
 
+  // Chave API atualizada
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqY3Zwb3p3anl5ZGJlZ3Jjc2txIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyNDU1NzYsImV4cCI6MjA2NjgyMTU3Nn0.ndEdb2KTe0LfPfFis41H4hU4mNBnlvizcHhYtIBkeUE';
+
   const handleTestRegister = async () => {
     setIsLoading(true);
     
@@ -59,7 +62,7 @@ const TestRegister = () => {
         const response = await fetch('https://hjcvpozwjyydbegrcskq.supabase.co/rest/v1/users', {
           method: 'POST',
           headers: {
-            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqY3Zwb3p3anl5ZGJlZ3Jjc2txIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyNDU1NzYsImV4cCI6MjA2NjgyMTU3Nn0.ndEdb2KTe0LfPfFis41H4hU4mNBnlvizcHhYtIBkeUE',
+            'apikey': SUPABASE_ANON_KEY,
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
@@ -69,7 +72,7 @@ const TestRegister = () => {
             nome_completo: formData.nome_completo,
             cpf_cnpj: formData.cpf_cnpj,
             tipo: formData.tipo,
-            is_admin: formData.email === 'isac.soares23@gmail.com',
+            role: formData.email === 'isac.soares23@gmail.com' ? 'dono' : 'usuario',
             status: 'ativo'
           })
         });
@@ -87,7 +90,7 @@ const TestRegister = () => {
         const walletResponse = await fetch('https://hjcvpozwjyydbegrcskq.supabase.co/rest/v1/wallets', {
           method: 'POST',
           headers: {
-            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqY3Zwb3p3anl5ZGJlZ3Jjc2txIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyNDU1NzYsImV4cCI6MjA2NjgyMTU3Nn0.ndEdb2KTe0LfPfFis41H4hU4mNBnlvizcHhYtIBkeUE',
+            'apikey': SUPABASE_ANON_KEY,
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
