@@ -9,13 +9,152 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      users: {
+        Row: {
+          cep: string | null
+          cidade: string | null
+          cpf: string | null
+          cpf_cnpj: string | null
+          created_at: string | null
+          criado_em: string | null
+          email: string
+          endereco: string | null
+          estado: string | null
+          id: string
+          is_admin: boolean | null
+          mae: string | null
+          nascimento: string | null
+          nome: string | null
+          nome_completo: string | null
+          profissao: string | null
+          role: string | null
+          status: string | null
+          telefone: string | null
+          tipo: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cep?: string | null
+          cidade?: string | null
+          cpf?: string | null
+          cpf_cnpj?: string | null
+          created_at?: string | null
+          criado_em?: string | null
+          email: string
+          endereco?: string | null
+          estado?: string | null
+          id: string
+          is_admin?: boolean | null
+          mae?: string | null
+          nascimento?: string | null
+          nome?: string | null
+          nome_completo?: string | null
+          profissao?: string | null
+          role?: string | null
+          status?: string | null
+          telefone?: string | null
+          tipo?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cep?: string | null
+          cidade?: string | null
+          cpf?: string | null
+          cpf_cnpj?: string | null
+          created_at?: string | null
+          criado_em?: string | null
+          email?: string
+          endereco?: string | null
+          estado?: string | null
+          id?: string
+          is_admin?: boolean | null
+          mae?: string | null
+          nascimento?: string | null
+          nome?: string | null
+          nome_completo?: string | null
+          profissao?: string | null
+          role?: string | null
+          status?: string | null
+          telefone?: string | null
+          tipo?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      wallets: {
+        Row: {
+          created_at: string | null
+          id: string
+          limite: number | null
+          rendimento_mes: number | null
+          saldo: number | null
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          limite?: number | null
+          rendimento_mes?: number | null
+          saldo?: number | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          limite?: number | null
+          rendimento_mes?: number | null
+          saldo?: number | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      wallets_ativas: {
+        Row: {
+          cpf: string | null
+          email: string | null
+          limite: number | null
+          nome_completo: string | null
+          rendimento_mes: number | null
+          role: string | null
+          saldo: number | null
+          status: string | null
+          telefone: string | null
+          tipo: string | null
+          user_id: string | null
+          wallet_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
-      [_ in never]: never
+      transferir_saldo: {
+        Args: { p_de: string; p_para: string; p_valor: number }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

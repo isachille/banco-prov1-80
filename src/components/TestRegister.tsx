@@ -23,15 +23,11 @@ const TestRegister = () => {
     });
   };
 
-  // Nova chave publishable que substitui a legacy
-  const SUPABASE_PUBLISHABLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqY3Zwb3p3anl5ZGJlZ3Jjc2txIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyNDU1NzYsImV4cCI6MjA2NjgyMTU3Nn0.ndEdb2KTe0LfPfFis41H4hU4mNBnlvizcHhYtIBkeUE';
-
   const handleTestRegister = async () => {
     setIsLoading(true);
     
     try {
       console.log('Iniciando cadastro de teste:', formData);
-      console.log('Usando chave:', SUPABASE_PUBLISHABLE_KEY.substring(0, 50) + '...');
       
       // Fazer cadastro usando Supabase
       const { data, error } = await supabase.auth.signUp({
@@ -52,68 +48,10 @@ const TestRegister = () => {
         return;
       }
 
-      if (data.user && data.session) {
+      if (data.user) {
         console.log('Cadastro realizado:', data);
-        
-        // Salvar token para usar na chamada REST
-        const token = data.session.access_token;
-        const userId = data.user.id;
-        
-        // Inserir dados na tabela users via REST API
-        const response = await fetch('https://hjcvpozwjyydbegrcskq.supabase.co/rest/v1/users', {
-          method: 'POST',
-          headers: {
-            'apikey': SUPABASE_PUBLISHABLE_KEY,
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            id: userId,
-            email: formData.email,
-            nome_completo: formData.nome_completo,
-            cpf_cnpj: formData.cpf_cnpj,
-            tipo: formData.tipo,
-            role: formData.email === 'isac.soares23@gmail.com' ? 'dono' : 'usuario',
-            status: 'ativo'
-          })
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error('Erro ao inserir dados do usuário:', errorData);
-          toast.error('Erro ao salvar dados: ' + JSON.stringify(errorData));
-          return;
-        }
-
-        console.log('Dados do usuário salvos via REST API');
-
-        // Criar carteira para o usuário
-        const walletResponse = await fetch('https://hjcvpozwjyydbegrcskq.supabase.co/rest/v1/wallets', {
-          method: 'POST',
-          headers: {
-            'apikey': SUPABASE_PUBLISHABLE_KEY,
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            user_id: userId,
-            saldo: 1000,
-            status: 'ativa'
-          })
-        });
-
-        if (!walletResponse.ok) {
-          const walletErrorData = await walletResponse.json();
-          console.error('Erro ao criar carteira:', walletErrorData);
-          toast.error('Erro ao criar carteira: ' + JSON.stringify(walletErrorData));
-          return;
-        }
-
-        console.log('Carteira criada via REST API');
-
         toast.success('Usuário de teste criado com sucesso!');
-        console.log('Token de acesso:', token);
-        console.log('User ID:', userId);
+        console.log('User ID:', data.user.id);
       }
     } catch (error) {
       console.error('Erro no cadastro:', error);
