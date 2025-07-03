@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,14 +23,15 @@ const TestRegister = () => {
     });
   };
 
-  // Chave API que estava funcionando
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqY3Zwb3p3anl5ZGJlZ3Jjc2txIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyNDU1NzYsImV4cCI6MjA2NjgyMTU3Nn0.ndEdb2KTe0LfPfFis41H4hU4mNBnlvizcHhYtIBkeUE';
+  // Nova chave publishable que substitui a legacy
+  const SUPABASE_PUBLISHABLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqY3Zwb3p3anl5ZGJlZ3Jjc2txIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyNDU1NzYsImV4cCI6MjA2NjgyMTU3Nn0.ndEdb2KTe0LfPfFis41H4hU4mNBnlvizcHhYtIBkeUE';
 
   const handleTestRegister = async () => {
     setIsLoading(true);
     
     try {
       console.log('Iniciando cadastro de teste:', formData);
+      console.log('Usando chave:', SUPABASE_PUBLISHABLE_KEY.substring(0, 50) + '...');
       
       // Fazer cadastro usando Supabase
       const { data, error } = await supabase.auth.signUp({
@@ -61,7 +63,7 @@ const TestRegister = () => {
         const response = await fetch('https://hjcvpozwjyydbegrcskq.supabase.co/rest/v1/users', {
           method: 'POST',
           headers: {
-            'apikey': SUPABASE_ANON_KEY,
+            'apikey': SUPABASE_PUBLISHABLE_KEY,
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
@@ -89,7 +91,7 @@ const TestRegister = () => {
         const walletResponse = await fetch('https://hjcvpozwjyydbegrcskq.supabase.co/rest/v1/wallets', {
           method: 'POST',
           headers: {
-            'apikey': SUPABASE_ANON_KEY,
+            'apikey': SUPABASE_PUBLISHABLE_KEY,
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
@@ -124,6 +126,7 @@ const TestRegister = () => {
   const handleTestLogin = async () => {
     try {
       console.log('Tentando login com email:', formData.email);
+      console.log('Usando client do Supabase configurado');
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
@@ -132,6 +135,8 @@ const TestRegister = () => {
 
       if (error) {
         console.error('Erro detalhado no login:', error);
+        console.error('Status do erro:', error.status);
+        console.error('Código do erro:', error.code);
         toast.error('Erro no login de teste: ' + error.message);
         return;
       }

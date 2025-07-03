@@ -4,10 +4,16 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
 const SUPABASE_URL = "https://hjcvpozwjyydbegrcskq.supabase.co";
+// Nova chave publishable (substitui a anon key legacy)
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhqY3Zwb3p3anl5ZGJlZ3Jjc2txIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyNDU1NzYsImV4cCI6MjA2NjgyMTU3Nn0.ndEdb2KTe0LfPfFis41H4hU4mNBnlvizcHhYtIBkeUE";
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
+
+console.log('Inicializando Supabase com:', {
+  url: SUPABASE_URL,
+  key: SUPABASE_PUBLISHABLE_KEY.substring(0, 50) + '...'
+});
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
@@ -16,5 +22,14 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     autoRefreshToken: true,
     detectSessionInUrl: true,
     flowType: 'pkce'
+  }
+});
+
+// Testar conexão na inicialização
+supabase.auth.getSession().then(({ data, error }) => {
+  if (error) {
+    console.error('Erro na inicialização do Supabase:', error);
+  } else {
+    console.log('Supabase inicializado com sucesso');
   }
 });
