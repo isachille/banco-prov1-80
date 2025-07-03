@@ -151,6 +151,10 @@ export type Database = {
       }
     }
     Functions: {
+      is_admin_user: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
       transferir_saldo: {
         Args: { p_de: string; p_para: string; p_valor: number }
         Returns: Json

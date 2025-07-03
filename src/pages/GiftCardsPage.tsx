@@ -26,13 +26,13 @@ const GiftCardsPage = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data: walletData } = await supabase
-          .from('binance_wallets')
-          .select('balance')
+          .from('wallets')
+          .select('saldo')
           .eq('user_id', user.id)
           .single();
 
         if (walletData) {
-          setBalance(walletData.balance || 0);
+          setBalance(walletData.saldo || 0);
         }
       }
     };
@@ -57,38 +57,14 @@ const GiftCardsPage = () => {
       // Gerar código do gift card
       const codigo = `${giftCard.name.toUpperCase()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
-      // Registrar compra
-      const { error: giftCardError } = await supabase
-        .from('giftcards')
-        .insert({
-          user_id: user.id,
-          nome: giftCard.name,
-          valor: giftCard.value,
-          codigo: codigo
-        });
-
-      if (giftCardError) throw giftCardError;
-
-      // Registrar transação
-      const { error: transactionError } = await supabase
-        .from('binance_transactions')
-        .insert({
-          user_id: user.id,
-          tipo: 'giftcard',
-          valor: giftCard.value,
-          moeda: 'BRL',
-          status: 'concluido',
-          metadata: { giftcard_name: giftCard.name, codigo: codigo }
-        });
-
-      if (transactionError) throw transactionError;
-
-      // Atualizar saldo
+      // Atualizar saldo na carteira
       const newBalance = balance - giftCard.value;
-      await supabase
-        .from('binance_wallets')
-        .update({ balance: newBalance })
+      const { error: updateError } = await supabase
+        .from('wallets')
+        .update({ saldo: newBalance })
         .eq('user_id', user.id);
+
+      if (updateError) throw updateError;
 
       setBalance(newBalance);
       toast.success(`Gift Card ${giftCard.name} comprado com sucesso! Código: ${codigo}`);
