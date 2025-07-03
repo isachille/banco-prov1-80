@@ -39,9 +39,9 @@ const createPDFContent = (data: PDFData): string => {
                     data.status === 'PRE_APROVADO' ? 'PRÉ-APROVADO' : 'NEGADO';
 
   return `
-    <div style="max-width: 760px; margin: 0 auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.4;">
+    <div style="max-width: 850px; margin: 0 auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.4; background: white; padding: 40px;">
       <!-- Header com Logo -->
-      <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #1e40af; padding-bottom: 20px;">
+      <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #1e40af; padding-bottom: 20px; page-break-inside: avoid;">
         <div style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 25px; border-radius: 10px; margin-bottom: 20px; position: relative;">
           <div style="display: flex; align-items: center; justify-content: center; gap: 20px;">
             <img 
@@ -50,14 +50,14 @@ const createPDFContent = (data: PDFData): string => {
               style="width: 120px; height: 120px; border-radius: 12px; background: white; padding: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" 
             />
             <div>
-              <h1 style="margin: 0; font-size: 38px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">PRO MOTORS</h1>
-              <p style="margin: 8px 0 0 0; font-size: 18px; opacity: 0.95; font-weight: 500;">Financiamento Veicular</p>
+              <h1 style="margin: 0; font-size: 38px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); color: white;">PRO MOTORS</h1>
+              <p style="margin: 8px 0 0 0; font-size: 18px; opacity: 0.95; font-weight: 500; color: white;">Financiamento Veicular</p>
             </div>
           </div>
         </div>
         
         <!-- Open Finance Explanation -->
-        <div style="background-color: #f0f9ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #0369a1;">
+        <div style="background-color: #f0f9ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #0369a1; page-break-inside: avoid;">
           <h4 style="margin: 0 0 8px 0; color: #0369a1; font-size: 14px; font-weight: bold;">🔒 ANÁLISE VIA OPEN FINANCE</h4>
           <p style="margin: 0; font-size: 12px; color: #075985; line-height: 1.4;">
             Nosso sistema utiliza tecnologia Open Finance para avaliar seu perfil de crédito em tempo real junto aos principais bancos do país, 
@@ -89,7 +89,7 @@ const createPDFContent = (data: PDFData): string => {
       </div>
 
       <!-- Status da Proposta -->
-      <div style="text-align: center; margin-bottom: 25px;">
+      <div style="text-align: center; margin-bottom: 25px; page-break-inside: avoid;">
         <div style="background-color: ${statusColor}; color: white; padding: 18px 35px; border-radius: 25px; display: inline-block; font-size: 20px; font-weight: bold; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
           ${statusText}
         </div>
@@ -121,11 +121,11 @@ const createPDFContent = (data: PDFData): string => {
       <div style="margin-bottom: 20px; page-break-inside: avoid;">
         <h3 style="color: #1e40af; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 15px;">Dados do Cliente</h3>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background-color: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
-          <div style="font-size: 14px;"><strong>Nome:</strong> ${data.cliente.nome}</div>
-          <div style="font-size: 14px;"><strong>CPF:</strong> ${data.cliente.cpf}</div>
-          <div style="font-size: 14px;"><strong>Nascimento:</strong> ${data.cliente.nascimento}</div>
-          <div style="font-size: 14px;"><strong>Nome da Mãe:</strong> ${data.cliente.mae}</div>
-          <div style="grid-column: span 2; font-size: 14px;"><strong>Profissão:</strong> ${data.cliente.profissao}</div>
+          <div style="font-size: 14px; color: #333;"><strong>Nome:</strong> ${data.cliente.nome}</div>
+          <div style="font-size: 14px; color: #333;"><strong>CPF:</strong> ${data.cliente.cpf}</div>
+          <div style="font-size: 14px; color: #333;"><strong>Nascimento:</strong> ${data.cliente.nascimento}</div>
+          <div style="font-size: 14px; color: #333;"><strong>Nome da Mãe:</strong> ${data.cliente.mae}</div>
+          <div style="grid-column: span 2; font-size: 14px; color: #333;"><strong>Profissão:</strong> ${data.cliente.profissao}</div>
         </div>
       </div>
 
@@ -234,7 +234,7 @@ export const generateFinancingPDF = async (data: PDFData): Promise<Blob> => {
   const tempDiv = document.createElement('div');
   tempDiv.style.position = 'absolute';
   tempDiv.style.left = '-9999px';
-  tempDiv.style.width = '850px'; // Increased width for better layout
+  tempDiv.style.width = '850px';
   tempDiv.style.backgroundColor = 'white';
   tempDiv.style.padding = '40px';
   tempDiv.style.fontFamily = 'Arial, sans-serif';
@@ -244,13 +244,18 @@ export const generateFinancingPDF = async (data: PDFData): Promise<Blob> => {
   document.body.appendChild(tempDiv);
 
   try {
+    // Aguardar um pouco para as imagens carregarem
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
     const canvas = await html2canvas(tempDiv, {
       scale: 2,
       useCORS: true,
       backgroundColor: '#ffffff',
       logging: false,
-      allowTaint: true,
-      foreignObjectRendering: true
+      allowTaint: false,
+      foreignObjectRendering: true,
+      height: tempDiv.scrollHeight,
+      width: tempDiv.scrollWidth
     });
 
     const imgData = canvas.toDataURL('image/png');
