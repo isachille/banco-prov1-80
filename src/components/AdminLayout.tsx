@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { 
   BarChart3, FileText, Send, ArrowRight, CreditCard, 
   Users, Upload, Receipt, TrendingUp, Settings, 
-  Menu, X, Home
+  Menu, X, Home, UserCheck, Shield
 } from 'lucide-react';
 import BankingHeader from './BankingHeader';
 
@@ -20,16 +20,15 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
   const adminMenuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3, path: '/admin/dashboard' },
+    { id: 'usuarios', label: 'Gerenciar Usuários', icon: UserCheck, path: '/admin/users' },
+    { id: 'contas-ativas', label: 'Contas Ativas', icon: Users, path: '/admin/contas-ativas' },
     { id: 'extrato', label: 'Extrato', icon: FileText, path: '/admin/extrato' },
-    { id: 'pix', label: 'Pix', icon: Send, path: '/admin/pix' },
+    { id: 'pix', label: 'PIX Admin', icon: Send, path: '/admin/pix' },
     { id: 'transferencias', label: 'Transferências', icon: ArrowRight, path: '/admin/transferencias' },
     { id: 'pagamentos', label: 'Pagamentos', icon: CreditCard, path: '/admin/pagamentos' },
     { id: 'cobrancas', label: 'Cobranças', icon: Receipt, path: '/admin/cobrancas' },
     { id: 'arquivos', label: 'Arquivos', icon: Upload, path: '/admin/arquivos' },
-    { id: 'cedentes', label: 'Cedentes', icon: Users, path: '/admin/cedentes' },
-    { id: 'bureaux', label: 'Bureaux', icon: TrendingUp, path: '/admin/bureaux' },
     { id: 'relatorios', label: 'Relatórios', icon: FileText, path: '/admin/relatorios' },
-    { id: 'conta', label: 'Conta', icon: Users, path: '/admin/conta' },
     { id: 'configuracoes', label: 'Configurações', icon: Settings, path: '/admin/configuracoes' },
   ];
 
@@ -60,7 +59,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             <Button
               variant="ghost"
               onClick={() => navigate('/home')}
-              className="w-full justify-start mb-4 text-[#0047AB]"
+              className="w-full justify-start mb-4 text-[#0047AB] hover:bg-blue-50"
             >
               <Home className="h-4 w-4 mr-2" />
               Voltar ao App
@@ -77,7 +76,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                   }}
                   className={`w-full justify-start ${
                     isActive(item.path)
-                      ? 'bg-[#0047AB] text-white'
+                      ? 'bg-[#0047AB] text-white hover:bg-[#0047AB]/90'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >

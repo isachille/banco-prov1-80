@@ -58,12 +58,12 @@ const NubankNavigation = () => {
     }
   ];
 
-  // Add admin panel if user is 'dono'
-  if (user?.role === 'dono') {
+  // Add admin panel if user is 'dono' or 'admin'
+  if (user?.role && ['dono', 'admin'].includes(user.role)) {
     menuItems.push({
       titulo: "Painel Admin",
       icone: Shield,
-      acao: () => navigate('/admin/users'),
+      acao: () => navigate('/admin/dashboard'),
       tela: "painel_adm"
     });
   }
