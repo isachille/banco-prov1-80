@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Car, MessageCircle, Download, Share, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -10,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { vehicleCategories, getAllVehicles, calculateVehiclePrice, operators, type Vehicle } from '@/data/vehicleCategories';
-import { generateFinancingPDF, shareWhatsApp } from '@/components/PDFGenerator';
+import { ProposalPreview } from '@/components/ProposalPreview';
 
 interface KYCData {
   nome_completo: string;
@@ -37,7 +36,7 @@ const FinancingPage = () => {
   const [parcelas, setParcelas] = useState('');
   const [proposal, setProposal] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [generatingPDF, setGeneratingPDF] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   const currentYear = new Date().getFullYear();
   const availableYears = Array.from({ length: 5 }, (_, i) => currentYear - i);
@@ -124,6 +123,7 @@ const FinancingPage = () => {
         operador: selectedOperatorData
       });
 
+      setShowPreview(true);
       toast.success('Proposta gerada com sucesso!');
     } catch (error) {
       console.error('Erro ao simular financiamento:', error);
@@ -133,82 +133,13 @@ const FinancingPage = () => {
     }
   };
 
-  const handleGeneratePDF = async () => {
-    if (!proposal) return;
-
-    setGeneratingPDF(true);
-    try {
-      const pdfData = {
-        codigoProposta: proposal.codigo,
-        cliente: {
-          nome: kycData.nome_completo,
-          cpf: kycData.cpf,
-          nascimento: kycData.data_nascimento ? new Date(kycData.data_nascimento).toLocaleDateString('pt-BR') : 'Não informado',
-          mae: kycData.nome_mae,
-          profissao: kycData.profissao
-        },
-        veiculo: {
-          marca: proposal.marca,
-          modelo: proposal.modelo,
-          ano: proposal.ano,
-          valor: proposal.valorVeiculo
-        },
-        financiamento: {
-          entrada: proposal.entrada,
-          parcelas: proposal.parcelas,
-          valorParcela: proposal.valorParcela,
-          valorTotal: proposal.valorTotal
-        },
-        operador: proposal.operador,
-        status: 'PRE_APROVADO' as const
-      };
-
-      const pdfBlob = await generateFinancingPDF(pdfData);
-      
-      // Criar link para download
-      const url = URL.createObjectURL(pdfBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `Proposta_${proposal.codigo}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      toast.success('PDF gerado com sucesso!');
-    } catch (error) {
-      console.error('Erro ao gerar PDF:', error);
-      toast.error('Erro ao gerar PDF');
-    } finally {
-      setGeneratingPDF(false);
-    }
+  const handleBackToForm = () => {
+    setShowPreview(false);
   };
 
-  const handleWhatsApp = () => {
-    if (!proposal || !selectedOperatorData) return;
-
-    const message = `Olá ${selectedOperatorData.nome}! Gostaria de prosseguir com minha proposta de financiamento.
-
-Código da proposta: ${proposal.codigo}
-
-Nome: ${kycData.nome_completo}
-CPF: ${kycData.cpf}
-Nascimento: ${kycData.data_nascimento ? new Date(kycData.data_nascimento).toLocaleDateString('pt-BR') : 'Não informado'}
-Nome da mãe: ${kycData.nome_mae}
-Profissão: ${kycData.profissao}
-
-Veículo: ${proposal.veiculo}
-Valor do veículo: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.valorVeiculo)}
-Entrada: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.entrada)}
-Financiamento: ${proposal.parcelas}x de ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.valorParcela)}
-
-Status: PRÉ-APROVADO
-
-Aguardo retorno. Obrigado!`;
-
-    const phoneNumber = selectedOperatorData.telefone.replace(/\D/g, '');
-    shareWhatsApp(message, `55${phoneNumber}`);
-  };
+  if (showPreview && proposal) {
+    return <ProposalPreview proposal={proposal} kycData={kycData} onBack={handleBackToForm} />;
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -219,283 +150,208 @@ Aguardo retorno. Obrigado!`;
         <h1 className="text-2xl font-bold">Financiamento Veicular</h1>
       </div>
 
-      {!proposal ? (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Car className="h-5 w-5" />
-              <span>Simulação de Financiamento</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Dados do Cliente */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-800">Dados do Cliente</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="nome">Nome Completo</Label>
-                  <Input
-                    id="nome"
-                    value={kycData.nome_completo}
-                    onChange={(e) => setKycData({...kycData, nome_completo: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="cpf">CPF</Label>
-                  <Input
-                    id="cpf"
-                    value={kycData.cpf}
-                    onChange={(e) => setKycData({...kycData, cpf: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="nascimento">Data de Nascimento</Label>
-                  <Input
-                    id="nascimento"
-                    type="date"
-                    value={kycData.data_nascimento}
-                    onChange={(e) => setKycData({...kycData, data_nascimento: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="mae">Nome da Mãe</Label>
-                  <Input
-                    id="mae"
-                    value={kycData.nome_mae}
-                    onChange={(e) => setKycData({...kycData, nome_mae: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="profissao">Profissão</Label>
-                  <Input
-                    id="profissao"
-                    value={kycData.profissao}
-                    onChange={(e) => setKycData({...kycData, profissao: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="operador">Operador Responsável</Label>
-                  <Select value={selectedOperator} onValueChange={setSelectedOperator}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione um operador" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {operators.map((operator) => (
-                        <SelectItem key={operator.id} value={operator.id}>
-                          {operator.nome} - {operator.telefone}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-
-            {/* Seleção do Veículo */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-800">Escolha seu Veículo</h3>
-              
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Car className="h-5 w-5" />
+            <span>Simulação de Financiamento</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Dados do Cliente */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-800">Dados do Cliente</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="categoria">Categoria do Veículo</Label>
-                <Select value={selectedCategory} onValueChange={(value) => {
-                  setSelectedCategory(value);
-                  setSelectedVehicle('');
-                }}>
+                <Label htmlFor="nome">Nome Completo</Label>
+                <Input
+                  id="nome"
+                  value={kycData.nome_completo}
+                  onChange={(e) => setKycData({...kycData, nome_completo: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="cpf">CPF</Label>
+                <Input
+                  id="cpf"
+                  value={kycData.cpf}
+                  onChange={(e) => setKycData({...kycData, cpf: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="nascimento">Data de Nascimento</Label>
+                <Input
+                  id="nascimento"
+                  type="date"
+                  value={kycData.data_nascimento}
+                  onChange={(e) => setKycData({...kycData, data_nascimento: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="mae">Nome da Mãe</Label>
+                <Input
+                  id="mae"
+                  value={kycData.nome_mae}
+                  onChange={(e) => setKycData({...kycData, nome_mae: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="profissao">Profissão</Label>
+                <Input
+                  id="profissao"
+                  value={kycData.profissao}
+                  onChange={(e) => setKycData({...kycData, profissao: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="operador">Operador Responsável</Label>
+                <Select value={selectedOperator} onValueChange={setSelectedOperator}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma categoria" />
+                    <SelectValue placeholder="Selecione um operador" />
                   </SelectTrigger>
                   <SelectContent>
-                    {vehicleCategories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        <div>
-                          <div className="font-medium">{category.nome}</div>
-                          <div className="text-sm text-gray-500">{category.descricao}</div>
+                    {operators.map((operator) => (
+                      <SelectItem key={operator.id} value={operator.id}>
+                        {operator.nome} - {operator.telefone}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+
+          {/* Seleção do Veículo */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-800">Escolha seu Veículo</h3>
+            
+            <div>
+              <Label htmlFor="categoria">Categoria do Veículo</Label>
+              <Select value={selectedCategory} onValueChange={(value) => {
+                setSelectedCategory(value);
+                setSelectedVehicle('');
+              }}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione uma categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  {vehicleCategories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      <div>
+                        <div className="font-medium">{category.nome}</div>
+                        <div className="text-sm text-gray-500">{category.descricao}</div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {selectedCategory && (
+              <div>
+                <Label htmlFor="veiculo">Modelo do Veículo</Label>
+                <Select value={selectedVehicle} onValueChange={setSelectedVehicle}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um modelo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredVehicles.map((vehicle) => (
+                      <SelectItem key={vehicle.id} value={vehicle.id}>
+                        <div className="flex justify-between items-center w-full">
+                          <span>{vehicle.marca} {vehicle.modelo}</span>
+                          <span className="text-sm text-gray-500 ml-2">
+                            {vehicle.popular && '⭐'} A partir de {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(vehicle.precoBase)}
+                          </span>
                         </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
+            )}
 
-              {selectedCategory && (
-                <div>
-                  <Label htmlFor="veiculo">Modelo do Veículo</Label>
-                  <Select value={selectedVehicle} onValueChange={setSelectedVehicle}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione um modelo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {filteredVehicles.map((vehicle) => (
-                        <SelectItem key={vehicle.id} value={vehicle.id}>
-                          <div className="flex justify-between items-center w-full">
-                            <span>{vehicle.marca} {vehicle.modelo}</span>
-                            <span className="text-sm text-gray-500 ml-2">
-                              {vehicle.popular && '⭐'} A partir de {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(vehicle.precoBase)}
-                            </span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              {selectedVehicle && (
-                <div>
-                  <Label htmlFor="ano">Ano do Veículo</Label>
-                  <Select value={selectedYear} onValueChange={setSelectedYear}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o ano" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableYears.map((year) => (
-                        <SelectItem key={year} value={year.toString()}>
-                          {year} {year === currentYear && '(0 KM)'}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              {selectedVehicleData && selectedYear && (
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-blue-900">
-                    {selectedVehicleData.marca} {selectedVehicleData.modelo} {selectedYear}
-                  </h4>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(vehiclePrice)}
-                  </p>
-                  {parseInt(selectedYear) < currentYear && (
-                    <p className="text-sm text-gray-600">
-                      Valor ajustado pela idade do veículo
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Condições de Financiamento */}
-            {vehiclePrice > 0 && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-800">Condições de Financiamento</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="entrada">Valor de Entrada (R$)</Label>
-                    <Input
-                      id="entrada"
-                      type="number"
-                      placeholder="0,00"
-                      value={valorEntrada}
-                      onChange={(e) => setValorEntrada(e.target.value)}
-                      max={vehiclePrice}
-                    />
-                    <p className="text-sm text-gray-500 mt-1">
-                      Mínimo: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(vehiclePrice * 0.2)} (20%)
-                    </p>
-                  </div>
-                  <div>
-                    <Label htmlFor="parcelas">Parcelamento</Label>
-                    <Select value={parcelas} onValueChange={setParcelas}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="12">12x (Taxa: 2,1% a.m.)</SelectItem>
-                        <SelectItem value="24">24x (Taxa: 2,3% a.m.)</SelectItem>
-                        <SelectItem value="36">36x (Taxa: 2,5% a.m.)</SelectItem>
-                        <SelectItem value="48">48x (Taxa: 2,7% a.m.)</SelectItem>
-                        <SelectItem value="60">60x (Taxa: 2,9% a.m.)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+            {selectedVehicle && (
+              <div>
+                <Label htmlFor="ano">Ano do Veículo</Label>
+                <Select value={selectedYear} onValueChange={setSelectedYear}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o ano" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableYears.map((year) => (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year} {year === currentYear && '(0 KM)'}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             )}
 
-            <Button 
-              className="w-full"
-              onClick={handleSimulate}
-              disabled={loading || !vehiclePrice}
-            >
-              {loading ? 'Simulando...' : 'Simular Financiamento'}
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Proposta Gerada</span>
-              <div className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
-                PRÉ-APROVADO
+            {selectedVehicleData && selectedYear && (
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h4 className="font-semibold text-blue-900">
+                  {selectedVehicleData.marca} {selectedVehicleData.modelo} {selectedYear}
+                </h4>
+                <p className="text-2xl font-bold text-blue-600">
+                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(vehiclePrice)}
+                </p>
+                {parseInt(selectedYear) < currentYear && (
+                  <p className="text-sm text-gray-600">
+                    Valor ajustado pela idade do veículo
+                  </p>
+                )}
               </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="bg-green-50 p-6 rounded-lg">
-              <h3 className="font-semibold mb-4 text-lg">Código da Proposta: {proposal.codigo}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <h4 className="font-medium text-gray-800">Veículo Selecionado</h4>
-                  <div className="bg-white p-4 rounded border">
-                    <p className="font-semibold text-lg">{proposal.veiculo}</p>
-                    <p className="text-2xl font-bold text-blue-600">
-                      {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.valorVeiculo)}
-                    </p>
-                  </div>
+            )}
+          </div>
+
+          {/* Condições de Financiamento */}
+          {vehiclePrice > 0 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-800">Condições de Financiamento</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="entrada">Valor de Entrada (R$)</Label>
+                  <Input
+                    id="entrada"
+                    type="number"
+                    placeholder="0,00"
+                    value={valorEntrada}
+                    onChange={(e) => setValorEntrada(e.target.value)}
+                    max={vehiclePrice}
+                  />
+                  <p className="text-sm text-gray-500 mt-1">
+                    Mínimo: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(vehiclePrice * 0.2)} (20%)
+                  </p>
                 </div>
-                
-                <div className="space-y-3">
-                  <h4 className="font-medium text-gray-800">Condições do Financiamento</h4>
-                  <div className="bg-white p-4 rounded border space-y-2">
-                    <p><strong>Entrada:</strong> {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.entrada)}</p>
-                    <p><strong>Parcelas:</strong> {proposal.parcelas}x de {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.valorParcela)}</p>
-                    <p><strong>Total:</strong> {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.valorTotal)}</p>
-                    <p className="text-sm text-gray-600"><strong>Taxa:</strong> {proposal.taxaJuros.toFixed(1)}% a.m.</p>
-                  </div>
+                <div>
+                  <Label htmlFor="parcelas">Parcelamento</Label>
+                  <Select value={parcelas} onValueChange={setParcelas}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="12">12x (Taxa: 2,1% a.m.)</SelectItem>
+                      <SelectItem value="24">24x (Taxa: 2,3% a.m.)</SelectItem>
+                      <SelectItem value="36">36x (Taxa: 2,5% a.m.)</SelectItem>
+                      <SelectItem value="48">48x (Taxa: 2,7% a.m.)</SelectItem>
+                      <SelectItem value="60">60x (Taxa: 2,9% a.m.)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-
-              {proposal.operador && (
-                <div className="mt-4 bg-white p-4 rounded border">
-                  <h4 className="font-medium text-gray-800 mb-2">Operador Responsável</h4>
-                  <p><strong>{proposal.operador.nome}</strong></p>
-                  <p className="text-gray-600">{proposal.operador.telefone}</p>
-                </div>
-              )}
             </div>
+          )}
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Button 
-                onClick={handleGeneratePDF}
-                disabled={generatingPDF}
-                className="flex items-center justify-center space-x-2"
-              >
-                <Download className="h-4 w-4" />
-                <span>{generatingPDF ? 'Gerando...' : 'Baixar PDF'}</span>
-              </Button>
-
-              <Button 
-                className="bg-green-600 hover:bg-green-700 flex items-center justify-center space-x-2"
-                onClick={handleWhatsApp}
-              >
-                <MessageCircle className="h-4 w-4" />
-                <span>WhatsApp</span>
-              </Button>
-
-              <Button 
-                variant="outline"
-                onClick={() => setProposal(null)}
-                className="flex items-center justify-center space-x-2"
-              >
-                <FileText className="h-4 w-4" />
-                <span>Nova Simulação</span>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+          <Button 
+            className="w-full"
+            onClick={handleSimulate}
+            disabled={loading || !vehiclePrice}
+          >
+            {loading ? 'Simulando...' : 'Visualizar Proposta'}
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 };
