@@ -29,6 +29,7 @@ const ConsorcioPage = () => {
     profissao: ''
   });
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedBrand, setSelectedBrand] = useState('');
   const [selectedVehicle, setSelectedVehicle] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
   const [selectedOperator, setSelectedOperator] = useState('');
@@ -41,11 +42,12 @@ const ConsorcioPage = () => {
   const currentYear = new Date().getFullYear();
   const availableYears = Array.from({ length: 5 }, (_, i) => currentYear - i);
 
-  const filteredVehicles = selectedCategory 
-    ? vehicleCategories.find(cat => cat.id === selectedCategory)?.veiculos || []
-    : [];
+  const selectedCategoryData = vehicleCategories.find(cat => cat.name === selectedCategory);
+  const filteredBrands = selectedCategoryData?.brands || [];
+  const selectedBrandData = filteredBrands.find(brand => brand.name === selectedBrand);
+  const filteredVehicles = selectedBrandData?.models || [];
 
-  const selectedVehicleData = filteredVehicles.find(v => v.id === selectedVehicle);
+  const selectedVehicleData = filteredVehicles.find(v => v.name === selectedVehicle);
   const selectedOperatorData = operators.find(op => op.id === selectedOperator);
 
   useEffect(() => {
@@ -74,7 +76,7 @@ const ConsorcioPage = () => {
   }, []);
 
   const handleSimulate = async () => {
-    if (!selectedCategory || !selectedVehicle || !selectedYear || !valorCredito || !parcelas || !selectedOperator) {
+    if (!selectedCategory || !selectedBrand || !selectedVehicle || !selectedYear || !valorCredito || !parcelas || !selectedOperator) {
       toast.error('Preencha todos os campos');
       return;
     }
@@ -97,9 +99,9 @@ const ConsorcioPage = () => {
       setProposal({
         codigo: codigoProposta,
         tipo: 'consorcio',
-        veiculo: `${selectedVehicleData.marca} ${selectedVehicleData.modelo} ${selectedYear}`,
-        marca: selectedVehicleData.marca,
-        modelo: selectedVehicleData.modelo,
+        veiculo: `${selectedBrand} ${selectedVehicleData.name} ${selectedYear}`,
+        marca: selectedBrand,
+        modelo: selectedVehicleData.name,
         ano: parseInt(selectedYear),
         valorCredito: credito,
         parcelas: numParcelas,
@@ -233,6 +235,7 @@ Aguardo retorno para dar continuidade ao processo de consórcio. Obrigado!`;
                 <Label htmlFor="categoria">Categoria do Veículo</Label>
                 <Select value={selectedCategory} onValueChange={(value) => {
                   setSelectedCategory(value);
+                  setSelectedBrand('');
                   setSelectedVehicle('');
                 }}>
                   <SelectTrigger>
@@ -240,10 +243,9 @@ Aguardo retorno para dar continuidade ao processo de consórcio. Obrigado!`;
                   </SelectTrigger>
                   <SelectContent>
                     {vehicleCategories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
+                      <SelectItem key={category.name} value={category.name}>
                         <div>
-                          <div className="font-medium">{category.nome}</div>
-                          <div className="text-sm text-gray-500">{category.descricao}</div>
+                          <div className="font-medium">{category.name}</div>
                         </div>
                       </SelectItem>
                     ))}
@@ -253,6 +255,27 @@ Aguardo retorno para dar continuidade ao processo de consórcio. Obrigado!`;
 
               {selectedCategory && (
                 <div>
+                  <Label htmlFor="marca">Marca do Veículo</Label>
+                  <Select value={selectedBrand} onValueChange={(value) => {
+                    setSelectedBrand(value);
+                    setSelectedVehicle('');
+                  }}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione uma marca" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {filteredBrands.map((brand) => (
+                        <SelectItem key={brand.name} value={brand.name}>
+                          {brand.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {selectedBrand && (
+                <div>
                   <Label htmlFor="veiculo">Modelo do Veículo</Label>
                   <Select value={selectedVehicle} onValueChange={setSelectedVehicle}>
                     <SelectTrigger>
@@ -260,11 +283,11 @@ Aguardo retorno para dar continuidade ao processo de consórcio. Obrigado!`;
                     </SelectTrigger>
                     <SelectContent>
                       {filteredVehicles.map((vehicle) => (
-                        <SelectItem key={vehicle.id} value={vehicle.id}>
+                        <SelectItem key={vehicle.name} value={vehicle.name}>
                           <div className="flex justify-between items-center w-full">
-                            <span>{vehicle.marca} {vehicle.modelo}</span>
+                            <span>{vehicle.name}</span>
                             <span className="text-sm text-gray-500 ml-2">
-                              {vehicle.popular && '⭐'} A partir de {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(vehicle.precoBase)}
+                              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(vehicle.price)}
                             </span>
                           </div>
                         </SelectItem>
