@@ -1,168 +1,119 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Zap, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 
 const Pagar = () => {
-  const [formData, setFormData] = useState({
-    banco: '',
-    agencia: '',
-    conta: '',
-    documento: '',
-    valor: ''
-  });
-  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const [codigoBarras, setCodigoBarras] = useState('');
 
-  // Mock user data
-  const userWalletId = "user-wallet-123";
-  const token = "mock-token";
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      // Em produção seria:
-      // const response = await fetch('https://seu-xano.com/api/ted', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Authorization': `Bearer ${token}`,
-      //     'Content-Type': 'application/json'
-      //   },
-      //   body: JSON.stringify({
-      //     from_wallet_id: userWalletId,
-      //     banco: formData.banco,
-      //     agencia: formData.agencia,
-      //     conta: formData.conta,
-      //     documento: formData.documento,
-      //     valor: parseFloat(formData.valor)
-      //   })
-      // });
-
-      // Mock success
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast.success('Pagamento via TED enviado com sucesso!');
-      setFormData({
-        banco: '',
-        agencia: '',
-        conta: '',
-        documento: '',
-        valor: ''
-      });
-    } catch (error) {
-      console.error('Erro ao fazer pagamento:', error);
-      toast.error('Erro ao realizar pagamento. Tente novamente.');
-    } finally {
-      setLoading(false);
+  const handlePayment = () => {
+    if (!codigoBarras) {
+      toast.error('Digite o código de barras do boleto');
+      return;
     }
+    toast.success('Pagamento processado com sucesso!');
+    navigate('/home');
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <h1 className="text-2xl font-bold text-[#1F1F1F] mb-6">Pagamento via TED</h1>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="banco" className="text-[#1F1F1F] font-medium">
-              Banco
-            </Label>
-            <Input
-              id="banco"
-              type="text"
-              value={formData.banco}
-              onChange={(e) => handleInputChange('banco', e.target.value)}
-              placeholder="Ex: Banco do Brasil"
-              className="mt-1"
-              required
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="agencia" className="text-[#1F1F1F] font-medium">
-              Agência
-            </Label>
-            <Input
-              id="agencia"
-              type="text"
-              value={formData.agencia}
-              onChange={(e) => handleInputChange('agencia', e.target.value)}
-              placeholder="Ex: 1234-5"
-              className="mt-1"
-              required
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="conta" className="text-[#1F1F1F] font-medium">
-              Conta
-            </Label>
-            <Input
-              id="conta"
-              type="text"
-              value={formData.conta}
-              onChange={(e) => handleInputChange('conta', e.target.value)}
-              placeholder="Ex: 12345-6"
-              className="mt-1"
-              required
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="documento" className="text-[#1F1F1F] font-medium">
-              CPF/CNPJ
-            </Label>
-            <Input
-              id="documento"
-              type="text"
-              value={formData.documento}
-              onChange={(e) => handleInputChange('documento', e.target.value)}
-              placeholder="Ex: 123.456.789-00"
-              className="mt-1"
-              required
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="valor" className="text-[#1F1F1F] font-medium">
-              Valor
-            </Label>
-            <div className="relative mt-1">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#1F1F1F]">
-                R$
-              </span>
-              <Input
-                id="valor"
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.valor}
-                onChange={(e) => handleInputChange('valor', e.target.value)}
-                placeholder="0,00"
-                className="pl-10"
-                required
-              />
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-[#001B3A] to-[#003F5C] text-white p-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => navigate('/home')}
+              className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <h1 className="text-2xl font-bold">Pagar</h1>
+              <p className="text-blue-100">Boletos e contas</p>
             </div>
           </div>
+          <img 
+            src="/lovable-uploads/4712549c-a705-4aad-8498-4702dc3cdd8f.png" 
+            alt="Banco Pro" 
+            className="h-12 w-auto"
+          />
+        </div>
+      </div>
 
-          <Button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-[#0057FF] hover:bg-[#0047CC] text-white font-medium py-3 mt-6"
-          >
-            {loading ? 'Enviando...' : 'Enviar TED'}
-          </Button>
-        </form>
+      <div className="container mx-auto p-6 max-w-md">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Zap className="mr-2 h-5 w-5" />
+              Pagar Boleto
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="codigo">Código de Barras</Label>
+              <Input
+                id="codigo"
+                placeholder="Digite ou escaneie o código de barras"
+                value={codigoBarras}
+                onChange={(e) => setCodigoBarras(e.target.value)}
+              />
+            </div>
+            
+            <Button 
+              variant="outline"
+              className="w-full"
+              onClick={() => toast.info('Funcionalidade de câmera em desenvolvimento')}
+            >
+              <Camera className="mr-2 h-4 w-4" />
+              Escanear Código de Barras
+            </Button>
+            
+            <Button 
+              onClick={handlePayment}
+              className="w-full bg-gradient-to-r from-[#001B3A] to-[#003F5C] hover:from-[#002A4A] hover:to-[#004F6C]"
+            >
+              Pagar Boleto
+            </Button>
+          </CardContent>
+        </Card>
+
+        <div className="mt-6 space-y-3">
+          <Card className="cursor-pointer hover:shadow-md transition-shadow">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold">Conta de Luz</h3>
+                  <p className="text-sm text-muted-foreground">Vencimento: 15/01/2024</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold">R$ 89,50</p>
+                  <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">Vencido</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="cursor-pointer hover:shadow-md transition-shadow">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold">Internet</h3>
+                  <p className="text-sm text-muted-foreground">Vencimento: 20/01/2024</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold">R$ 129,90</p>
+                  <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Pendente</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

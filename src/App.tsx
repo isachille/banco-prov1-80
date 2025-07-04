@@ -29,6 +29,12 @@ import DetalhesProposta from '@/pages/DetalhesProposta';
 import PainelOperador from '@/pages/PainelOperador';
 import FinancingAdmin from '@/pages/FinancingAdmin';
 import AdminUsers from '@/pages/AdminUsers';
+import Cartoes from '@/pages/Cartoes';
+import PIX from '@/pages/PIX';
+import Transferir from '@/pages/Transferir';
+import Pagar from '@/pages/Pagar';
+import Cofrinho from '@/pages/Cofrinho';
+import Investimentos from '@/pages/Investimentos';
 
 const queryClient = new QueryClient();
 
@@ -56,6 +62,38 @@ function App() {
           <Route path="/home" element={
             <ProtectedRoute>
               <Home />
+            </ProtectedRoute>
+          } />
+          
+          {/* Banking routes */}
+          <Route path="/transferir" element={
+            <ProtectedRoute>
+              <Transferir />
+            </ProtectedRoute>
+          } />
+          <Route path="/pix" element={
+            <ProtectedRoute>
+              <PIX />
+            </ProtectedRoute>
+          } />
+          <Route path="/pagar" element={
+            <ProtectedRoute>
+              <Pagar />
+            </ProtectedRoute>
+          } />
+          <Route path="/cartoes" element={
+            <ProtectedRoute>
+              <Cartoes />
+            </ProtectedRoute>
+          } />
+          <Route path="/cofrinho" element={
+            <ProtectedRoute>
+              <Cofrinho />
+            </ProtectedRoute>
+          } />
+          <Route path="/investimentos" element={
+            <ProtectedRoute>
+              <Investimentos />
             </ProtectedRoute>
           } />
           

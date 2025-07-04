@@ -1,112 +1,136 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 
 const Transferir = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    chave_pix: '',
+    banco: '',
+    agencia: '',
+    conta: '',
+    cpf: '',
+    nome: '',
     valor: ''
   });
-  const [loading, setLoading] = useState(false);
 
-  // Mock user data
-  const userWalletId = "user-wallet-123";
-  const token = "mock-token";
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      // Em produção seria:
-      // const response = await fetch('https://seu-xano.com/api/transactions', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Authorization': `Bearer ${token}`,
-      //     'Content-Type': 'application/json'
-      //   },
-      //   body: JSON.stringify({
-      //     from_wallet_id: userWalletId,
-      //     to_pix_key: formData.chave_pix,
-      //     valor: parseFloat(formData.valor),
-      //     tipo: "pix"
-      //   })
-      // });
-
-      // Mock success
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast.success('Transferência via Pix realizada com sucesso!');
-      setFormData({ chave_pix: '', valor: '' });
-    } catch (error) {
-      console.error('Erro ao fazer transferência:', error);
-      toast.error('Erro ao realizar transferência. Tente novamente.');
-    } finally {
-      setLoading(false);
+  const handleTransfer = () => {
+    if (!formData.valor || !formData.conta || !formData.cpf) {
+      toast.error('Preencha todos os campos obrigatórios');
+      return;
     }
+    toast.success('Transferência realizada com sucesso!');
+    navigate('/home');
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <h1 className="text-2xl font-bold text-[#1F1F1F] mb-6">Transferência via Pix</h1>
-        
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <Label htmlFor="chave_pix" className="text-[#1F1F1F] font-medium">
-              Chave Pix do destinatário
-            </Label>
-            <Input
-              id="chave_pix"
-              type="text"
-              value={formData.chave_pix}
-              onChange={(e) => handleInputChange('chave_pix', e.target.value)}
-              placeholder="Ex: 11999999999 ou email@exemplo.com"
-              className="mt-1"
-              required
-            />
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-[#001B3A] to-[#003F5C] text-white p-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => navigate('/home')}
+              className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <h1 className="text-2xl font-bold">Transferir</h1>
+              <p className="text-blue-100">Envie dinheiro para outras contas</p>
+            </div>
           </div>
+          <img 
+            src="/lovable-uploads/4712549c-a705-4aad-8498-4702dc3cdd8f.png" 
+            alt="Banco Pro" 
+            className="h-12 w-auto"
+          />
+        </div>
+      </div>
 
-          <div>
-            <Label htmlFor="valor" className="text-[#1F1F1F] font-medium">
-              Valor
-            </Label>
-            <div className="relative mt-1">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#1F1F1F]">
-                R$
-              </span>
+      <div className="container mx-auto p-6 max-w-md">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Send className="mr-2 h-5 w-5" />
+              Nova Transferência
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="banco">Banco</Label>
+              <Input
+                id="banco"
+                placeholder="Código do banco"
+                value={formData.banco}
+                onChange={(e) => setFormData({...formData, banco: e.target.value})}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="agencia">Agência</Label>
+              <Input
+                id="agencia"
+                placeholder="Número da agência"
+                value={formData.agencia}
+                onChange={(e) => setFormData({...formData, agencia: e.target.value})}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="conta">Conta *</Label>
+              <Input
+                id="conta"
+                placeholder="Número da conta"
+                value={formData.conta}
+                onChange={(e) => setFormData({...formData, conta: e.target.value})}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="cpf">CPF *</Label>
+              <Input
+                id="cpf"
+                placeholder="000.000.000-00"
+                value={formData.cpf}
+                onChange={(e) => setFormData({...formData, cpf: e.target.value})}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="nome">Nome do Beneficiário</Label>
+              <Input
+                id="nome"
+                placeholder="Nome completo"
+                value={formData.nome}
+                onChange={(e) => setFormData({...formData, nome: e.target.value})}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="valor">Valor *</Label>
               <Input
                 id="valor"
                 type="number"
-                step="0.01"
-                min="0"
-                value={formData.valor}
-                onChange={(e) => handleInputChange('valor', e.target.value)}
                 placeholder="0,00"
-                className="pl-10"
-                required
+                value={formData.valor}
+                onChange={(e) => setFormData({...formData, valor: e.target.value})}
               />
             </div>
-          </div>
-
-          <Button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-[#0057FF] hover:bg-[#0047CC] text-white font-medium py-3"
-          >
-            {loading ? 'Enviando...' : 'Enviar Pix'}
-          </Button>
-        </form>
+            
+            <Button 
+              onClick={handleTransfer}
+              className="w-full bg-gradient-to-r from-[#001B3A] to-[#003F5C] hover:from-[#002A4A] hover:to-[#004F6C]"
+            >
+              Transferir
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
