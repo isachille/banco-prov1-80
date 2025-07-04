@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { Toaster } from 'sonner';
@@ -35,6 +34,7 @@ import Transferir from '@/pages/Transferir';
 import Pagar from '@/pages/Pagar';
 import Cofrinho from '@/pages/Cofrinho';
 import Investimentos from '@/pages/Investimentos';
+import GiftCardsPage from '@/pages/GiftCardsPage';
 
 const queryClient = new QueryClient();
 
@@ -94,6 +94,11 @@ function App() {
           <Route path="/investimentos" element={
             <ProtectedRoute>
               <Investimentos />
+            </ProtectedRoute>
+          } />
+          <Route path="/gift-cards" element={
+            <ProtectedRoute>
+              <GiftCardsPage />
             </ProtectedRoute>
           } />
           

@@ -1,141 +1,81 @@
 
-import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Gift, ShoppingCart } from 'lucide-react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Gift, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
-const giftCards = [
-  { id: 1, name: 'Netflix', value: 50, image: '🎬' },
-  { id: 2, name: 'Rappi', value: 100, image: '🍔' },
-  { id: 3, name: 'iFood', value: 75, image: '🍕' },
-  { id: 4, name: 'Spotify', value: 30, image: '🎵' },
-  { id: 5, name: 'Amazon', value: 200, image: '📦' },
-  { id: 6, name: 'Google Play', value: 25, image: '🎮' },
-];
 
 const GiftCardsPage = () => {
   const navigate = useNavigate();
-  const [balance, setBalance] = useState(0);
-  const [loading, setLoading] = useState<number | null>(null);
 
-  useEffect(() => {
-    const fetchBalance = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: walletData } = await supabase
-          .from('wallets')
-          .select('saldo')
-          .eq('user_id', user.id)
-          .single();
+  const giftCards = [
+    { id: 1, name: 'Amazon', value: 50, image: '🛒' },
+    { id: 2, name: 'Netflix', value: 30, image: '🎬' },
+    { id: 3, name: 'Spotify', value: 20, image: '🎵' },
+    { id: 4, name: 'Google Play', value: 25, image: '📱' },
+  ];
 
-        if (walletData) {
-          setBalance(walletData.saldo || 0);
-        }
-      }
-    };
-
-    fetchBalance();
-  }, []);
-
-  const handlePurchase = async (giftCard: typeof giftCards[0]) => {
-    if (balance < giftCard.value) {
-      toast.error('Saldo insuficiente');
-      return;
-    }
-
-    setLoading(giftCard.id);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error('Usuário não autenticado');
-        return;
-      }
-
-      // Gerar código do gift card
-      const codigo = `${giftCard.name.toUpperCase()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-
-      // Atualizar saldo na carteira
-      const newBalance = balance - giftCard.value;
-      const { error: updateError } = await supabase
-        .from('wallets')
-        .update({ saldo: newBalance })
-        .eq('user_id', user.id);
-
-      if (updateError) throw updateError;
-
-      setBalance(newBalance);
-      toast.success(`Gift Card ${giftCard.name} comprado com sucesso! Código: ${codigo}`);
-    } catch (error) {
-      console.error('Erro na compra:', error);
-      toast.error('Erro ao comprar gift card');
-    } finally {
-      setLoading(null);
-    }
-  };
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
+  const handlePurchase = (cardName: string, value: number) => {
+    toast.success(`Gift Card ${cardName} de R$ ${value} comprado com sucesso!`);
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center space-x-4">
-        <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <h1 className="text-2xl font-bold">Gift Cards</h1>
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => navigate('/home')}
+              className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <h1 className="text-2xl font-bold">Gift Cards</h1>
+              <p className="text-purple-100">Presenteie quem você ama</p>
+            </div>
+          </div>
+          <Gift className="h-8 w-8" />
+        </div>
       </div>
 
-      <Card className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-purple-100 text-sm">Saldo Disponível</p>
-              <p className="text-xl font-bold">{formatCurrency(balance)}</p>
-            </div>
-            <Gift className="h-8 w-8 text-purple-100" />
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {giftCards.map((giftCard) => (
-          <Card key={giftCard.id} className="hover:shadow-lg transition-shadow">
-            <CardHeader className="text-center">
-              <div className="text-4xl mb-2">{giftCard.image}</div>
-              <CardTitle className="text-lg">{giftCard.name}</CardTitle>
-            </CardHeader>
-            <CardContent className="text-center space-y-4">
-              <div>
-                <p className="text-2xl font-bold text-green-600">
-                  {formatCurrency(giftCard.value)}
-                </p>
-              </div>
-              <Button
-                className="w-full"
-                onClick={() => handlePurchase(giftCard)}
-                disabled={loading === giftCard.id || balance < giftCard.value}
-              >
-                {loading === giftCard.id ? (
-                  'Comprando...'
-                ) : balance < giftCard.value ? (
-                  'Saldo Insuficiente'
-                ) : (
-                  <>
-                    <ShoppingCart className="h-4 w-4 mr-2" />
+      <div className="container mx-auto p-6 max-w-md">
+        <div className="space-y-4">
+          {giftCards.map((card) => (
+            <Card key={card.id} className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="text-2xl">{card.image}</div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">{card.name}</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">R$ {card.value}</p>
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => handlePurchase(card.name, card.value)}
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                  >
                     Comprar
-                  </>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <Card className="mt-6 bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-none">
+          <CardContent className="p-4 text-center">
+            <Star className="h-8 w-8 mx-auto mb-2" />
+            <h3 className="font-bold mb-1">Gift Cards Especiais</h3>
+            <p className="text-sm text-yellow-100">
+              Ganhe pontos e desccontos especiais em compras de gift cards
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

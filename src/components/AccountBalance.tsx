@@ -8,10 +8,10 @@ export const AccountBalance = () => {
   const [showBalance, setShowBalance] = React.useState(true);
 
   return (
-    <Card className="bg-gradient-to-r from-blue-600 to-cyan-500 border-none text-white">
+    <Card className="bg-gradient-to-r from-[#0047AB] to-[#0056CC] border-none text-white">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span>Conta Corrente</span>
+          <span className="text-lg">Conta Corrente</span>
           <Button
             variant="ghost"
             size="icon"
