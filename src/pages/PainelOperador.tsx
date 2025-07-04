@@ -37,7 +37,7 @@ const PainelOperador = () => {
 
       // Buscar ID do operador baseado no usuário logado
       const { data: operadorData } = await supabase
-        .from('operadores_cadastrados')
+        .from('operadores_cadastrados' as any)
         .select('id')
         .eq('user_id', user.id)
         .single();
@@ -55,25 +55,30 @@ const PainelOperador = () => {
     queryFn: async () => {
       if (!operadorId) return [];
 
-      const { data, error } = await supabase
-        .from('propostas_operadores')
-        .select(`
-          *,
-          propostas_financiamento (
-            codigo_proposta,
-            cliente_nome,
-            cliente_cpf,
-            veiculo,
-            valor_veiculo,
-            valor_parcela,
-            parcelas
-          )
-        `)
-        .eq('operador_id', operadorId)
-        .order('created_at', { ascending: false });
+      try {
+        const { data, error } = await supabase
+          .from('propostas_operadores' as any)
+          .select(`
+            *,
+            propostas_financiamento (
+              codigo_proposta,
+              cliente_nome,
+              cliente_cpf,
+              veiculo,
+              valor_veiculo,
+              valor_parcela,
+              parcelas
+            )
+          `)
+          .eq('operador_id', operadorId)
+          .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      return data as PropostaOperador[];
+        if (error) throw error;
+        return (data || []) as PropostaOperador[];
+      } catch (error) {
+        console.error('Erro ao buscar propostas do operador:', error);
+        return [];
+      }
     },
     enabled: !!operadorId,
     refetchInterval: 30000, // Atualizar a cada 30 segundos
@@ -218,7 +223,7 @@ const PainelOperador = () => {
                         </span>
                       </div>
                       <div className="text-right">
-                        <p className="font-mono text-sm">{item.propostas_financiamento.codigo_proposta}</p>
+                        <p className="font-mono text-sm">{item.propostas_financiamento?.codigo_proposta}</p>
                       </div>
                     </div>
 
@@ -227,9 +232,9 @@ const PainelOperador = () => {
                         <div className="flex items-center space-x-2">
                           <User className="h-4 w-4 text-blue-500" />
                           <div>
-                            <p className="font-medium">{item.propostas_financiamento.cliente_nome}</p>
+                            <p className="font-medium">{item.propostas_financiamento?.cliente_nome}</p>
                             <p className="text-sm text-muted-foreground">
-                              {formatCPF(item.propostas_financiamento.cliente_cpf)}
+                              {formatCPF(item.propostas_financiamento?.cliente_cpf)}
                             </p>
                           </div>
                         </div>
@@ -237,9 +242,9 @@ const PainelOperador = () => {
                         <div className="flex items-center space-x-2">
                           <Car className="h-4 w-4 text-green-500" />
                           <div>
-                            <p className="font-medium">{item.propostas_financiamento.veiculo}</p>
+                            <p className="font-medium">{item.propostas_financiamento?.veiculo}</p>
                             <p className="text-sm text-muted-foreground">
-                              {formatCurrency(item.propostas_financiamento.valor_veiculo)}
+                              {formatCurrency(item.propostas_financiamento?.valor_veiculo)}
                             </p>
                           </div>
                         </div>
@@ -250,7 +255,7 @@ const PainelOperador = () => {
                           <Calendar className="h-4 w-4 text-purple-500" />
                           <div>
                             <p className="font-medium">
-                              {item.propostas_financiamento.parcelas}x de {formatCurrency(item.propostas_financiamento.valor_parcela)}
+                              {item.propostas_financiamento?.parcelas}x de {formatCurrency(item.propostas_financiamento?.valor_parcela)}
                             </p>
                             <p className="text-sm text-muted-foreground">Parcelas mensais</p>
                           </div>

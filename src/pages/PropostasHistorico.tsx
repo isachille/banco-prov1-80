@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Clock, CheckCircle, Eye, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -31,26 +31,17 @@ const PropostasHistorico = () => {
     queryKey: ['propostas_usuario', filtroStatus],
     queryFn: async () => {
       try {
-        // Usar RPC para buscar propostas do usuário
-        const { data, error } = await supabase.rpc('get_user_proposals');
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Usuário não autenticado');
 
-        if (error) {
-          console.error('Erro RPC:', error);
-          // Fallback: buscar diretamente
-          const { data: { user } } = await supabase.auth.getUser();
-          if (!user) throw new Error('Usuário não autenticado');
+        const { data, error } = await supabase
+          .from('propostas_financiamento' as any)
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
 
-          const { data: fallbackData, error: fallbackError } = await supabase
-            .from('propostas_financiamento' as any)
-            .select('*')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false });
-
-          if (fallbackError) throw fallbackError;
-          return fallbackData || [];
-        }
-
-        return data || [];
+        if (error) throw error;
+        return (data || []) as Proposta[];
       } catch (error) {
         console.error('Erro ao buscar propostas:', error);
         toast.error('Erro ao carregar propostas');

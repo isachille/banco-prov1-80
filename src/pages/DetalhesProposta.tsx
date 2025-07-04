@@ -42,59 +42,53 @@ const DetalhesProposta = () => {
     queryFn: async () => {
       if (!id) throw new Error('ID da proposta não fornecido');
 
-      // Usar RPC para buscar os dados da proposta, já que a tabela ainda não está nos tipos
-      const { data, error } = await supabase.rpc('get_proposta_detalhes', {
-        proposta_id: id
-      });
-
-      if (error) {
-        console.error('Erro RPC:', error);
-        // Fallback: tentar buscar diretamente (pode não funcionar por enquanto)
-        const { data: fallbackData, error: fallbackError } = await supabase
+      try {
+        // Tentar buscar diretamente da tabela usando type assertion
+        const { data, error } = await supabase
           .from('propostas_financiamento' as any)
           .select('*')
           .eq('id', id)
           .single();
 
-        if (fallbackError) throw fallbackError;
-        data[0] = fallbackData;
+        if (error) throw error;
+
+        if (!data) {
+          throw new Error('Proposta não encontrada');
+        }
+
+        // Transformar dados para o formato esperado pelo ProposalPreview
+        const proposalData: PropostaDetalhada = {
+          id: data.id,
+          codigo: data.codigo_proposta,
+          marca: data.marca,
+          modelo: data.modelo,
+          ano: data.ano_veiculo,
+          valorVeiculo: data.valor_veiculo,
+          valorEntrada: data.valor_entrada,
+          parcelas: data.parcelas,
+          valorParcela: data.valor_parcela,
+          valorTotal: data.valor_total,
+          taxaJuros: data.taxa_juros,
+          operador: data.operador_nome ? {
+            nome: data.operador_nome,
+            telefone: data.operador_telefone
+          } : undefined
+        };
+
+        return {
+          proposta: proposalData,
+          kycData: {
+            nome_completo: data.cliente_nome,
+            cpf: data.cliente_cpf,
+            data_nascimento: data.cliente_nascimento,
+            nome_mae: data.cliente_mae,
+            profissao: data.cliente_profissao
+          } as KYCData
+        };
+      } catch (error) {
+        console.error('Erro ao buscar proposta:', error);
+        throw error;
       }
-
-      if (!data || data.length === 0) {
-        throw new Error('Proposta não encontrada');
-      }
-
-      const propostaData = data[0];
-
-      // Transformar dados para o formato esperado pelo ProposalPreview
-      const proposalData: PropostaDetalhada = {
-        id: propostaData.id,
-        codigo: propostaData.codigo_proposta,
-        marca: propostaData.marca,
-        modelo: propostaData.modelo,
-        ano: propostaData.ano_veiculo,
-        valorVeiculo: propostaData.valor_veiculo,
-        valorEntrada: propostaData.valor_entrada,
-        parcelas: propostaData.parcelas,
-        valorParcela: propostaData.valor_parcela,
-        valorTotal: propostaData.valor_total,
-        taxaJuros: propostaData.taxa_juros,
-        operador: propostaData.operador_nome ? {
-          nome: propostaData.operador_nome,
-          telefone: propostaData.operador_telefone
-        } : undefined
-      };
-
-      return {
-        proposta: proposalData,
-        kycData: {
-          nome_completo: propostaData.cliente_nome,
-          cpf: propostaData.cliente_cpf,
-          data_nascimento: propostaData.cliente_nascimento,
-          nome_mae: propostaData.cliente_mae,
-          profissao: propostaData.cliente_profissao
-        } as KYCData
-      };
     },
     enabled: !!id
   });

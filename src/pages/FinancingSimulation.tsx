@@ -116,7 +116,7 @@ const FinancingSimulation = () => {
 
       // Salvar proposta
       const { error } = await supabase
-        .from('propostas_financiamento')
+        .from('propostas_financiamento' as any)
         .insert({
           user_id: simulationType === 'proprio' ? user.id : user.id, // Para terceiros, ainda vincula ao gerente
           codigo_proposta: codigoProposta,
