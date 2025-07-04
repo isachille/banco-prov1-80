@@ -1,9 +1,6 @@
 
 import React from 'react';
-import { ArrowLeft, Download, Share, Car, User, Phone, Mail, MapPin } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { ProposalActions } from '@/components/proposal/ProposalActions';
 
 interface ProposalPreviewProps {
   proposal: {
@@ -37,186 +34,167 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   kycData,
   onBack
 }) => {
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
-  };
-
-  const formatCPF = (cpf: string) => {
-    return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-  };
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return '';
-    return new Date(dateString).toLocaleDateString('pt-BR');
-  };
-
-  const formatPhone = (phone: string) => {
-    return phone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-  };
-
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-[#001B3A] to-[#003F5C] text-white p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={onBack}
-              className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div>
-              <h1 className="text-2xl font-bold">Proposta de Financiamento</h1>
-              <p className="text-blue-100">Código: {proposal.codigo}</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Button variant="outline" size="sm" className="text-white border-white hover:bg-white hover:text-[#001B3A]">
-              <Download className="h-4 w-4 mr-2" />
-              Baixar PDF
-            </Button>
-            <Button variant="outline" size="sm" className="text-white border-white hover:bg-white hover:text-[#001B3A]">
-              <Share className="h-4 w-4 mr-2" />
-              Compartilhar
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      <div className="container mx-auto p-6 max-w-4xl">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Dados do Cliente */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <User className="mr-2 h-5 w-5" />
-                Dados do Cliente
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Nome Completo</p>
-                <p className="font-medium">{kycData.nome_completo}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">CPF</p>
-                <p className="font-medium">{formatCPF(kycData.cpf)}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Data de Nascimento</p>
-                <p className="font-medium">{formatDate(kycData.data_nascimento)}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Nome da Mãe</p>
-                <p className="font-medium">{kycData.nome_mae}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Profissão</p>
-                <p className="font-medium">{kycData.profissao}</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Dados do Veículo */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Car className="mr-2 h-5 w-5" />
-                Dados do Veículo
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Veículo</p>
-                <p className="font-medium">{proposal.marca} {proposal.modelo}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Ano</p>
-                <p className="font-medium">{proposal.ano}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Valor do Veículo</p>
-                <p className="font-medium text-lg text-green-600">{formatCurrency(proposal.valorVeiculo)}</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Detalhes do Financiamento */}
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>Detalhes do Financiamento</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <p className="text-sm text-gray-600">Valor de Entrada</p>
-                <p className="text-xl font-bold text-blue-600">{formatCurrency(proposal.valorEntrada)}</p>
-              </div>
-              <div className="text-center p-4 bg-green-50 rounded-lg">
-                <p className="text-sm text-gray-600">Parcelas</p>
-                <p className="text-xl font-bold text-green-600">{proposal.parcelas}x</p>
-              </div>
-              <div className="text-center p-4 bg-purple-50 rounded-lg">
-                <p className="text-sm text-gray-600">Valor da Parcela</p>
-                <p className="text-xl font-bold text-purple-600">{formatCurrency(proposal.valorParcela)}</p>
-              </div>
-              <div className="text-center p-4 bg-orange-50 rounded-lg">
-                <p className="text-sm text-gray-600">Valor Total</p>
-                <p className="text-xl font-bold text-orange-600">{formatCurrency(proposal.valorTotal)}</p>
-              </div>
-            </div>
-
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Taxa de Juros:</span>
-                <span className="font-medium">{proposal.taxaJuros.toFixed(2)}% a.m.</span>
-              </div>
-              <div className="flex justify-between items-center mt-2">
-                <span className="text-sm text-gray-600">Valor Financiado:</span>
-                <span className="font-medium">{formatCurrency(proposal.valorVeiculo - proposal.valorEntrada)}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Operador Responsável */}
-        {proposal.operador && (
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Phone className="mr-2 h-5 w-5" />
-                Operador Responsável
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
+      <ProposalActions 
+        proposal={proposal}
+        kycData={kycData}
+        onBack={onBack}
+      />
+      
+      <div className="container mx-auto p-6 max-w-4xl pt-20">
+        {/* Proposta Preview Content */}
+        <div className="bg-white rounded-lg shadow-lg p-8">
+          {/* Header com Logo */}
+          <div className="text-center mb-8 border-b-2 border-blue-600 pb-6">
+            <div className="bg-gradient-to-r from-blue-800 to-blue-600 text-white p-6 rounded-lg mb-4">
+              <div className="flex items-center justify-center gap-4">
+                <img 
+                  src="/lovable-uploads/4712549c-a705-4aad-8498-4702dc3cdd8f.png" 
+                  alt="Pro Motors Logo" 
+                  className="w-16 h-16 bg-white rounded-lg p-2"
+                />
                 <div>
-                  <p className="font-medium">{proposal.operador.nome}</p>
-                  <p className="text-sm text-muted-foreground">{formatPhone(proposal.operador.telefone)}</p>
+                  <h1 className="text-3xl font-bold">PRO MOTORS</h1>
+                  <p className="text-blue-100">Financiamento Veicular</p>
                 </div>
-                <Badge variant="secondary">Atribuído</Badge>
               </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Status */}
-        <Card className="mt-6">
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <Badge className="mb-4 bg-yellow-100 text-yellow-800">Proposta Pendente</Badge>
-              <p className="text-sm text-muted-foreground">
-                Sua proposta foi gerada com sucesso e está sendo analisada pela nossa equipe.
-                Em breve você será contatado por um de nossos operadores.
+            </div>
+            
+            {/* Open Finance */}
+            <div className="bg-blue-50 p-4 rounded-lg mb-4 border border-blue-200">
+              <h4 className="text-blue-800 font-bold text-sm mb-2">🔒 ANÁLISE VIA OPEN FINANCE</h4>
+              <p className="text-blue-700 text-xs">
+                Nosso sistema utiliza tecnologia Open Finance para avaliar seu perfil de crédito em tempo real junto aos principais bancos do país.
               </p>
             </div>
-          </CardContent>
-        </Card>
+            
+            {/* Logos dos Bancos */}
+            <div className="flex justify-center items-center gap-3 mb-4 flex-wrap">
+              <div className="w-16 h-10 bg-orange-500 text-white flex items-center justify-center rounded text-xs font-bold">ITAÚ</div>
+              <div className="w-16 h-10 bg-yellow-400 text-black flex items-center justify-center rounded text-xs font-bold">BB</div>
+              <div className="w-16 h-10 bg-red-600 text-white flex items-center justify-center rounded text-xs font-bold">SANTANDER</div>
+              <div className="w-16 h-10 bg-green-600 text-white flex items-center justify-center rounded text-xs font-bold">SICREDI</div>
+              <div className="w-16 h-10 bg-blue-600 text-white flex items-center justify-center rounded text-xs font-bold">SAFRA</div>
+              <div className="w-16 h-10 bg-purple-600 text-white flex items-center justify-center rounded text-xs font-bold">NUBANK</div>
+            </div>
+          </div>
+
+          {/* Status da Proposta */}
+          <div className="text-center mb-6">
+            <div className="bg-yellow-500 text-white px-8 py-4 rounded-full inline-block text-xl font-bold mb-3">
+              PRÉ-APROVADO
+            </div>
+            <p className="text-gray-600">Código da Proposta: <strong className="text-blue-600">{proposal.codigo}</strong></p>
+          </div>
+
+          {/* Dados do Cliente */}
+          <div className="mb-6">
+            <h3 className="text-blue-600 text-lg font-bold border-b border-gray-200 pb-2 mb-4">Dados do Cliente</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div><strong>Nome:</strong> {kycData.nome_completo}</div>
+              <div><strong>CPF:</strong> {kycData.cpf}</div>
+              <div><strong>Nascimento:</strong> {new Date(kycData.data_nascimento).toLocaleDateString('pt-BR')}</div>
+              <div><strong>Nome da Mãe:</strong> {kycData.nome_mae}</div>
+              <div className="md:col-span-2"><strong>Profissão:</strong> {kycData.profissao}</div>
+            </div>
+          </div>
+
+          {/* Veículo */}
+          <div className="mb-6">
+            <h3 className="text-blue-600 text-lg font-bold border-b border-gray-200 pb-2 mb-4">Veículo Selecionado</h3>
+            <div className="bg-gray-50 p-6 rounded-lg">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                <div>
+                  <h4 className="text-xl font-bold text-blue-600 mb-2">{proposal.marca} {proposal.modelo}</h4>
+                  <p className="text-gray-600">Ano: <strong>{proposal.ano}</strong></p>
+                  {proposal.ano === new Date().getFullYear() && (
+                    <p className="text-green-600 text-sm font-bold mt-1">🆕 Veículo 0 KM</p>
+                  )}
+                </div>
+                <div className="text-right">
+                  <div className="text-3xl font-bold text-blue-600">
+                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.valorVeiculo)}
+                  </div>
+                  <p className="text-gray-500 text-sm">Valor de mercado</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Financiamento */}
+          <div className="mb-6">
+            <h3 className="text-blue-600 text-lg font-bold border-b border-gray-200 pb-2 mb-4">Simulação de Financiamento</h3>
+            <div className="bg-gray-50 p-6 rounded-lg">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div className="text-center bg-white p-4 rounded-lg">
+                  <div className="text-sm text-gray-600 mb-2 font-bold">ENTRADA</div>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.valorEntrada)}
+                  </div>
+                </div>
+                <div className="text-center bg-white p-4 rounded-lg">
+                  <div className="text-sm text-gray-600 mb-2 font-bold">PARCELAS</div>
+                  <div className="text-2xl font-bold text-blue-600">{proposal.parcelas}x</div>
+                  <div className="text-gray-600 mt-1">
+                    de {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.valorParcela)}
+                  </div>
+                </div>
+              </div>
+              <div className="text-center bg-gradient-to-r from-blue-800 to-blue-600 text-white p-6 rounded-lg">
+                <div className="text-sm mb-2">VALOR TOTAL DO FINANCIAMENTO</div>
+                <div className="text-3xl font-bold">
+                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.valorTotal)}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Operador */}
+          {proposal.operador && (
+            <div className="mb-6">
+              <h3 className="text-blue-600 text-lg font-bold border-b border-gray-200 pb-2 mb-4">Operador Responsável</h3>
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <p className="font-bold text-lg">{proposal.operador.nome}</p>
+                <p className="text-gray-600">{proposal.operador.telefone}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Footer */}
+          <div className="mt-8 text-center border-t border-gray-200 pt-6">
+            <p className="text-sm text-gray-600 mb-4">
+              Proposta pré-aprovada. Entre em contato para finalizar o processo.
+            </p>
+            <div className="bg-blue-600 text-white p-3 rounded inline-block mb-4">
+              <strong>{proposal.operador?.telefone || '(61) 98483-3965'}</strong>
+            </div>
+            
+            {/* Informações da Empresa */}
+            <div className="bg-gray-50 p-4 rounded-lg text-left">
+              <h4 className="text-blue-600 font-bold text-center mb-3">PRO MOTORS LTDA</h4>
+              <div className="text-xs text-gray-600 grid grid-cols-1 md:grid-cols-2 gap-2">
+                <p><strong>CNPJ:</strong> 12.345.678/0001-90</p>
+                <p><strong>Telefone:</strong> (61) 3333-4444</p>
+                <p className="md:col-span-2"><strong>Endereço:</strong> SIA Trecho 1, Lote 123 - Guará, Brasília - DF, CEP: 71200-000</p>
+                <p><strong>E-mail:</strong> contato@promotors.com.br</p>
+              </div>
+            </div>
+
+            {/* LGPD */}
+            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-3 mt-4 rounded">
+              <p className="text-xs text-yellow-800 text-left">
+                <strong>LGPD - Lei Geral de Proteção de Dados:</strong> Seus dados pessoais são tratados em conformidade com a LGPD (Lei 13.709/2018). 
+                Utilizamos suas informações exclusivamente para processar sua solicitação de financiamento. Para exercer seus direitos ou obter mais informações 
+                sobre o tratamento de seus dados, entre em contato conosco através dos canais oficiais.
+              </p>
+            </div>
+            
+            <p className="text-xs text-gray-500 mt-4">
+              Documento gerado em {new Date().toLocaleDateString('pt-BR')} - Pro Motors Financiamentos
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

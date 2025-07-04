@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calculator, Car, User, Building2 } from 'lucide-react';
+import { ArrowLeft, Calculator, Car, User, Building2, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserStatus } from '@/hooks/useUserStatus';
 import { ProposalPreview } from '@/components/ProposalPreview';
+import { vehicleCategories } from '@/data/vehicleCategories';
 
 interface UserData {
   id: string;
@@ -28,7 +29,30 @@ interface VehicleData {
   modelo: string;
   ano: number;
   valor: number;
+  categoria: string;
 }
+
+interface Operador {
+  id: string;
+  nome: string;
+  telefone: string;
+  especialidade: string;
+}
+
+const operadores: Operador[] = [
+  {
+    id: '1',
+    nome: 'Samuel Costa',
+    telefone: '(61) 98765-4321',
+    especialidade: 'Financiamento de Veículos Novos'
+  },
+  {
+    id: '2',
+    nome: 'Maria Eduarda Silva',
+    telefone: '(61) 99123-4567',
+    especialidade: 'Financiamento de Veículos Usados'
+  }
+];
 
 interface SimulationData {
   clienteNome: string;
@@ -39,6 +63,7 @@ interface SimulationData {
   veiculo: VehicleData;
   valorEntrada: number;
   parcelas: number;
+  operadorId: string;
 }
 
 const FinancingSimulation = () => {
@@ -47,6 +72,9 @@ const FinancingSimulation = () => {
   const [simulationType, setSimulationType] = useState<'proprio' | 'terceiro'>('proprio');
   const [showPreview, setShowPreview] = useState(false);
   const [proposalData, setProposalData] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedBrand, setSelectedBrand] = useState('');
+  const [availableModels, setAvailableModels] = useState<any[]>([]);
   const [formData, setFormData] = useState<SimulationData>({
     clienteNome: '',
     clienteCpf: '',
@@ -57,10 +85,12 @@ const FinancingSimulation = () => {
       marca: '',
       modelo: '',
       ano: new Date().getFullYear(),
-      valor: 0
+      valor: 0,
+      categoria: ''
     },
     valorEntrada: 0,
-    parcelas: 60
+    parcelas: 60,
+    operadorId: ''
   });
   const [loading, setLoading] = useState(false);
   const [canSimulateForOthers, setCanSimulateForOthers] = useState(false);
@@ -96,9 +126,54 @@ const FinancingSimulation = () => {
     checkPermissions();
   }, [simulationType]);
 
+  useEffect(() => {
+    if (selectedCategory && selectedBrand) {
+      const category = vehicleCategories.find(cat => cat.name === selectedCategory);
+      if (category) {
+        const brand = category.brands.find(b => b.name === selectedBrand);
+        if (brand) {
+          setAvailableModels(brand.models);
+        }
+      }
+    }
+  }, [selectedCategory, selectedBrand]);
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    setSelectedBrand('');
+    setAvailableModels([]);
+    setFormData(prev => ({
+      ...prev,
+      veiculo: { ...prev.veiculo, categoria: category, marca: '', modelo: '', valor: 0 }
+    }));
+  };
+
+  const handleBrandChange = (brand: string) => {
+    setSelectedBrand(brand);
+    setFormData(prev => ({
+      ...prev,
+      veiculo: { ...prev.veiculo, marca: brand, modelo: '', valor: 0 }
+    }));
+  };
+
+  const handleModelChange = (modelo: string) => {
+    const selectedModel = availableModels.find(m => m.name === modelo);
+    if (selectedModel) {
+      setFormData(prev => ({
+        ...prev,
+        veiculo: {
+          ...prev.veiculo,
+          modelo: modelo,
+          valor: selectedModel.price,
+          ano: selectedModel.year
+        }
+      }));
+    }
+  };
+
   const handleSimulation = async () => {
-    if (!formData.clienteNome || !formData.clienteCpf || !formData.veiculo.marca || !formData.veiculo.modelo) {
-      toast.error('Preencha todos os campos obrigatórios');
+    if (!formData.clienteNome || !formData.clienteCpf || !formData.veiculo.marca || !formData.veiculo.modelo || !formData.operadorId) {
+      toast.error('Preencha todos os campos obrigatórios, incluindo o operador');
       return;
     }
 
@@ -113,10 +188,40 @@ const FinancingSimulation = () => {
       const valorTotal = valorParcela * formData.parcelas;
 
       const codigoProposta = `PM-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+      const operadorSelecionado = operadores.find(op => op.id === formData.operadorId);
 
-      // Criar dados da proposta para o preview
-      const proposal = {
+      // Salvar proposta no localStorage para simular base de dados
+      const propostas = JSON.parse(localStorage.getItem('propostas_usuario') || '[]');
+      const novaProposta = {
         id: Math.random().toString(36).substring(2, 15),
+        codigo: codigoProposta,
+        usuario_id: user.id,
+        cliente_nome: formData.clienteNome,
+        cliente_cpf: formData.clienteCpf,
+        cliente_nascimento: formData.clienteNascimento,
+        cliente_mae: formData.clienteMae,
+        cliente_profissao: formData.clienteProfissao,
+        veiculo: `${formData.veiculo.marca} ${formData.veiculo.modelo}`,
+        marca: formData.veiculo.marca,
+        modelo: formData.veiculo.modelo,
+        ano: formData.veiculo.ano,
+        categoria: formData.veiculo.categoria,
+        valor_veiculo: formData.veiculo.valor,
+        valor_entrada: formData.valorEntrada,
+        parcelas: formData.parcelas,
+        valor_parcela: Math.round(valorParcela * 100) / 100,
+        valor_total: Math.round(valorTotal * 100) / 100,
+        taxa_juros: taxaJuros * 100,
+        operador: operadorSelecionado,
+        status: 'pendente',
+        created_at: new Date().toISOString()
+      };
+
+      propostas.push(novaProposta);
+      localStorage.setItem('propostas_usuario', JSON.stringify(propostas));
+
+      const proposal = {
+        id: novaProposta.id,
         codigo: codigoProposta,
         marca: formData.veiculo.marca,
         modelo: formData.veiculo.modelo,
@@ -127,10 +232,7 @@ const FinancingSimulation = () => {
         valorParcela: Math.round(valorParcela * 100) / 100,
         valorTotal: Math.round(valorTotal * 100) / 100,
         taxaJuros: taxaJuros * 100,
-        operador: {
-          nome: 'João Silva',
-          telefone: '(11) 99999-9999'
-        }
+        operador: operadorSelecionado
       };
 
       const kycData = {
@@ -144,7 +246,7 @@ const FinancingSimulation = () => {
       setProposalData({ proposal, kycData });
       setShowPreview(true);
 
-      toast.success('Proposta gerada com sucesso!');
+      toast.success('Proposta gerada e salva com sucesso!');
     } catch (error) {
       console.error('Erro ao criar proposta:', error);
       toast.error('Erro ao criar proposta de financiamento');
@@ -187,7 +289,7 @@ const FinancingSimulation = () => {
             </button>
             <div>
               <h1 className="text-2xl font-bold">Simulação de Financiamento</h1>
-              <p className="text-blue-100">Simule seu financiamento veicular</p>
+              <p className="text-blue-100">Simule seu financiamento veicular com operador especializado</p>
             </div>
           </div>
           <img 
@@ -198,7 +300,7 @@ const FinancingSimulation = () => {
         </div>
       </div>
 
-      <div className="container mx-auto p-6 max-w-4xl">
+      <div className="container mx-auto p-6 max-w-6xl">
         {canSimulateForOthers && (
           <Card className="mb-6">
             <CardHeader>
@@ -228,7 +330,7 @@ const FinancingSimulation = () => {
           </Card>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Dados do Cliente */}
           <Card>
             <CardHeader>
@@ -295,99 +397,145 @@ const FinancingSimulation = () => {
             </CardContent>
           </Card>
 
-          {/* Dados do Veículo */}
-          <Card>
+          {/* Seleção de Veículo */}
+          <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Car className="mr-2 h-5 w-5" />
-                Dados do Veículo
+                Seleção de Veículo
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="marca">Marca *</Label>
-                <Input
-                  id="marca"
-                  value={formData.veiculo.marca}
-                  onChange={(e) => setFormData(prev => ({ 
-                    ...prev, 
-                    veiculo: { ...prev.veiculo, marca: e.target.value }
-                  }))}
-                  placeholder="Ex: Toyota, Honda, Ford"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="categoria">Categoria *</Label>
+                  <Select value={selectedCategory} onValueChange={handleCategoryChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {vehicleCategories.map((category) => (
+                        <SelectItem key={category.name} value={category.name}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="marca">Marca *</Label>
+                  <Select value={selectedBrand} onValueChange={handleBrandChange} disabled={!selectedCategory}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a marca" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {selectedCategory && vehicleCategories
+                        .find(cat => cat.name === selectedCategory)?.brands
+                        .map((brand) => (
+                          <SelectItem key={brand.name} value={brand.name}>
+                            {brand.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="modelo">Modelo *</Label>
+                  <Select value={formData.veiculo.modelo} onValueChange={handleModelChange} disabled={!selectedBrand}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o modelo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableModels.map((model) => (
+                        <SelectItem key={model.name} value={model.name}>
+                          {model.name} - {model.year}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
-              <div>
-                <Label htmlFor="modelo">Modelo *</Label>
-                <Input
-                  id="modelo"
-                  value={formData.veiculo.modelo}
-                  onChange={(e) => setFormData(prev => ({ 
-                    ...prev, 
-                    veiculo: { ...prev.veiculo, modelo: e.target.value }
-                  }))}
-                  placeholder="Ex: Corolla, Civic, Focus"
-                />
-              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="valor">Valor do Veículo</Label>
+                  <Input
+                    id="valor"
+                    type="text"
+                    value={formatCurrency(formData.veiculo.valor)}
+                    disabled
+                    className="bg-gray-100"
+                  />
+                </div>
 
-              <div>
-                <Label htmlFor="ano">Ano</Label>
-                <Input
-                  id="ano"
-                  type="number"
-                  value={formData.veiculo.ano}
-                  onChange={(e) => setFormData(prev => ({ 
-                    ...prev, 
-                    veiculo: { ...prev.veiculo, ano: Number(e.target.value) }
-                  }))}
-                  min="1990"
-                  max={new Date().getFullYear() + 1}
-                />
-              </div>
+                <div>
+                  <Label htmlFor="entrada">Valor de Entrada</Label>
+                  <Input
+                    id="entrada"
+                    type="number"
+                    value={formData.valorEntrada}
+                    onChange={(e) => setFormData(prev => ({ ...prev, valorEntrada: Number(e.target.value) }))}
+                    placeholder="0"
+                  />
+                </div>
 
-              <div>
-                <Label htmlFor="valor">Valor do Veículo *</Label>
-                <Input
-                  id="valor"
-                  type="number"
-                  value={formData.veiculo.valor}
-                  onChange={(e) => setFormData(prev => ({ 
-                    ...prev, 
-                    veiculo: { ...prev.veiculo, valor: Number(e.target.value) }
-                  }))}
-                  placeholder="0"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="entrada">Valor de Entrada</Label>
-                <Input
-                  id="entrada"
-                  type="number"
-                  value={formData.valorEntrada}
-                  onChange={(e) => setFormData(prev => ({ ...prev, valorEntrada: Number(e.target.value) }))}
-                  placeholder="0"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="parcelas">Número de Parcelas</Label>
-                <Select value={String(formData.parcelas)} onValueChange={(value) => setFormData(prev => ({ ...prev, parcelas: Number(value) }))}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="24">24x</SelectItem>
-                    <SelectItem value="36">36x</SelectItem>
-                    <SelectItem value="48">48x</SelectItem>
-                    <SelectItem value="60">60x</SelectItem>
-                    <SelectItem value="72">72x</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div>
+                  <Label htmlFor="parcelas">Número de Parcelas</Label>
+                  <Select value={String(formData.parcelas)} onValueChange={(value) => setFormData(prev => ({ ...prev, parcelas: Number(value) }))}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="24">24x</SelectItem>
+                      <SelectItem value="36">36x</SelectItem>
+                      <SelectItem value="48">48x</SelectItem>
+                      <SelectItem value="60">60x</SelectItem>
+                      <SelectItem value="72">72x</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
+
+        {/* Seleção de Operador */}
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Users className="mr-2 h-5 w-5" />
+              Operador Responsável
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {operadores.map((operador) => (
+                <div
+                  key={operador.id}
+                  className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                    formData.operadorId === operador.id
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                  onClick={() => setFormData(prev => ({ ...prev, operadorId: operador.id }))}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                      <User className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">{operador.nome}</h3>
+                      <p className="text-sm text-gray-600">{operador.telefone}</p>
+                      <p className="text-xs text-gray-500">{operador.especialidade}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
         {formData.veiculo.valor > 0 && (
           <Card className="mt-6">

@@ -1,11 +1,11 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { useQuery } from '@tanstack/react-query';
 import { ProposalPreview } from '@/components/ProposalPreview';
+import { toast } from 'sonner';
 
 interface PropostaDetalhada {
   id: string;
@@ -36,75 +36,77 @@ interface KYCData {
 const DetalhesProposta = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [proposta, setProposta] = useState<{ proposta: PropostaDetalhada; kycData: KYCData } | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const { data: proposta, isLoading, error } = useQuery({
-    queryKey: ['proposta_detalhes', id],
-    queryFn: async () => {
-      if (!id) throw new Error('ID da proposta não fornecido');
+  useEffect(() => {
+    loadProposta();
+  }, [id]);
 
-      try {
-        // Usar consulta direta simulando dados da proposta
-        // Como não temos a tabela real, vamos simular os dados baseado no ID
-        const mockPropostaData = {
-          id: id,
-          codigo_proposta: `PROP-${id.slice(0, 8).toUpperCase()}`,
-          marca: 'Toyota',
-          modelo: 'Corolla',
-          ano_veiculo: 2023,
-          valor_veiculo: 85000,
-          valor_entrada: 15000,
-          parcelas: 48,
-          valor_parcela: 1850,
-          valor_total: 103800,
-          taxa_juros: 1.2,
-          operador_nome: 'João Silva',
-          operador_telefone: '(11) 99999-9999',
-          cliente_nome: 'Maria Santos',
-          cliente_cpf: '123.456.789-00',
-          cliente_nascimento: '1985-06-15',
-          cliente_mae: 'Ana Santos',
-          cliente_profissao: 'Enfermeira'
-        };
+  const loadProposta = async () => {
+    if (!id) {
+      toast.error('ID da proposta não fornecido');
+      navigate('/propostas');
+      return;
+    }
 
-        const proposalData: PropostaDetalhada = {
-          id: mockPropostaData.id,
-          codigo: mockPropostaData.codigo_proposta,
-          marca: mockPropostaData.marca,
-          modelo: mockPropostaData.modelo,
-          ano: mockPropostaData.ano_veiculo,
-          valorVeiculo: mockPropostaData.valor_veiculo,
-          valorEntrada: mockPropostaData.valor_entrada,
-          parcelas: mockPropostaData.parcelas,
-          valorParcela: mockPropostaData.valor_parcela,
-          valorTotal: mockPropostaData.valor_total,
-          taxaJuros: mockPropostaData.taxa_juros,
-          operador: {
-            nome: mockPropostaData.operador_nome,
-            telefone: mockPropostaData.operador_telefone
-          }
-        };
-
-        const kycData: KYCData = {
-          nome_completo: mockPropostaData.cliente_nome,
-          cpf: mockPropostaData.cliente_cpf,
-          data_nascimento: mockPropostaData.cliente_nascimento,
-          nome_mae: mockPropostaData.cliente_mae,
-          profissao: mockPropostaData.cliente_profissao
-        };
-
-        return {
-          proposta: proposalData,
-          kycData: kycData
-        };
-      } catch (error) {
-        console.error('Erro ao buscar proposta:', error);
-        throw error;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('Usuário não autenticado');
+        navigate('/login');
+        return;
       }
-    },
-    enabled: !!id
-  });
 
-  if (isLoading) {
+      // Carregar proposta do localStorage
+      const propostasStorage = localStorage.getItem('propostas_usuario');
+      if (propostasStorage) {
+        const propostas = JSON.parse(propostasStorage);
+        const propostaEncontrada = propostas.find((p: any) => p.id === id && p.usuario_id === user.id);
+        
+        if (propostaEncontrada) {
+          const proposalData: PropostaDetalhada = {
+            id: propostaEncontrada.id,
+            codigo: propostaEncontrada.codigo,
+            marca: propostaEncontrada.marca,
+            modelo: propostaEncontrada.modelo,
+            ano: propostaEncontrada.ano,
+            valorVeiculo: propostaEncontrada.valor_veiculo,
+            valorEntrada: propostaEncontrada.valor_entrada,
+            parcelas: propostaEncontrada.parcelas,
+            valorParcela: propostaEncontrada.valor_parcela,
+            valorTotal: propostaEncontrada.valor_total,
+            taxaJuros: propostaEncontrada.taxa_juros,
+            operador: propostaEncontrada.operador
+          };
+
+          const kycData: KYCData = {
+            nome_completo: propostaEncontrada.cliente_nome,
+            cpf: propostaEncontrada.cliente_cpf,
+            data_nascimento: propostaEncontrada.cliente_nascimento,
+            nome_mae: propostaEncontrada.cliente_mae,
+            profissao: propostaEncontrada.cliente_profissao
+          };
+
+          setProposta({ proposta: proposalData, kycData });
+        } else {
+          toast.error('Proposta não encontrada');
+          navigate('/propostas');
+        }
+      } else {
+        toast.error('Nenhuma proposta encontrada');
+        navigate('/propostas');
+      }
+    } catch (error) {
+      console.error('Erro ao buscar proposta:', error);
+      toast.error('Erro ao carregar proposta');
+      navigate('/propostas');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#0057FF]"></div>
@@ -112,7 +114,7 @@ const DetalhesProposta = () => {
     );
   }
 
-  if (error || !proposta) {
+  if (!proposta) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

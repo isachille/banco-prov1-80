@@ -57,8 +57,17 @@ const createPDFContent = (data: PDFData): string => {
       <!-- Header -->
       <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #1e40af; padding-bottom: 20px;">
         <div style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 25px; border-radius: 10px; margin-bottom: 20px;">
-          <h1 style="margin: 0; font-size: 38px; font-weight: bold;">PRO MOTORS</h1>
-          <p style="margin: 8px 0 0 0; font-size: 18px; opacity: 0.95;">Financiamento Veicular</p>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 20px;">
+            <img 
+              src="/lovable-uploads/4712549c-a705-4aad-8498-4702dc3cdd8f.png" 
+              alt="Pro Motors Logo" 
+              style="width: 80px; height: 80px; background: white; border-radius: 8px; padding: 8px;"
+            />
+            <div>
+              <h1 style="margin: 0; font-size: 38px; font-weight: bold;">PRO MOTORS</h1>
+              <p style="margin: 8px 0 0 0; font-size: 18px; opacity: 0.95;">Financiamento Veicular</p>
+            </div>
+          </div>
         </div>
         
         <!-- Open Finance -->
@@ -154,6 +163,26 @@ const createPDFContent = (data: PDFData): string => {
         <p style="margin: 0; font-size: 14px; color: #666;">${getStatusMessage()}</p>
         <div style="margin-top: 15px; background-color: #1e40af; color: white; padding: 10px; border-radius: 5px; display: inline-block;">
           <strong>${data.operador?.telefone || '(61) 98483-3965'}</strong>
+        </div>
+        
+        <!-- Informações da Empresa -->
+        <div style="margin-top: 20px; background-color: #f8fafc; padding: 15px; border-radius: 8px; text-align: left;">
+          <h4 style="margin: 0 0 10px 0; color: #1e40af; text-align: center;">PRO MOTORS LTDA</h4>
+          <div style="font-size: 12px; color: #666; line-height: 1.4;">
+            <p style="margin: 5px 0;"><strong>CNPJ:</strong> 12.345.678/0001-90</p>
+            <p style="margin: 5px 0;"><strong>Endereço:</strong> SIA Trecho 1, Lote 123 - Guará, Brasília - DF, CEP: 71200-000</p>
+            <p style="margin: 5px 0;"><strong>Telefone:</strong> (61) 3333-4444</p>
+            <p style="margin: 5px 0;"><strong>E-mail:</strong> contato@promotors.com.br</p>
+          </div>
+        </div>
+
+        <!-- LGPD -->
+        <div style="margin-top: 15px; background-color: #fef3c7; padding: 10px; border-radius: 5px; border-left: 4px solid #f59e0b;">
+          <p style="margin: 0; font-size: 11px; color: #92400e; text-align: left;">
+            <strong>LGPD - Lei Geral de Proteção de Dados:</strong> Seus dados pessoais são tratados em conformidade com a LGPD (Lei 13.709/2018). 
+            Utilizamos suas informações exclusivamente para processar sua solicitação de financiamento. Para exercer seus direitos ou obter mais informações 
+            sobre o tratamento de seus dados, entre em contato conosco através dos canais oficiais.
+          </p>
         </div>
         
         <p style="margin: 15px 0 0 0; font-size: 12px; color: #999;">

@@ -1,17 +1,18 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Clock, CheckCircle, Eye, Calendar } from 'lucide-react';
+import { ArrowLeft, Clock, CheckCircle, Eye, Calendar, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
-import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 interface Proposta {
   id: string;
-  codigo_proposta: string;
+  codigo: string;
+  usuario_id: string;
   cliente_nome: string;
   veiculo: string;
   valor_veiculo: number;
@@ -19,57 +20,44 @@ interface Proposta {
   parcelas: number;
   status: string;
   created_at: string;
-  operador_nome?: string;
+  operador?: {
+    nome: string;
+    telefone: string;
+  };
 }
 
 const PropostasHistorico = () => {
   const navigate = useNavigate();
   const [filtroStatus, setFiltroStatus] = useState('todos');
+  const [propostas, setPropostas] = useState<Proposta[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const { data: propostas = [], isLoading } = useQuery({
-    queryKey: ['propostas_usuario', filtroStatus],
-    queryFn: async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) throw new Error('Usuário não autenticado');
+  useEffect(() => {
+    loadPropostas();
+  }, []);
 
-        // Simulando dados de propostas para demonstração
-        const mockPropostas = [
-          {
-            id: '1',
-            codigo_proposta: 'PROP-2024-001',
-            cliente_nome: 'Maria Santos',
-            veiculo: 'Toyota Corolla 2023',
-            valor_veiculo: 85000,
-            valor_parcela: 1850,
-            parcelas: 48,
-            status: 'pendente',
-            created_at: new Date().toISOString(),
-            operador_nome: undefined
-          },
-          {
-            id: '2',
-            codigo_proposta: 'PROP-2024-002',
-            cliente_nome: 'João Silva',
-            veiculo: 'Honda Civic 2022',
-            valor_veiculo: 92000,
-            valor_parcela: 2100,
-            parcelas: 42,
-            status: 'em_andamento',
-            created_at: new Date(Date.now() - 86400000).toISOString(),
-            operador_nome: 'Ana Costa'
-          }
-        ];
-        
-        return mockPropostas as Proposta[];
-      } catch (error) {
-        console.error('Erro ao buscar propostas:', error);
-        toast.error('Erro ao carregar propostas');
-        return [];
+  const loadPropostas = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('Usuário não autenticado');
+        return;
       }
-    },
-    refetchInterval: 10000,
-  });
+
+      // Carregar propostas do localStorage
+      const propostasStorage = localStorage.getItem('propostas_usuario');
+      if (propostasStorage) {
+        const todasPropostas = JSON.parse(propostasStorage);
+        const propostasUsuario = todasPropostas.filter((p: Proposta) => p.usuario_id === user.id);
+        setPropostas(propostasUsuario);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar propostas:', error);
+      toast.error('Erro ao carregar propostas');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const propostasFiltradas = filtroStatus === 'todos' 
     ? propostas 
@@ -82,6 +70,16 @@ const PropostasHistorico = () => {
       case 'aprovado': return 'bg-green-100 text-green-800';
       case 'recusado': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'pendente': return 'Pendente';
+      case 'em_andamento': return 'Em Andamento';
+      case 'aprovado': return 'Aprovado';
+      case 'recusado': return 'Recusado';
+      default: return status;
     }
   };
 
@@ -110,7 +108,7 @@ const PropostasHistorico = () => {
             </button>
             <div>
               <h1 className="text-2xl font-bold">Minhas Propostas</h1>
-              <p className="text-blue-100">Histórico de simulações e propostas</p>
+              <p className="text-blue-100">Acompanhe suas propostas de financiamento</p>
             </div>
           </div>
           <img 
@@ -145,7 +143,7 @@ const PropostasHistorico = () => {
         </div>
 
         {/* Lista de Propostas */}
-        {isLoading ? (
+        {loading ? (
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0057FF] mx-auto"></div>
             <p className="mt-2 text-muted-foreground">Carregando propostas...</p>
@@ -153,12 +151,12 @@ const PropostasHistorico = () => {
         ) : propostasFiltradas.length === 0 ? (
           <Card>
             <CardContent className="text-center py-12">
-              <Clock className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+              <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">Nenhuma proposta encontrada</h3>
               <p className="text-muted-foreground mb-4">
                 {filtroStatus === 'todos' 
                   ? 'Você ainda não possui propostas de financiamento.'
-                  : `Não há propostas com status "${filtroStatus}".`
+                  : `Não há propostas com status "${getStatusText(filtroStatus)}".`
                 }
               </p>
               <Button onClick={() => navigate('/simulacao')}>
@@ -174,16 +172,16 @@ const PropostasHistorico = () => {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 bg-[#0057FF] bg-opacity-10 rounded-lg flex items-center justify-center">
-                        <CheckCircle className="w-5 h-5 text-[#0057FF]" />
+                        <FileText className="w-5 h-5 text-[#0057FF]" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-lg">{proposta.codigo_proposta}</h3>
+                        <h3 className="font-semibold text-lg">{proposta.codigo}</h3>
                         <p className="text-sm text-muted-foreground">{proposta.cliente_nome}</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Badge className={getStatusColor(proposta.status)}>
-                        {proposta.status}
+                        {getStatusText(proposta.status)}
                       </Badge>
                       <Button
                         size="sm"
@@ -220,10 +218,10 @@ const PropostasHistorico = () => {
                     </div>
                   </div>
 
-                  {proposta.operador_nome && (
+                  {proposta.operador && (
                     <div className="mt-4 pt-4 border-t">
                       <p className="text-sm text-muted-foreground">
-                        Operador responsável: <span className="font-medium text-foreground">{proposta.operador_nome}</span>
+                        Operador responsável: <span className="font-medium text-foreground">{proposta.operador.nome}</span>
                       </p>
                     </div>
                   )}
