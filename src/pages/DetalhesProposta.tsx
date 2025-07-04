@@ -43,48 +43,56 @@ const DetalhesProposta = () => {
       if (!id) throw new Error('ID da proposta não fornecido');
 
       try {
-        // Tentar buscar diretamente da tabela usando type assertion
+        // Buscar dados usando query SQL direta
         const { data, error } = await supabase
-          .from('propostas_financiamento' as any)
-          .select('*')
-          .eq('id', id)
+          .rpc('get_proposta_detalhes', { proposta_id: id })
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Erro RPC, tentando query direta:', error);
+          
+          // Fallback para query direta
+          const { data: directData, error: directError } = await supabase
+            .from('propostas_financiamento' as any)
+            .select('*')
+            .eq('id', id)
+            .single();
 
-        if (!data) {
-          throw new Error('Proposta não encontrada');
+          if (directError) throw directError;
+          
+          if (!directData) throw new Error('Proposta não encontrada');
+
+          const proposalData: PropostaDetalhada = {
+            id: directData.id,
+            codigo: directData.codigo_proposta || '',
+            marca: directData.marca || '',
+            modelo: directData.modelo || '',
+            ano: directData.ano_veiculo || 0,
+            valorVeiculo: directData.valor_veiculo || 0,
+            valorEntrada: directData.valor_entrada || 0,
+            parcelas: directData.parcelas || 0,
+            valorParcela: directData.valor_parcela || 0,
+            valorTotal: directData.valor_total || 0,
+            taxaJuros: directData.taxa_juros || 0,
+            operador: directData.operador_nome ? {
+              nome: directData.operador_nome,
+              telefone: directData.operador_telefone || ''
+            } : undefined
+          };
+
+          return {
+            proposta: proposalData,
+            kycData: {
+              nome_completo: directData.cliente_nome || '',
+              cpf: directData.cliente_cpf || '',
+              data_nascimento: directData.cliente_nascimento || '',
+              nome_mae: directData.cliente_mae || '',
+              profissao: directData.cliente_profissao || ''
+            } as KYCData
+          };
         }
 
-        // Transformar dados para o formato esperado pelo ProposalPreview
-        const proposalData: PropostaDetalhada = {
-          id: data.id,
-          codigo: data.codigo_proposta,
-          marca: data.marca,
-          modelo: data.modelo,
-          ano: data.ano_veiculo,
-          valorVeiculo: data.valor_veiculo,
-          valorEntrada: data.valor_entrada,
-          parcelas: data.parcelas,
-          valorParcela: data.valor_parcela,
-          valorTotal: data.valor_total,
-          taxaJuros: data.taxa_juros,
-          operador: data.operador_nome ? {
-            nome: data.operador_nome,
-            telefone: data.operador_telefone
-          } : undefined
-        };
-
-        return {
-          proposta: proposalData,
-          kycData: {
-            nome_completo: data.cliente_nome,
-            cpf: data.cliente_cpf,
-            data_nascimento: data.cliente_nascimento,
-            nome_mae: data.cliente_mae,
-            profissao: data.cliente_profissao
-          } as KYCData
-        };
+        return data;
       } catch (error) {
         console.error('Erro ao buscar proposta:', error);
         throw error;

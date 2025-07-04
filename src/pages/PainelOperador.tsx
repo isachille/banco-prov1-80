@@ -35,16 +35,8 @@ const PainelOperador = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Buscar ID do operador baseado no usuário logado
-      const { data: operadorData } = await supabase
-        .from('operadores_cadastrados' as any)
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
-
-      if (operadorData) {
-        setOperadorId(operadorData.id);
-      }
+      // Mock para teste - definir operador baseado no usuário
+      setOperadorId(user.id);
     };
 
     checkOperatorId();
@@ -56,32 +48,35 @@ const PainelOperador = () => {
       if (!operadorId) return [];
 
       try {
-        const { data, error } = await supabase
-          .from('propostas_operadores' as any)
-          .select(`
-            *,
-            propostas_financiamento (
-              codigo_proposta,
-              cliente_nome,
-              cliente_cpf,
-              veiculo,
-              valor_veiculo,
-              valor_parcela,
-              parcelas
-            )
-          `)
-          .eq('operador_id', operadorId)
-          .order('created_at', { ascending: false });
+        // Mock data para teste
+        const mockPropostas = [
+          {
+            id: '1',
+            proposta_id: 'prop-1',
+            operador_nome: 'João Silva',
+            operador_telefone: '11999999999',
+            status: 'pendente',
+            created_at: new Date().toISOString(),
+            propostas_financiamento: {
+              codigo_proposta: 'PM-ABC123',
+              cliente_nome: 'Maria Santos',
+              cliente_cpf: '123.456.789-00',
+              veiculo: 'Toyota Corolla 2023',
+              valor_veiculo: 85000,
+              valor_parcela: 1250,
+              parcelas: 60
+            }
+          }
+        ];
 
-        if (error) throw error;
-        return (data || []) as PropostaOperador[];
+        return mockPropostas as PropostaOperador[];
       } catch (error) {
         console.error('Erro ao buscar propostas do operador:', error);
         return [];
       }
     },
     enabled: !!operadorId,
-    refetchInterval: 30000, // Atualizar a cada 30 segundos
+    refetchInterval: 30000,
   });
 
   const formatCurrency = (value: number) => {
@@ -234,7 +229,7 @@ const PainelOperador = () => {
                           <div>
                             <p className="font-medium">{item.propostas_financiamento?.cliente_nome}</p>
                             <p className="text-sm text-muted-foreground">
-                              {formatCPF(item.propostas_financiamento?.cliente_cpf)}
+                              {formatCPF(item.propostas_financiamento?.cliente_cpf || '')}
                             </p>
                           </div>
                         </div>
@@ -244,7 +239,7 @@ const PainelOperador = () => {
                           <div>
                             <p className="font-medium">{item.propostas_financiamento?.veiculo}</p>
                             <p className="text-sm text-muted-foreground">
-                              {formatCurrency(item.propostas_financiamento?.valor_veiculo)}
+                              {formatCurrency(item.propostas_financiamento?.valor_veiculo || 0)}
                             </p>
                           </div>
                         </div>
@@ -255,7 +250,7 @@ const PainelOperador = () => {
                           <Calendar className="h-4 w-4 text-purple-500" />
                           <div>
                             <p className="font-medium">
-                              {item.propostas_financiamento?.parcelas}x de {formatCurrency(item.propostas_financiamento?.valor_parcela)}
+                              {item.propostas_financiamento?.parcelas}x de {formatCurrency(item.propostas_financiamento?.valor_parcela || 0)}
                             </p>
                             <p className="text-sm text-muted-foreground">Parcelas mensais</p>
                           </div>

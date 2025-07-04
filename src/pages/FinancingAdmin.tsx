@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Users, Clock, CheckCircle, Eye, UserPlus } from 'lucide-react';
@@ -49,47 +48,55 @@ const FinancingAdmin = () => {
           .select('*')
           .order('created_at', { ascending: false });
 
-        if (error) throw error;
-        return (data || []) as Proposta[];
+        if (error) {
+          console.error('Erro ao buscar propostas:', error);
+          return [];
+        }
+        
+        return (data || []).map((item: any) => ({
+          id: item.id,
+          codigo_proposta: item.codigo_proposta || '',
+          cliente_nome: item.cliente_nome || '',
+          cliente_cpf: item.cliente_cpf || '',
+          veiculo: item.veiculo || '',
+          valor_veiculo: item.valor_veiculo || 0,
+          valor_parcela: item.valor_parcela || 0,
+          parcelas: item.parcelas || 0,
+          status: item.status || 'pendente',
+          operador_nome: item.operador_nome,
+          operador_telefone: item.operador_telefone,
+          created_at: item.created_at || ''
+        })) as Proposta[];
       } catch (error) {
         console.error('Erro ao buscar propostas:', error);
         return [];
       }
     },
-    refetchInterval: 5000, // Atualizar a cada 5 segundos
+    refetchInterval: 5000,
   });
 
-  // Buscar operadores
+  // Buscar operadores (mock data por enquanto)
   const { data: operadores = [] } = useQuery({
     queryKey: ['operadores_cadastrados'],
     queryFn: async () => {
-      try {
-        const { data, error } = await supabase
-          .from('operadores_cadastrados' as any)
-          .select('*')
-          .eq('ativo', true)
-          .order('nome');
-
-        if (error) throw error;
-        return (data || []) as Operador[];
-      } catch (error) {
-        console.error('Erro ao buscar operadores:', error);
-        return [];
-      }
+      // Mock data para operadores
+      return [
+        { id: '1', nome: 'João Silva', telefone: '11999999999', ativo: true },
+        { id: '2', nome: 'Maria Santos', telefone: '11888888888', ativo: true },
+        { id: '3', nome: 'Pedro Costa', telefone: '11777777777', ativo: true }
+      ] as Operador[];
     },
   });
 
   const atribuirOperador = async (propostaId: string, operadorId: string) => {
     try {
-      // Buscar dados do operador
       const operador = operadores.find(op => op.id === operadorId);
       if (!operador) {
         toast.error('Operador não encontrado');
         return;
       }
 
-      // Atualizar proposta
-      const { error: updateError } = await supabase
+      const { error } = await supabase
         .from('propostas_financiamento' as any)
         .update({
           operador_id: operadorId,
@@ -100,20 +107,7 @@ const FinancingAdmin = () => {
         })
         .eq('id', propostaId);
 
-      if (updateError) throw updateError;
-
-      // Criar notificação para operador
-      const { error: insertError } = await supabase
-        .from('propostas_operadores' as any)
-        .insert({
-          proposta_id: propostaId,
-          operador_id: operadorId,
-          operador_nome: operador.nome,
-          operador_telefone: operador.telefone,
-          atribuido_por: (await supabase.auth.getUser()).data.user?.id
-        });
-
-      if (insertError) throw insertError;
+      if (error) throw error;
 
       toast.success('Proposta atribuída ao operador com sucesso!');
       queryClient.invalidateQueries({ queryKey: ['propostas_financiamento'] });
@@ -154,7 +148,7 @@ const FinancingAdmin = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <button
-              onClick={() => navigate('/admin')}
+              onClick={() => navigate('/home')}
               className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />

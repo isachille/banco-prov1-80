@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calculator, Car, User, Building2 } from 'lucide-react';
@@ -77,7 +76,6 @@ const FinancingSimulation = () => {
         const isManager = ['dono', 'gerente', 'admin'].includes(userInfo.role);
         setCanSimulateForOthers(isManager);
 
-        // Preencher dados do usuário se simulação for para si mesmo
         if (!isManager || simulationType === 'proprio') {
           setFormData(prev => ({
             ...prev,
@@ -105,20 +103,17 @@ const FinancingSimulation = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
-      // Calcular financiamento
       const valorFinanciado = formData.veiculo.valor - formData.valorEntrada;
-      const taxaJuros = 0.015; // 1.5% ao mês
+      const taxaJuros = 0.015;
       const valorParcela = (valorFinanciado * (1 + taxaJuros * formData.parcelas)) / formData.parcelas;
       const valorTotal = valorParcela * formData.parcelas;
 
-      // Gerar código da proposta
       const codigoProposta = `PM-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
-      // Salvar proposta
       const { error } = await supabase
         .from('propostas_financiamento' as any)
         .insert({
-          user_id: simulationType === 'proprio' ? user.id : user.id, // Para terceiros, ainda vincula ao gerente
+          user_id: user.id,
           codigo_proposta: codigoProposta,
           cliente_nome: formData.clienteNome,
           cliente_cpf: formData.clienteCpf,
@@ -138,11 +133,13 @@ const FinancingSimulation = () => {
           criado_por: user.id
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao criar proposta:', error);
+        toast.error('Erro ao criar proposta. Tente novamente.');
+        return;
+      }
 
       toast.success('Proposta criada com sucesso!');
-      
-      // Redirecionar para visualização da proposta
       navigate(`/propostas`);
     } catch (error) {
       console.error('Erro ao criar proposta:', error);
@@ -160,7 +157,7 @@ const FinancingSimulation = () => {
   };
 
   const valorFinanciado = formData.veiculo.valor - formData.valorEntrada;
-  const valorParcela = valorFinanciado > 0 ? (valorFinanciado * 1.90) / formData.parcelas : 0; // Estimativa simples
+  const valorParcela = valorFinanciado > 0 ? (valorFinanciado * 1.90) / formData.parcelas : 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -188,7 +185,6 @@ const FinancingSimulation = () => {
       </div>
 
       <div className="container mx-auto p-6 max-w-4xl">
-        {/* Tipo de Simulação */}
         {canSimulateForOthers && (
           <Card className="mb-6">
             <CardHeader>
@@ -379,7 +375,6 @@ const FinancingSimulation = () => {
           </Card>
         </div>
 
-        {/* Resumo da Simulação */}
         {formData.veiculo.valor > 0 && (
           <Card className="mt-6">
             <CardHeader>
@@ -411,7 +406,6 @@ const FinancingSimulation = () => {
           </Card>
         )}
 
-        {/* Botão de Simulação */}
         <div className="mt-6 text-center">
           <Button
             onClick={handleSimulation}

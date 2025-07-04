@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Clock, CheckCircle, Eye, Calendar } from 'lucide-react';
@@ -40,15 +39,30 @@ const PropostasHistorico = () => {
           .eq('user_id', user.id)
           .order('created_at', { ascending: false });
 
-        if (error) throw error;
-        return (data || []) as Proposta[];
+        if (error) {
+          console.error('Erro ao buscar propostas:', error);
+          return [];
+        }
+        
+        return (data || []).map((item: any) => ({
+          id: item.id,
+          codigo_proposta: item.codigo_proposta || '',
+          cliente_nome: item.cliente_nome || '',
+          veiculo: item.veiculo || '',
+          valor_veiculo: item.valor_veiculo || 0,
+          valor_parcela: item.valor_parcela || 0,
+          parcelas: item.parcelas || 0,
+          status: item.status || 'pendente',
+          created_at: item.created_at || '',
+          operador_nome: item.operador_nome
+        })) as Proposta[];
       } catch (error) {
         console.error('Erro ao buscar propostas:', error);
         toast.error('Erro ao carregar propostas');
         return [];
       }
     },
-    refetchInterval: 10000, // Atualizar a cada 10 segundos
+    refetchInterval: 10000,
   });
 
   const propostasFiltradas = filtroStatus === 'todos' 
