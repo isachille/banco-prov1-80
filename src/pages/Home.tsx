@@ -1,183 +1,199 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Wallet, Send, Gift, PiggyBank, FileText, Shield, TrendingUp } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { useQuery } from '@tanstack/react-query';
+import { useUserStatus } from '@/hooks/useUserStatus';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { LogOut, Users, Settings, BarChart3, Calculator, FileText, Headphones } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from 'sonner';
 
 const Home = () => {
   const navigate = useNavigate();
+  const [nomeUsuario, setNomeUsuario] = useState<string | null>(null);
+  const { status, loading, userData } = useUserStatus(null);
 
-  // Fetch user data and wallet balance
-  const { data: user } = useQuery({
-    queryKey: ['user'],
-    queryFn: async () => {
+  useEffect(() => {
+    const fetchUserName = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
+      if (user) {
+        setNomeUsuario(user.email);
+      }
+    };
 
-      const { data: userData } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', user.id)
-        .single();
+    fetchUserName();
+  }, []);
 
-      return { ...user, ...userData };
-    }
-  });
-
-  const { data: wallet } = useQuery({
-    queryKey: ['wallet', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return null;
-      
-      const { data } = await supabase
-        .from('wallets')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-      
-      return data;
-    },
-    enabled: !!user?.id
-  });
-
-  const handleSyncBinance = async () => {
-    try {
-      // Mock sync functionality since we don't have the actual function
-      toast.success('Sincronização simulada realizada com sucesso!');
-    } catch (error) {
-      console.error('Erro na sincronização:', error);
-      toast.error('Erro ao sincronizar com Binance');
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast.error('Erro ao fazer logout.');
+    } else {
+      navigate('/login');
     }
   };
 
-  const menuItems = [
-    {
-      titulo: "PIX",
-      icone: Send,
-      acao: () => navigate('/pix'),
-      bgColor: "bg-gradient-to-r from-blue-500 to-blue-600"
-    },
-    {
-      titulo: "Transferências",
-      icone: TrendingUp,
-      acao: () => navigate('/transferencias'),
-      bgColor: "bg-gradient-to-r from-green-500 to-green-600"
-    },
-    {
-      titulo: "Gift Cards",
-      icone: Gift,
-      acao: () => navigate('/gift-cards-page'),
-      bgColor: "bg-gradient-to-r from-pink-500 to-pink-600"
-    },
-    {
-      titulo: "Cofrinho",
-      icone: PiggyBank,
-      acao: () => navigate('/cofrinho'),
-      bgColor: "bg-gradient-to-r from-yellow-500 to-yellow-600"
-    },
-    {
-      titulo: "Financiamento",
-      icone: FileText,
-      acao: () => navigate('/financing-page'),
-      bgColor: "bg-gradient-to-r from-indigo-500 to-indigo-600"
-    }
-  ];
-
-  // Add admin panel if user is 'dono'
-  if (user?.role === 'dono') {
-    menuItems.push({
-      titulo: "Painel Admin",
-      icone: Shield,
-      acao: () => navigate('/admin/users'),
-      bgColor: "bg-gradient-to-r from-red-500 to-red-600"
-    });
-  }
-
   return (
-    <div className="space-y-6 pb-20">
-      {/* Header com saudação */}
-      <div className="bg-gradient-to-r from-purple-600 to-purple-800 text-white p-6 rounded-b-3xl">
-        <h1 className="text-2xl font-bold">Olá, {user?.nome_completo || user?.nome || 'Usuário'}!</h1>
-        <p className="text-purple-100 mt-1">Bem-vindo ao seu banco digital</p>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-[#001B3A] to-[#003F5C] text-white p-6">
+        <div className="container mx-auto flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Avatar className="h-10 w-10">
+              <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+              <AvatarFallback>CN</AvatarFallback>
+            </Avatar>
+            <div>
+              <h1 className="text-2xl font-bold">Olá, {nomeUsuario || 'Usuário'}!</h1>
+              <p className="text-blue-100">Bem-vindo ao Banco Pro</p>
+            </div>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <Settings className="h-4 w-4" />
+                <span className="sr-only">Abrir menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
+              <DropdownMenuItem onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Sair
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
-      {/* Cartão de Saldo */}
-      <Card className="mx-4 bg-gradient-to-r from-gray-900 to-gray-800 text-white">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle className="text-lg">Minha Carteira</CardTitle>
-            <p className="text-gray-300 text-sm">Saldo disponível</p>
-          </div>
-          <Wallet className="h-8 w-8 text-gray-300" />
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div>
-            <p className="text-2xl font-bold">
-              R$ {wallet?.saldo?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}
-            </p>
-            <p className="text-sm text-gray-300">Saldo em Real (BRL)</p>
-          </div>
-          
-          <Button 
-            onClick={handleSyncBinance}
-            variant="secondary" 
-            size="sm" 
-            className="w-full mt-3"
-          >
-            Sincronizar com Binance
-          </Button>
-        </CardContent>
-      </Card>
+      {/* Content */}
+      <div className="container mx-auto p-6">
+        {/* Status do Usuário */}
+        {loading ? (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Status da Conta</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-4 w-[200px]" />
+            </CardContent>
+          </Card>
+        ) : status ? (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Status da Conta</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {status === 'pendente' && (
+                <p className="text-yellow-500">Sua conta está pendente de aprovação.</p>
+              )}
+              {status === 'ativo' && (
+                <p className="text-green-500">Sua conta está ativa!</p>
+              )}
+              {status === 'recusado' && (
+                <p className="text-red-500">Sua conta foi recusada.</p>
+              )}
+            </CardContent>
+          </Card>
+        ) : null}
 
-      {/* Menu de Ações */}
-      <div className="px-4">
-        <h2 className="text-lg font-semibold mb-4 text-gray-800">Ações Rápidas</h2>
-        <div className="grid grid-cols-2 gap-4">
-          {menuItems.map((item, index) => {
-            const IconComponent = item.icone;
-            return (
+          {/* Ações Principais */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-shadow"
+              onClick={() => navigate('/simulacao')}
+            >
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center text-lg">
+                  <Calculator className="mr-2 h-5 w-5 text-green-600" />
+                  Simular Financiamento
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Simule seu financiamento veicular e gere uma proposta
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-shadow"
+              onClick={() => navigate('/propostas')}
+            >
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center text-lg">
+                  <FileText className="mr-2 h-5 w-5 text-blue-600" />
+                  Minhas Propostas
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Visualize o histórico das suas propostas de financiamento
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Mostrar painel do operador se for operador */}
+            {userData?.role === 'operador' && (
               <Card 
-                key={index} 
                 className="cursor-pointer hover:shadow-lg transition-shadow"
-                onClick={item.acao}
+                onClick={() => navigate('/operador')}
               >
-                <CardContent className="p-4 text-center">
-                  <div className={`w-12 h-12 ${item.bgColor} rounded-full flex items-center justify-center mx-auto mb-3`}>
-                    <IconComponent className="h-6 w-6 text-white" />
-                  </div>
-                  <p className="font-medium text-gray-800">{item.titulo}</p>
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center text-lg">
+                    <Headphones className="mr-2 h-5 w-5 text-orange-600" />
+                    Painel Operador
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Gerencie seus clientes e propostas atribuídas
+                  </p>
                 </CardContent>
               </Card>
-            );
-          })}
-        </div>
-      </div>
+            )}
 
-      {/* Ações Rápidas Adicionais */}
-      <div className="px-4">
-        <h2 className="text-lg font-semibold mb-4 text-gray-800">Outros Serviços</h2>
-        <div className="space-y-3">
-          <Button 
-            variant="outline" 
-            className="w-full justify-start" 
-            onClick={() => navigate('/extrato-page')}
-          >
-            <FileText className="h-4 w-4 mr-2" />
-            Ver Extrato Completo
-          </Button>
-          <Button 
-            variant="outline" 
-            className="w-full justify-start" 
-            onClick={() => navigate('/investimentos')}
-          >
-            <TrendingUp className="h-4 w-4 mr-2" />
-            Investimentos
-          </Button>
-        </div>
+            {/* Ações Administrativas (visível apenas para admins) */}
+            {userData?.role === 'admin' && (
+              <>
+                <Card
+                  className="cursor-pointer hover:shadow-lg transition-shadow"
+                  onClick={() => navigate('/admin/users')}
+                >
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center text-lg">
+                      <Users className="mr-2 h-5 w-5 text-blue-600" />
+                      Gerenciar Usuários
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      Visualizar, editar e gerenciar todos os usuários do sistema
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card
+                  className="cursor-pointer hover:shadow-lg transition-shadow"
+                  onClick={() => navigate('/admin/relatorios')}
+                >
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center text-lg">
+                      <BarChart3 className="mr-2 h-5 w-5 text-purple-600" />
+                      Relatórios
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      Visualizar relatórios e estatísticas do sistema
+                    </p>
+                  </CardContent>
+                </Card>
+              </>
+            )}
+          </div>
       </div>
     </div>
   );

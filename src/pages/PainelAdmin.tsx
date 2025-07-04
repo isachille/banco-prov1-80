@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Users, CheckCircle, XCircle, Clock, Search, Shield, UserCheck } from 'lucide-react';
+import { ArrowLeft, Users, CheckCircle, XCircle, Clock, Search, Shield, UserCheck, Car, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -261,6 +260,60 @@ const PainelAdmin = () => {
             </CardContent>
           </Card>
         </div>
+
+          {/* Ações Administrativas */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-shadow"
+              onClick={() => navigate('/admin/users')}
+            >
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center text-lg">
+                  <Users className="mr-2 h-5 w-5 text-blue-600" />
+                  Gerenciar Usuários
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Visualizar, editar e gerenciar todos os usuários do sistema
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-shadow"
+              onClick={() => navigate('/financiamento-admin')}
+            >
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center text-lg">
+                  <Car className="mr-2 h-5 w-5 text-green-600" />
+                  Financiamentos
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Gerenciar propostas de financiamento e atribuir operadores
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-shadow"
+              onClick={() => navigate('/admin/relatorios')}
+            >
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center text-lg">
+                  <BarChart3 className="mr-2 h-5 w-5 text-purple-600" />
+                  Relatórios
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Visualizar relatórios e estatísticas do sistema
+                </p>
+              </CardContent>
+            </Card>
+          </div>
 
         {/* Lista de Usuários Pendentes */}
         <Card>
