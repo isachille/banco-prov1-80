@@ -1,57 +1,68 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Eye, Search, Filter } from 'lucide-react';
+import { ArrowLeft, Clock, CheckCircle, Eye, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 interface Proposta {
   id: string;
   codigo_proposta: string;
   cliente_nome: string;
-  cliente_cpf: string;
   veiculo: string;
   valor_veiculo: number;
   valor_parcela: number;
   parcelas: number;
   status: string;
-  operador_nome?: string;
   created_at: string;
+  operador_nome?: string;
 }
 
 const PropostasHistorico = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [filtroStatus, setFiltroStatus] = useState('todos');
 
   const { data: propostas = [], isLoading } = useQuery({
-    queryKey: ['minhas_propostas'],
+    queryKey: ['propostas_usuario', filtroStatus],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('propostas_financiamento')
-        .select('*')
-        .order('created_at', { ascending: false });
+      try {
+        // Usar RPC para buscar propostas do usuário
+        const { data, error } = await supabase.rpc('get_user_proposals');
 
-      if (error) throw error;
-      return data as Proposta[];
+        if (error) {
+          console.error('Erro RPC:', error);
+          // Fallback: buscar diretamente
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) throw new Error('Usuário não autenticado');
+
+          const { data: fallbackData, error: fallbackError } = await supabase
+            .from('propostas_financiamento' as any)
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false });
+
+          if (fallbackError) throw fallbackError;
+          return fallbackData || [];
+        }
+
+        return data || [];
+      } catch (error) {
+        console.error('Erro ao buscar propostas:', error);
+        toast.error('Erro ao carregar propostas');
+        return [];
+      }
     },
+    refetchInterval: 10000, // Atualizar a cada 10 segundos
   });
 
-  const filteredPropostas = propostas.filter(proposta => {
-    const matchesSearch = proposta.cliente_nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         proposta.codigo_proposta.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         proposta.veiculo.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'all' || proposta.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
-  });
+  const propostasFiltradas = filtroStatus === 'todos' 
+    ? propostas 
+    : propostas.filter((p: Proposta) => p.status === filtroStatus);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -70,12 +81,8 @@ const PropostasHistorico = () => {
     }).format(value);
   };
 
-  const formatCPF = (cpf: string) => {
-    return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-  };
-
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('pt-BR');
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
   return (
@@ -91,8 +98,8 @@ const PropostasHistorico = () => {
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
-              <h1 className="text-2xl font-bold">Histórico de Propostas</h1>
-              <p className="text-blue-100">Visualize todas as suas propostas de financiamento</p>
+              <h1 className="text-2xl font-bold">Minhas Propostas</h1>
+              <p className="text-blue-100">Histórico de simulações e propostas</p>
             </div>
           </div>
           <img 
@@ -105,118 +112,115 @@ const PropostasHistorico = () => {
 
       <div className="container mx-auto p-6">
         {/* Filtros */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Filter className="mr-2 h-5 w-5" />
-              Filtros
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    placeholder="Buscar por nome, código ou veículo..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-              <div className="w-full md:w-48">
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos os Status</SelectItem>
-                    <SelectItem value="pendente">Pendente</SelectItem>
-                    <SelectItem value="em_andamento">Em Andamento</SelectItem>
-                    <SelectItem value="aprovado">Aprovado</SelectItem>
-                    <SelectItem value="recusado">Recusado</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-4">
+            <h2 className="text-lg font-semibold">Filtrar por status:</h2>
+            <Select value={filtroStatus} onValueChange={setFiltroStatus}>
+              <SelectTrigger className="w-48">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos</SelectItem>
+                <SelectItem value="pendente">Pendente</SelectItem>
+                <SelectItem value="em_andamento">Em Andamento</SelectItem>
+                <SelectItem value="aprovado">Aprovado</SelectItem>
+                <SelectItem value="recusado">Recusado</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {propostasFiltradas.length} proposta(s) encontrada(s)
+          </p>
+        </div>
 
         {/* Lista de Propostas */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Propostas ({filteredPropostas.length})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0057FF] mx-auto"></div>
-                <p className="mt-2 text-muted-foreground">Carregando propostas...</p>
-              </div>
-            ) : filteredPropostas.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">
-                  {searchTerm || statusFilter !== 'all' ? 'Nenhuma proposta encontrada com os filtros aplicados' : 'Nenhuma proposta encontrada'}
-                </p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Código</TableHead>
-                      <TableHead>Cliente</TableHead>
-                      <TableHead>Veículo</TableHead>
-                      <TableHead>Valor</TableHead>
-                      <TableHead>Parcelas</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredPropostas.map((proposta) => (
-                      <TableRow key={proposta.id}>
-                        <TableCell className="font-medium">{proposta.codigo_proposta}</TableCell>
-                        <TableCell>
-                          <div>
-                            <p className="font-medium">{proposta.cliente_nome}</p>
-                            <p className="text-sm text-muted-foreground">{formatCPF(proposta.cliente_cpf)}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell>{proposta.veiculo}</TableCell>
-                        <TableCell>{formatCurrency(proposta.valor_veiculo)}</TableCell>
-                        <TableCell>
-                          <div>
-                            <p>{proposta.parcelas}x</p>
-                            <p className="text-sm text-muted-foreground">{formatCurrency(proposta.valor_parcela)}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={getStatusColor(proposta.status)}>
-                            {proposta.status.replace('_', ' ')}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{formatDate(proposta.created_at)}</TableCell>
-                        <TableCell>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => navigate(`/proposta/${proposta.id}`)}
-                          >
-                            <Eye className="h-4 w-4 mr-2" />
-                            Ver
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        {isLoading ? (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0057FF] mx-auto"></div>
+            <p className="mt-2 text-muted-foreground">Carregando propostas...</p>
+          </div>
+        ) : propostasFiltradas.length === 0 ? (
+          <Card>
+            <CardContent className="text-center py-12">
+              <Clock className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Nenhuma proposta encontrada</h3>
+              <p className="text-muted-foreground mb-4">
+                {filtroStatus === 'todos' 
+                  ? 'Você ainda não possui propostas de financiamento.'
+                  : `Não há propostas com status "${filtroStatus}".`
+                }
+              </p>
+              <Button onClick={() => navigate('/simulacao')}>
+                Fazer Nova Simulação
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-4">
+            {propostasFiltradas.map((proposta: Proposta) => (
+              <Card key={proposta.id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-[#0057FF] bg-opacity-10 rounded-lg flex items-center justify-center">
+                        <CheckCircle className="w-5 h-5 text-[#0057FF]" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg">{proposta.codigo_proposta}</h3>
+                        <p className="text-sm text-muted-foreground">{proposta.cliente_nome}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Badge className={getStatusColor(proposta.status)}>
+                        {proposta.status}
+                      </Badge>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => navigate(`/proposta/${proposta.id}`)}
+                      >
+                        <Eye className="h-4 w-4 mr-1" />
+                        Ver Detalhes
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                    <div>
+                      <p className="text-muted-foreground">Veículo</p>
+                      <p className="font-medium">{proposta.veiculo}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Valor do Veículo</p>
+                      <p className="font-medium">{formatCurrency(proposta.valor_veiculo)}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Parcelas</p>
+                      <p className="font-medium">
+                        {proposta.parcelas}x de {formatCurrency(proposta.valor_parcela)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Data</p>
+                      <p className="font-medium flex items-center">
+                        <Calendar className="h-4 w-4 mr-1" />
+                        {formatDate(proposta.created_at)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {proposta.operador_nome && (
+                    <div className="mt-4 pt-4 border-t">
+                      <p className="text-sm text-muted-foreground">
+                        Operador responsável: <span className="font-medium text-foreground">{proposta.operador_nome}</span>
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

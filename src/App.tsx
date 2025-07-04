@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { Toaster } from 'sonner';
@@ -27,6 +28,7 @@ import PropostasHistorico from '@/pages/PropostasHistorico';
 import DetalhesProposta from '@/pages/DetalhesProposta';
 import PainelOperador from '@/pages/PainelOperador';
 import FinancingAdmin from '@/pages/FinancingAdmin';
+import AdminUsers from '@/pages/AdminUsers';
 
 const queryClient = new QueryClient();
 
