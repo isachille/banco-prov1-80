@@ -33,29 +33,35 @@ const PropostasHistorico = () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error('Usuário não autenticado');
 
-        const { data, error } = await supabase
-          .from('propostas_financiamento' as any)
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
-
-        if (error) {
-          console.error('Erro ao buscar propostas:', error);
-          return [];
-        }
+        // Simulando dados de propostas para demonstração
+        const mockPropostas = [
+          {
+            id: '1',
+            codigo_proposta: 'PROP-2024-001',
+            cliente_nome: 'Maria Santos',
+            veiculo: 'Toyota Corolla 2023',
+            valor_veiculo: 85000,
+            valor_parcela: 1850,
+            parcelas: 48,
+            status: 'pendente',
+            created_at: new Date().toISOString(),
+            operador_nome: undefined
+          },
+          {
+            id: '2',
+            codigo_proposta: 'PROP-2024-002',
+            cliente_nome: 'João Silva',
+            veiculo: 'Honda Civic 2022',
+            valor_veiculo: 92000,
+            valor_parcela: 2100,
+            parcelas: 42,
+            status: 'em_andamento',
+            created_at: new Date(Date.now() - 86400000).toISOString(),
+            operador_nome: 'Ana Costa'
+          }
+        ];
         
-        return (data || []).map((item: any) => ({
-          id: item.id,
-          codigo_proposta: item.codigo_proposta || '',
-          cliente_nome: item.cliente_nome || '',
-          veiculo: item.veiculo || '',
-          valor_veiculo: item.valor_veiculo || 0,
-          valor_parcela: item.valor_parcela || 0,
-          parcelas: item.parcelas || 0,
-          status: item.status || 'pendente',
-          created_at: item.created_at || '',
-          operador_nome: item.operador_nome
-        })) as Proposta[];
+        return mockPropostas as Proposta[];
       } catch (error) {
         console.error('Erro ao buscar propostas:', error);
         toast.error('Erro ao carregar propostas');
