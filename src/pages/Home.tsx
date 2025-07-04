@@ -1,9 +1,10 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserStatus } from '@/hooks/useUserStatus';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { LogOut, Users, Settings, BarChart3, Calculator, FileText, Headphones } from 'lucide-react';
+import { LogOut, Users, Settings, BarChart3, Calculator, FileText, Headphones, CreditCard, PiggyBank, TrendingUp, Zap, Send, QrCode, Shield } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -35,6 +36,8 @@ const Home = () => {
     }
   };
 
+  const isAdminUser = userData?.role && ['admin', 'dono', 'gerente', 'analista'].includes(userData.role);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -50,21 +53,33 @@ const Home = () => {
               <p className="text-blue-100">Bem-vindo ao Banco Pro</p>
             </div>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <Settings className="h-4 w-4" />
-                <span className="sr-only">Abrir menu</span>
+          <div className="flex items-center space-x-4">
+            {isAdminUser && (
+              <Button 
+                variant="outline" 
+                className="text-white border-white hover:bg-white hover:text-[#001B3A]"
+                onClick={() => navigate('/painel-admin')}
+              >
+                <Shield className="mr-2 h-4 w-4" />
+                Painel Admin
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
-              <DropdownMenuItem onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                Sair
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            )}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <Settings className="h-4 w-4" />
+                  <span className="sr-only">Abrir menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sair
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
 
@@ -99,8 +114,115 @@ const Home = () => {
           </Card>
         ) : null}
 
-          {/* Ações Principais */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Ações Bancárias Principais */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => navigate('/transferir')}
+          >
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center text-lg">
+                <Send className="mr-2 h-5 w-5 text-blue-600" />
+                Transferir
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Envie dinheiro para outras contas
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => navigate('/pix')}
+          >
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center text-lg">
+                <QrCode className="mr-2 h-5 w-5 text-green-600" />
+                PIX
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Pagamentos instantâneos
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => navigate('/pagar')}
+          >
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center text-lg">
+                <Zap className="mr-2 h-5 w-5 text-orange-600" />
+                Pagar
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Boletos e contas
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => navigate('/cartoes')}
+          >
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center text-lg">
+                <CreditCard className="mr-2 h-5 w-5 text-purple-600" />
+                Cartões
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Gerencie seus cartões
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => navigate('/cofrinho')}
+          >
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center text-lg">
+                <PiggyBank className="mr-2 h-5 w-5 text-pink-600" />
+                Cofrinho
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Economize para seus objetivos
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => navigate('/investimentos')}
+          >
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center text-lg">
+                <TrendingUp className="mr-2 h-5 w-5 text-emerald-600" />
+                Investimentos
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Faça seu dinheiro render
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Seção de Financiamento */}
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-4">Financiamento Veicular</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card 
               className="cursor-pointer hover:shadow-lg transition-shadow"
               onClick={() => navigate('/simulacao')}
@@ -134,66 +256,31 @@ const Home = () => {
                 </p>
               </CardContent>
             </Card>
-
-            {/* Mostrar painel do operador se for operador */}
-            {userData?.role === 'operador' && (
-              <Card 
-                className="cursor-pointer hover:shadow-lg transition-shadow"
-                onClick={() => navigate('/operador')}
-              >
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center text-lg">
-                    <Headphones className="mr-2 h-5 w-5 text-orange-600" />
-                    Painel Operador
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    Gerencie seus clientes e propostas atribuídas
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Ações Administrativas (visível apenas para admins) */}
-            {userData?.role === 'admin' && (
-              <>
-                <Card
-                  className="cursor-pointer hover:shadow-lg transition-shadow"
-                  onClick={() => navigate('/admin/users')}
-                >
-                  <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center text-lg">
-                      <Users className="mr-2 h-5 w-5 text-blue-600" />
-                      Gerenciar Usuários
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      Visualizar, editar e gerenciar todos os usuários do sistema
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card
-                  className="cursor-pointer hover:shadow-lg transition-shadow"
-                  onClick={() => navigate('/admin/relatorios')}
-                >
-                  <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center text-lg">
-                      <BarChart3 className="mr-2 h-5 w-5 text-purple-600" />
-                      Relatórios
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      Visualizar relatórios e estatísticas do sistema
-                    </p>
-                  </CardContent>
-                </Card>
-              </>
-            )}
           </div>
+        </div>
+
+        {/* Painel do Operador (apenas para operadores) */}
+        {userData?.role === 'operador' && (
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold mb-4">Área do Operador</h2>
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-shadow"
+              onClick={() => navigate('/operador')}
+            >
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center text-lg">
+                  <Headphones className="mr-2 h-5 w-5 text-orange-600" />
+                  Painel Operador
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Gerencie seus clientes e propostas atribuídas
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   );

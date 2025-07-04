@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calculator, Car, User, Building2 } from 'lucide-react';
@@ -10,6 +11,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserStatus } from '@/hooks/useUserStatus';
+import { ProposalPreview } from '@/components/ProposalPreview';
 
 interface UserData {
   id: string;
@@ -43,6 +45,8 @@ const FinancingSimulation = () => {
   const navigate = useNavigate();
   const { userData } = useUserStatus(null);
   const [simulationType, setSimulationType] = useState<'proprio' | 'terceiro'>('proprio');
+  const [showPreview, setShowPreview] = useState(false);
+  const [proposalData, setProposalData] = useState(null);
   const [formData, setFormData] = useState<SimulationData>({
     clienteNome: '',
     clienteCpf: '',
@@ -110,37 +114,37 @@ const FinancingSimulation = () => {
 
       const codigoProposta = `PM-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
-      const { error } = await supabase
-        .from('propostas_financiamento' as any)
-        .insert({
-          user_id: user.id,
-          codigo_proposta: codigoProposta,
-          cliente_nome: formData.clienteNome,
-          cliente_cpf: formData.clienteCpf,
-          cliente_nascimento: formData.clienteNascimento ? new Date(formData.clienteNascimento).toISOString().split('T')[0] : null,
-          cliente_mae: formData.clienteMae,
-          cliente_profissao: formData.clienteProfissao,
-          veiculo: `${formData.veiculo.marca} ${formData.veiculo.modelo}`,
-          marca: formData.veiculo.marca,
-          modelo: formData.veiculo.modelo,
-          ano_veiculo: formData.veiculo.ano,
-          valor_veiculo: formData.veiculo.valor,
-          valor_entrada: formData.valorEntrada,
-          parcelas: formData.parcelas,
-          valor_parcela: Math.round(valorParcela * 100) / 100,
-          valor_total: Math.round(valorTotal * 100) / 100,
-          taxa_juros: taxaJuros * 100,
-          criado_por: user.id
-        });
+      // Criar dados da proposta para o preview
+      const proposal = {
+        id: Math.random().toString(36).substring(2, 15),
+        codigo: codigoProposta,
+        marca: formData.veiculo.marca,
+        modelo: formData.veiculo.modelo,
+        ano: formData.veiculo.ano,
+        valorVeiculo: formData.veiculo.valor,
+        valorEntrada: formData.valorEntrada,
+        parcelas: formData.parcelas,
+        valorParcela: Math.round(valorParcela * 100) / 100,
+        valorTotal: Math.round(valorTotal * 100) / 100,
+        taxaJuros: taxaJuros * 100,
+        operador: {
+          nome: 'João Silva',
+          telefone: '(11) 99999-9999'
+        }
+      };
 
-      if (error) {
-        console.error('Erro ao criar proposta:', error);
-        toast.error('Erro ao criar proposta. Tente novamente.');
-        return;
-      }
+      const kycData = {
+        nome_completo: formData.clienteNome,
+        cpf: formData.clienteCpf,
+        data_nascimento: formData.clienteNascimento,
+        nome_mae: formData.clienteMae,
+        profissao: formData.clienteProfissao
+      };
 
-      toast.success('Proposta criada com sucesso!');
-      navigate(`/propostas`);
+      setProposalData({ proposal, kycData });
+      setShowPreview(true);
+
+      toast.success('Proposta gerada com sucesso!');
     } catch (error) {
       console.error('Erro ao criar proposta:', error);
       toast.error('Erro ao criar proposta de financiamento');
@@ -158,6 +162,16 @@ const FinancingSimulation = () => {
 
   const valorFinanciado = formData.veiculo.valor - formData.valorEntrada;
   const valorParcela = valorFinanciado > 0 ? (valorFinanciado * 1.90) / formData.parcelas : 0;
+
+  if (showPreview && proposalData) {
+    return (
+      <ProposalPreview
+        proposal={proposalData.proposal}
+        kycData={proposalData.kycData}
+        onBack={() => setShowPreview(false)}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -413,7 +427,7 @@ const FinancingSimulation = () => {
             size="lg"
             className="px-8 py-3"
           >
-            {loading ? 'Processando...' : 'Criar Proposta de Financiamento'}
+            {loading ? 'Processando...' : 'Gerar Proposta de Financiamento'}
           </Button>
         </div>
       </div>
