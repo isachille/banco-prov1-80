@@ -37,6 +37,9 @@ import Pagar from '@/pages/Pagar';
 import Cofrinho from '@/pages/Cofrinho';
 import Investimentos from '@/pages/Investimentos';
 import GiftCardsPage from '@/pages/GiftCardsPage';
+import CadastroEfi from '@/pages/CadastroEfi';
+import PainelFinanceiro from '@/pages/PainelFinanceiro';
+import TransacoesGlobais from '@/pages/TransacoesGlobais';
 
 const queryClient = new QueryClient();
 
@@ -60,6 +63,18 @@ function App() {
             <Route path="/pendente" element={<AguardandoAprovacao />} />
             <Route path="/recusado" element={<ContaRecusada />} />
             <Route path="/analise" element={<ContaAnalise />} />
+
+            {/* Efí Bank routes */}
+            <Route path="/cadastro-efi" element={
+              <ProtectedRoute>
+                <CadastroEfi />
+              </ProtectedRoute>
+            } />
+            <Route path="/painel-financeiro" element={
+              <ProtectedRoute>
+                <PainelFinanceiro />
+              </ProtectedRoute>
+            } />
 
             {/* Protected routes */}
             <Route path="/home" element={
@@ -143,6 +158,11 @@ function App() {
             <Route path="/financiamento-admin" element={
               <ProtectedRoute adminOnly>
                 <FinancingAdmin />
+              </ProtectedRoute>
+            } />
+            <Route path="/transacoes-globais" element={
+              <ProtectedRoute adminOnly>
+                <TransacoesGlobais />
               </ProtectedRoute>
             } />
 
