@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 // Import pages
 import Index from '@/pages/Index';
@@ -47,141 +48,143 @@ function App() {
   return (
     <Router>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<Index />} />
-            <Route path="/splash" element={<Splash />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/cadastro-tipo" element={<CadastroTipo />} />
-            <Route path="/cadastro-pf" element={<CadastroPF />} />
-            <Route path="/cadastro-pj" element={<CadastroPJ />} />
-            <Route path="/confirme-email" element={<ConfirmeEmail />} />
-            <Route path="/email-confirmado" element={<EmailConfirmado />} />
-            <Route path="/confirmacao" element={<Confirmacao />} />
-            <Route path="/confirmado" element={<Confirmado />} />
-            <Route path="/pendente" element={<AguardandoAprovacao />} />
-            <Route path="/recusado" element={<ContaRecusada />} />
-            <Route path="/analise" element={<ContaAnalise />} />
+        <AuthProvider>
+          <ThemeProvider>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<Index />} />
+              <Route path="/splash" element={<Splash />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/cadastro-tipo" element={<CadastroTipo />} />
+              <Route path="/cadastro-pf" element={<CadastroPF />} />
+              <Route path="/cadastro-pj" element={<CadastroPJ />} />
+              <Route path="/confirme-email" element={<ConfirmeEmail />} />
+              <Route path="/email-confirmado" element={<EmailConfirmado />} />
+              <Route path="/confirmacao" element={<Confirmacao />} />
+              <Route path="/confirmado" element={<Confirmado />} />
+              <Route path="/pendente" element={<AguardandoAprovacao />} />
+              <Route path="/recusado" element={<ContaRecusada />} />
+              <Route path="/analise" element={<ContaAnalise />} />
 
-            {/* Efí Bank routes */}
-            <Route path="/cadastro-efi" element={
-              <ProtectedRoute>
-                <CadastroEfi />
-              </ProtectedRoute>
-            } />
-            <Route path="/painel-financeiro" element={
-              <ProtectedRoute>
-                <PainelFinanceiro />
-              </ProtectedRoute>
-            } />
+              {/* Efí Bank routes */}
+              <Route path="/cadastro-efi" element={
+                <ProtectedRoute>
+                  <CadastroEfi />
+                </ProtectedRoute>
+              } />
+              <Route path="/painel-financeiro" element={
+                <ProtectedRoute>
+                  <PainelFinanceiro />
+                </ProtectedRoute>
+              } />
 
-            {/* Protected routes */}
-            <Route path="/home" element={
-              <ProtectedRoute>
-                <Home />
-              </ProtectedRoute>
-            } />
-            
-            {/* Banking routes */}
-            <Route path="/transferir" element={
-              <ProtectedRoute>
-                <Transferir />
-              </ProtectedRoute>
-            } />
-            <Route path="/pix" element={
-              <ProtectedRoute>
-                <PIX />
-              </ProtectedRoute>
-            } />
-            <Route path="/pagar" element={
-              <ProtectedRoute>
-                <Pagar />
-              </ProtectedRoute>
-            } />
-            <Route path="/cartoes" element={
-              <ProtectedRoute>
-                <Cartoes />
-              </ProtectedRoute>
-            } />
-            <Route path="/cofrinho" element={
-              <ProtectedRoute>
-                <Cofrinho />
-              </ProtectedRoute>
-            } />
-            <Route path="/investimentos" element={
-              <ProtectedRoute>
-                <Investimentos />
-              </ProtectedRoute>
-            } />
-            <Route path="/gift-cards" element={
-              <ProtectedRoute>
-                <GiftCardsPage />
-              </ProtectedRoute>
-            } />
-            
-            {/* Financing routes */}
-            <Route path="/simulacao" element={
-              <ProtectedRoute>
-                <FinancingSimulation />
-              </ProtectedRoute>
-            } />
-            <Route path="/propostas" element={
-              <ProtectedRoute>
-                <PropostasHistorico />
-              </ProtectedRoute>
-            } />
-            <Route path="/proposta/:id" element={
-              <ProtectedRoute>
-                <DetalhesProposta />
-              </ProtectedRoute>
-            } />
+              {/* Protected routes */}
+              <Route path="/home" element={
+                <ProtectedRoute>
+                  <Home />
+                </ProtectedRoute>
+              } />
+              
+              {/* Banking routes */}
+              <Route path="/transferir" element={
+                <ProtectedRoute>
+                  <Transferir />
+                </ProtectedRoute>
+              } />
+              <Route path="/pix" element={
+                <ProtectedRoute>
+                  <PIX />
+                </ProtectedRoute>
+              } />
+              <Route path="/pagar" element={
+                <ProtectedRoute>
+                  <Pagar />
+                </ProtectedRoute>
+              } />
+              <Route path="/cartoes" element={
+                <ProtectedRoute>
+                  <Cartoes />
+                </ProtectedRoute>
+              } />
+              <Route path="/cofrinho" element={
+                <ProtectedRoute>
+                  <Cofrinho />
+                </ProtectedRoute>
+              } />
+              <Route path="/investimentos" element={
+                <ProtectedRoute>
+                  <Investimentos />
+                </ProtectedRoute>
+              } />
+              <Route path="/gift-cards" element={
+                <ProtectedRoute>
+                  <GiftCardsPage />
+                </ProtectedRoute>
+              } />
+              
+              {/* Financing routes */}
+              <Route path="/simulacao" element={
+                <ProtectedRoute>
+                  <FinancingSimulation />
+                </ProtectedRoute>
+              } />
+              <Route path="/propostas" element={
+                <ProtectedRoute>
+                  <PropostasHistorico />
+                </ProtectedRoute>
+              } />
+              <Route path="/proposta/:id" element={
+                <ProtectedRoute>
+                  <DetalhesProposta />
+                </ProtectedRoute>
+              } />
 
-            {/* Operator routes */}
-            <Route path="/operador" element={
-              <ProtectedRoute>
-                <PainelOperador />
-              </ProtectedRoute>
-            } />
+              {/* Operator routes */}
+              <Route path="/operador" element={
+                <ProtectedRoute>
+                  <PainelOperador />
+                </ProtectedRoute>
+              } />
 
-            {/* Admin routes */}
-            <Route path="/admin" element={
-              <ProtectedRoute adminOnly>
-                <Admin />
-              </ProtectedRoute>
-            } />
-            <Route path="/painel-admin" element={
-              <ProtectedRoute adminOnly>
-                <PainelAdmin />
-              </ProtectedRoute>
-            } />
-            <Route path="/financiamento-admin" element={
-              <ProtectedRoute adminOnly>
-                <FinancingAdmin />
-              </ProtectedRoute>
-            } />
-            <Route path="/transacoes-globais" element={
-              <ProtectedRoute adminOnly>
-                <TransacoesGlobais />
-              </ProtectedRoute>
-            } />
+              {/* Admin routes */}
+              <Route path="/admin" element={
+                <ProtectedRoute adminOnly>
+                  <Admin />
+                </ProtectedRoute>
+              } />
+              <Route path="/painel-admin" element={
+                <ProtectedRoute adminOnly>
+                  <PainelAdmin />
+                </ProtectedRoute>
+              } />
+              <Route path="/financiamento-admin" element={
+                <ProtectedRoute adminOnly>
+                  <FinancingAdmin />
+                </ProtectedRoute>
+              } />
+              <Route path="/transacoes-globais" element={
+                <ProtectedRoute adminOnly>
+                  <TransacoesGlobais />
+                </ProtectedRoute>
+              } />
 
-            <Route path="/admin/users" element={
-              <ProtectedRoute adminOnly>
-                <AdminUsers />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/relatorios" element={
-              <ProtectedRoute adminOnly>
-                <div>Relatórios (Em construção)</div>
-              </ProtectedRoute>
-            } />
+              <Route path="/admin/users" element={
+                <ProtectedRoute adminOnly>
+                  <AdminUsers />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/relatorios" element={
+                <ProtectedRoute adminOnly>
+                  <div>Relatórios (Em construção)</div>
+                </ProtectedRoute>
+              } />
 
-            {/* Catch all route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <Toaster />
-        </ThemeProvider>
+              {/* Catch all route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <Toaster />
+          </ThemeProvider>
+        </AuthProvider>
       </QueryClientProvider>
     </Router>
   );

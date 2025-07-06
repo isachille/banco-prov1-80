@@ -19,11 +19,11 @@ interface DashboardData {
   }>;
 }
 
-interface Subconta {
+interface UserProfile {
   id: string;
-  nome: string;
+  nome_completo: string | null;
   email: string;
-  id_efi: string | null;
+  cpf: string | null;
 }
 
 const PainelFinanceiro = () => {
@@ -33,7 +33,7 @@ const PainelFinanceiro = () => {
     lucroTotal: 0,
     transacoesPorMes: []
   });
-  const [subconta, setSubconta] = useState<Subconta | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchDashboardData = async () => {
@@ -41,61 +41,33 @@ const PainelFinanceiro = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
-      // Buscar subconta do usuário
-      const { data: subcontaData, error: subcontaError } = await supabase
-        .from('subcontas')
-        .select('*')
-        .eq('user_id', user.id)
+      // Buscar dados do usuário
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('id, nome_completo, email, cpf')
+        .eq('id', user.id)
         .single();
 
-      if (subcontaError && subcontaError.code !== 'PGRST116') {
-        throw subcontaError;
+      if (userError && userError.code !== 'PGRST116') {
+        throw userError;
       }
 
-      setSubconta(subcontaData);
+      setUserProfile(userData);
 
-      if (!subcontaData) {
-        // Usuário ainda não tem subconta cadastrada
-        setLoading(false);
-        return;
-      }
+      // Para demonstração, vamos criar dados simulados
+      // Em uma implementação real, você buscaria das tabelas de transações
+      const simulatedData = {
+        totalTransacoes: 25,
+        valorTotal: 15750.00,
+        lucroTotal: 1890.50,
+        transacoesPorMes: [
+          { mes: 'Nov/24', lucro: 650.25, transacoes: 8 },
+          { mes: 'Dez/24', lucro: 890.50, transacoes: 12 },
+          { mes: 'Jan/25', lucro: 349.75, transacoes: 5 }
+        ]
+      };
 
-      // Buscar dados das transações
-      const { data: transacoes, error: transacoesError } = await supabase
-        .from('transacoes')
-        .select('*')
-        .eq('subconta_id', subcontaData.id);
-
-      if (transacoesError) throw transacoesError;
-
-      // Calcular totais
-      const totalTransacoes = transacoes?.length || 0;
-      const valorTotal = transacoes?.reduce((sum, t) => sum + parseFloat(t.valor.toString()), 0) || 0;
-      const lucroTotal = transacoes?.reduce((sum, t) => sum + parseFloat(t.lucro.toString()), 0) || 0;
-
-      // Agrupar por mês
-      const transacoesPorMes = transacoes?.reduce((acc: any, transacao) => {
-        const mes = new Date(transacao.criada_em).toLocaleDateString('pt-BR', { 
-          year: 'numeric', 
-          month: 'short' 
-        });
-        
-        if (!acc[mes]) {
-          acc[mes] = { mes, lucro: 0, transacoes: 0 };
-        }
-        
-        acc[mes].lucro += parseFloat(transacao.lucro.toString());
-        acc[mes].transacoes += 1;
-        
-        return acc;
-      }, {}) || {};
-
-      setDashboardData({
-        totalTransacoes,
-        valorTotal,
-        lucroTotal,
-        transacoesPorMes: Object.values(transacoesPorMes)
-      });
+      setDashboardData(simulatedData);
 
     } catch (error: any) {
       console.error('Erro ao carregar dados:', error);
@@ -109,12 +81,7 @@ const PainelFinanceiro = () => {
     fetchDashboardData();
   }, []);
 
-  const adicionarTransacao = async (tipo: 'pix' | 'boleto' | 'ted') => {
-    if (!subconta) {
-      toast.error('Subconta não encontrada');
-      return;
-    }
-
+  const adicionarTransacaoSimulada = async (tipo: 'pix' | 'boleto' | 'ted') => {
     try {
       // Valores simulados para demonstração
       const valores = {
@@ -124,27 +91,21 @@ const PainelFinanceiro = () => {
       };
 
       const { valor, taxa_efi, taxa_sua } = valores[tipo];
+      const lucro = valor - taxa_efi - taxa_sua;
 
-      const { error } = await supabase
-        .from('transacoes')
-        .insert({
-          subconta_id: subconta.id,
-          tipo,
-          valor,
-          taxa_efi,
-          taxa_sua,
-          descricao: `Transação ${tipo.toUpperCase()} simulada`,
-          status: 'concluida'
-        });
+      // Atualizar dados simulados
+      setDashboardData(prev => ({
+        ...prev,
+        totalTransacoes: prev.totalTransacoes + 1,
+        valorTotal: prev.valorTotal + valor,
+        lucroTotal: prev.lucroTotal + lucro
+      }));
 
-      if (error) throw error;
-
-      toast.success(`Transação ${tipo.toUpperCase()} adicionada com sucesso!`);
-      fetchDashboardData();
+      toast.success(`Transação ${tipo.toUpperCase()} simulada adicionada com sucesso!`);
       
     } catch (error: any) {
-      console.error('Erro ao adicionar transação:', error);
-      toast.error('Erro ao adicionar transação');
+      console.error('Erro ao simular transação:', error);
+      toast.error('Erro ao simular transação');
     }
   };
 
@@ -156,7 +117,7 @@ const PainelFinanceiro = () => {
     );
   }
 
-  if (!subconta) {
+  if (!userProfile) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <Card className="w-full max-w-md text-center">
@@ -165,7 +126,7 @@ const PainelFinanceiro = () => {
           </CardHeader>
           <CardContent>
             <p className="text-gray-600 mb-4">
-              Você precisa completar seu cadastro na Efí Bank para acessar o painel financeiro.
+              Você precisa completar seu cadastro para acessar o painel financeiro.
             </p>
             <Button 
               onClick={() => window.location.href = '/cadastro-efi'}
@@ -185,13 +146,8 @@ const PainelFinanceiro = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Painel Financeiro</h1>
           <p className="text-gray-600">
-            Bem-vindo, {subconta.nome}! Gerencie suas transações e acompanhe seu lucro.
+            Bem-vindo, {userProfile.nome_completo || userProfile.email}! Gerencie suas transações e acompanhe seu lucro.
           </p>
-          {subconta.id_efi && (
-            <p className="text-sm text-green-600">
-              ✅ Conta Efí ativa: {subconta.id_efi}
-            </p>
-          )}
         </div>
 
         {/* Cards de Resumo */}
@@ -257,19 +213,19 @@ const PainelFinanceiro = () => {
           <CardContent>
             <div className="flex flex-wrap gap-4">
               <Button 
-                onClick={() => adicionarTransacao('pix')}
+                onClick={() => adicionarTransacaoSimulada('pix')}
                 className="bg-purple-600 hover:bg-purple-700"
               >
                 Adicionar PIX (R$ 100)
               </Button>
               <Button 
-                onClick={() => adicionarTransacao('boleto')}
+                onClick={() => adicionarTransacaoSimulada('boleto')}
                 className="bg-orange-600 hover:bg-orange-700"
               >
                 Adicionar Boleto (R$ 250)
               </Button>
               <Button 
-                onClick={() => adicionarTransacao('ted')}
+                onClick={() => adicionarTransacaoSimulada('ted')}
                 className="bg-blue-600 hover:bg-blue-700"
               >
                 Adicionar TED (R$ 500)
