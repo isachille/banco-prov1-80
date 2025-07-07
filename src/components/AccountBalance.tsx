@@ -27,7 +27,7 @@ export const AccountBalance = () => {
           <div>
             <p className="text-blue-100 text-sm">Saldo disponível</p>
             <p className="text-3xl font-bold">
-              {showBalance ? 'R$ 12.458,90' : '••••••'}
+              {showBalance ? 'R$ 0,00' : '••••••'}
             </p>
           </div>
           
@@ -35,13 +35,13 @@ export const AccountBalance = () => {
             <div>
               <p className="text-blue-100 text-sm">Limite disponível</p>
               <p className="text-lg font-semibold">
-                {showBalance ? 'R$ 5.000,00' : '••••••'}
+                {showBalance ? 'R$ 0,00' : '••••••'}
               </p>
             </div>
             <div>
               <p className="text-blue-100 text-sm">Rendimento do mês</p>
               <p className="text-lg font-semibold text-green-300">
-                {showBalance ? '+ R$ 124,50' : '••••••'}
+                {showBalance ? 'R$ 0,00' : '••••••'}
               </p>
             </div>
           </div>

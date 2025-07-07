@@ -25,6 +25,7 @@ const Home = () => {
     fetchUserName();
   }, []);
 
+  // Verificar se o usuário tem permissão de admin
   const isAdminUser = userData?.role && ['admin', 'dono', 'gerente', 'analista'].includes(userData.role);
 
   return (
@@ -57,6 +58,9 @@ const Home = () => {
             <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Status da Conta</h3>
             {status === 'pendente' && (
               <p className="text-yellow-600 dark:text-yellow-400">Sua conta está pendente de aprovação.</p>
+            )}
+            {status === 'analise' && (
+              <p className="text-blue-600 dark:text-blue-400">Sua conta está em análise.</p>
             )}
             {status === 'ativo' && (
               <p className="text-green-600 dark:text-green-400">Sua conta está ativa!</p>
