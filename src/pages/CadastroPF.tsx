@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -47,7 +48,7 @@ const CadastroPF = () => {
     try {
       console.log('Iniciando cadastro PF:', formData);
 
-      // Cadastrar no Supabase Auth com redirect para confirmação
+      // Cadastrar no Supabase Auth com todos os dados nos metadados
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.senha,
@@ -59,7 +60,9 @@ const CadastroPF = () => {
             cpf: formData.cpf.replace(/\D/g, ''),
             cpf_cnpj: formData.cpf.replace(/\D/g, ''),
             telefone: formData.telefone.replace(/\D/g, ''),
-            tipo: 'cliente'
+            tipo: 'PF',
+            role: 'usuario',
+            status: 'pendente'
           }
         }
       });

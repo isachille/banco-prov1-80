@@ -55,10 +55,27 @@ const Confirmacao = () => {
 
         if (result?.data?.user) {
           console.log('Email confirmado com sucesso!', result.data.user.id);
-          toast.success('Email confirmado com sucesso!');
           
-          // Redirecionar para a página /confirmado
-          navigate('/confirmado');
+          // Atualizar status do usuário para "analise" em vez de "ativo"
+          try {
+            const { error: updateError } = await supabase
+              .from('users')
+              .update({ status: 'analise' })
+              .eq('id', result.data.user.id);
+
+            if (updateError) {
+              console.error('Erro ao atualizar status:', updateError);
+            } else {
+              console.log('Status atualizado para análise');
+            }
+          } catch (err) {
+            console.error('Erro ao atualizar status:', err);
+          }
+
+          toast.success('Email confirmado! Sua conta está em análise.');
+          
+          // Redirecionar para a página de análise
+          navigate('/analise');
         } else {
           console.log('Não foi possível confirmar o email');
           toast.error('Não foi possível confirmar o email');
