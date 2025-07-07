@@ -69,29 +69,31 @@ const CadastroEfi = () => {
         throw new Error('Usuário não autenticado');
       }
 
-      // Chamar a edge function para cadastro na Efí
-      const response = await fetch('/functions/v1/efi-cadastro-conta', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
-        },
+      // Chamar nossa própria API
+      const response = await supabase.functions.invoke('api-cadastro-conta', {
         body: JSON.stringify({
           nome: formData.nome,
           email: formData.email,
           cpf: formData.cpf.replace(/\D/g, ''), // Remover formatação
           telefone: formData.telefone.replace(/\D/g, ''), // Remover formatação
           data_nascimento: formData.data_nascimento
-        })
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        }
       });
 
-      const result = await response.json();
+      if (response.error) {
+        throw new Error(response.error.message || 'Erro ao criar conta');
+      }
 
-      if (!response.ok || !result.success) {
+      const result = response.data;
+      if (!result.success) {
         throw new Error(result.error || 'Erro ao criar conta');
       }
 
-      toast.success('Conta criada com sucesso na Efí Bank!');
+      toast.success('Conta criada com sucesso!');
       
       // Redirecionar para o painel financeiro
       navigate('/painel-financeiro');
@@ -112,7 +114,7 @@ const CadastroEfi = () => {
             <CreditCard className="w-8 h-8 text-white" />
           </div>
           <CardTitle className="text-2xl font-bold text-gray-900">
-            Cadastro Efí Bank
+            Cadastro da Conta
           </CardTitle>
           <p className="text-gray-600">
             Complete seu cadastro para acessar os serviços financeiros
@@ -218,7 +220,7 @@ const CadastroEfi = () => {
                   Criando conta...
                 </>
               ) : (
-                'Criar Conta na Efí'
+                'Criar Conta'
               )}
             </Button>
           </form>

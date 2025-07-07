@@ -17,6 +17,7 @@ interface DashboardData {
     lucro: number;
     transacoes: number;
   }>;
+  transacoesRecentes: Array<any>;
 }
 
 interface UserProfile {
@@ -31,7 +32,8 @@ const PainelFinanceiro = () => {
     totalTransacoes: 0,
     valorTotal: 0,
     lucroTotal: 0,
-    transacoesPorMes: []
+    transacoesPorMes: [],
+    transacoesRecentes: []
   });
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -54,20 +56,23 @@ const PainelFinanceiro = () => {
 
       setUserProfile(userData);
 
-      // Para demonstração, vamos criar dados simulados
-      // Em uma implementação real, você buscaria das tabelas de transações
-      const simulatedData = {
-        totalTransacoes: 25,
-        valorTotal: 15750.00,
-        lucroTotal: 1890.50,
-        transacoesPorMes: [
-          { mes: 'Nov/24', lucro: 650.25, transacoes: 8 },
-          { mes: 'Dez/24', lucro: 890.50, transacoes: 12 },
-          { mes: 'Jan/25', lucro: 349.75, transacoes: 5 }
-        ]
-      };
+      // Buscar dados do dashboard usando nossa API
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const response = await supabase.functions.invoke('api-dashboard', {
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`
+        }
+      });
 
-      setDashboardData(simulatedData);
+      if (response.error) {
+        throw new Error(response.error.message || 'Erro ao carregar dashboard');
+      }
+
+      const result = response.data;
+      if (result.success) {
+        setDashboardData(result.data);
+      }
 
     } catch (error: any) {
       console.error('Erro ao carregar dados:', error);
@@ -81,31 +86,44 @@ const PainelFinanceiro = () => {
     fetchDashboardData();
   }, []);
 
-  const adicionarTransacaoSimulada = async (tipo: 'pix' | 'boleto' | 'ted') => {
+  const adicionarTransacao = async (tipo: 'pix' | 'boleto' | 'ted') => {
     try {
-      // Valores simulados para demonstração
+      // Valores de exemplo para cada tipo
       const valores = {
         pix: { valor: 100, taxa_efi: 2.5, taxa_sua: 1.0 },
         boleto: { valor: 250, taxa_efi: 3.5, taxa_sua: 1.5 },
         ted: { valor: 500, taxa_efi: 8.0, taxa_sua: 2.0 }
       };
 
-      const { valor, taxa_efi, taxa_sua } = valores[tipo];
-      const lucro = valor - taxa_efi - taxa_sua;
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const response = await supabase.functions.invoke('api-transacoes', {
+        body: JSON.stringify({
+          tipo,
+          ...valores[tipo],
+          descricao: `Transação ${tipo.toUpperCase()} de teste`
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`
+        }
+      });
 
-      // Atualizar dados simulados
-      setDashboardData(prev => ({
-        ...prev,
-        totalTransacoes: prev.totalTransacoes + 1,
-        valorTotal: prev.valorTotal + valor,
-        lucroTotal: prev.lucroTotal + lucro
-      }));
+      if (response.error) {
+        throw new Error(response.error.message || 'Erro ao criar transação');
+      }
 
-      toast.success(`Transação ${tipo.toUpperCase()} simulada adicionada com sucesso!`);
+      const result = response.data;
+      if (result.success) {
+        toast.success(`Transação ${tipo.toUpperCase()} criada com sucesso!`);
+        fetchDashboardData(); // Recarregar dados
+      } else {
+        throw new Error(result.error || 'Erro ao criar transação');
+      }
       
     } catch (error: any) {
-      console.error('Erro ao simular transação:', error);
-      toast.error('Erro ao simular transação');
+      console.error('Erro ao criar transação:', error);
+      toast.error('Erro ao criar transação');
     }
   };
 
@@ -207,28 +225,28 @@ const PainelFinanceiro = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Plus className="w-5 h-5" />
-              Simular Transações (Demonstração)
+              Criar Transações
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-4">
               <Button 
-                onClick={() => adicionarTransacaoSimulada('pix')}
+                onClick={() => adicionarTransacao('pix')}
                 className="bg-purple-600 hover:bg-purple-700"
               >
-                Adicionar PIX (R$ 100)
+                Criar PIX (R$ 100)
               </Button>
               <Button 
-                onClick={() => adicionarTransacaoSimulada('boleto')}
+                onClick={() => adicionarTransacao('boleto')}
                 className="bg-orange-600 hover:bg-orange-700"
               >
-                Adicionar Boleto (R$ 250)
+                Criar Boleto (R$ 250)
               </Button>
               <Button 
-                onClick={() => adicionarTransacaoSimulada('ted')}
+                onClick={() => adicionarTransacao('ted')}
                 className="bg-blue-600 hover:bg-blue-700"
               >
-                Adicionar TED (R$ 500)
+                Criar TED (R$ 500)
               </Button>
             </div>
           </CardContent>
