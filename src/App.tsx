@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { Toaster } from 'sonner';
@@ -38,6 +39,9 @@ import Cofrinho from '@/pages/Cofrinho';
 import Investimentos from '@/pages/Investimentos';
 import GiftCardsPage from '@/pages/GiftCardsPage';
 import TransacoesGlobais from '@/pages/TransacoesGlobais';
+import Configuracoes from '@/pages/Configuracoes';
+import Perfil from '@/pages/Perfil';
+import Ajuda from '@/pages/Ajuda';
 
 const queryClient = new QueryClient();
 
@@ -68,6 +72,23 @@ function App() {
               <Route path="/home" element={
                 <ProtectedRoute>
                   <Home />
+                </ProtectedRoute>
+              } />
+              
+              {/* Configuration routes */}
+              <Route path="/configuracoes" element={
+                <ProtectedRoute>
+                  <Configuracoes />
+                </ProtectedRoute>
+              } />
+              <Route path="/perfil" element={
+                <ProtectedRoute>
+                  <Perfil />
+                </ProtectedRoute>
+              } />
+              <Route path="/ajuda" element={
+                <ProtectedRoute>
+                  <Ajuda />
                 </ProtectedRoute>
               } />
               
