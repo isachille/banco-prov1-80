@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -60,9 +61,9 @@ export default function Index() {
               size="lg" 
               variant="outline" 
               className="border-white text-white hover:bg-white hover:text-purple-900 font-semibold px-8 py-3"
-              onClick={() => navigate('/cadastro-efi')}
+              onClick={() => navigate('/login')}
             >
-              Cadastrar na Efí Bank
+              Cadastrar-se
             </Button>
           </div>
         </div>
@@ -72,7 +73,7 @@ export default function Index() {
       <section className="py-20 px-4 bg-white/5 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-white mb-16">
-            Integração Completa com Efí Bank
+            Recursos Financeiros Completos
           </h2>
           
           <div className="grid md:grid-cols-3 gap-8">
@@ -80,9 +81,9 @@ export default function Index() {
               <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <User className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-3">Cadastro Automático</h3>
+              <h3 className="text-xl font-semibold text-white mb-3">Gestão de Contas</h3>
               <p className="text-gray-300">
-                Criação automática de conta na Efí Bank com integração completa via API
+                Controle completo das suas contas e informações financeiras
               </p>
             </div>
             
@@ -90,9 +91,9 @@ export default function Index() {
               <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <TrendingUp className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-3">Gestão Financeira</h3>
+              <h3 className="text-xl font-semibold text-white mb-3">Transações</h3>
               <p className="text-gray-300">
-                Controle total de transações PIX, boletos e TEDs com cálculo automático de lucro
+                Realize PIX, transferências e pagamentos com segurança
               </p>
             </div>
             
@@ -100,9 +101,9 @@ export default function Index() {
               <div className="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <BarChart3 className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-3">Relatórios Avançados</h3>
+              <h3 className="text-xl font-semibold text-white mb-3">Relatórios</h3>
               <p className="text-gray-300">
-                Dashboards completos com gráficos de lucro mensal e métricas de performance
+                Acompanhe seu desempenho financeiro com relatórios detalhados
               </p>
             </div>
           </div>
