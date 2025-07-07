@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 
-export type UserStatus = 'pendente' | 'ativo' | 'recusado' | null;
+export type UserStatus = 'pendente' | 'ativo' | 'recusado' | 'analise' | null;
 
 export const useUserStatus = (user: User | null) => {
   const [status, setStatus] = useState<UserStatus>(null);
