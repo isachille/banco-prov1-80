@@ -3,8 +3,7 @@ import React from 'react';
 import { ArrowLeft, User, Shield, Bell, CreditCard, HelpCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import TestRegister from '@/components/TestRegister';
+import { Card, CardContent } from '@/components/ui/card';
 
 const Configuracoes = () => {
   const navigate = useNavigate();
@@ -61,32 +60,24 @@ const Configuracoes = () => {
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Opções de Configuração */}
-          <div className="space-y-4">
-            {configOptions.map((option, index) => {
-              const IconComponent = option.icon;
-              return (
-                <Card key={index} className="cursor-pointer hover:shadow-lg transition-shadow" onClick={option.action}>
-                  <CardContent className="flex items-center gap-4 p-4">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <IconComponent className="h-6 w-6 text-[#0057FF]" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900">{option.title}</h3>
-                      <p className="text-sm text-muted-foreground">{option.description}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-
-          {/* Área de Teste */}
-          <div>
-            <h2 className="text-lg font-semibold text-[#0057FF] mb-4">Área de Desenvolvimento</h2>
-            <TestRegister />
-          </div>
+        {/* Opções de Configuração */}
+        <div className="grid gap-4 md:grid-cols-2">
+          {configOptions.map((option, index) => {
+            const IconComponent = option.icon;
+            return (
+              <Card key={index} className="cursor-pointer hover:shadow-lg transition-shadow" onClick={option.action}>
+                <CardContent className="flex items-center gap-4 p-4">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <IconComponent className="h-6 w-6 text-[#0057FF]" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900">{option.title}</h3>
+                    <p className="text-sm text-muted-foreground">{option.description}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </div>
     </div>
