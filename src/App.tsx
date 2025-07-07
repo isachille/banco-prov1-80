@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { Toaster } from 'sonner';
@@ -53,6 +52,7 @@ function App() {
               <Route path="/" element={<Index />} />
               <Route path="/splash" element={<Splash />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/cadastro" element={<CadastroTipo />} />
               <Route path="/cadastro-tipo" element={<CadastroTipo />} />
               <Route path="/cadastro-pf" element={<CadastroPF />} />
               <Route path="/cadastro-pj" element={<CadastroPJ />} />
