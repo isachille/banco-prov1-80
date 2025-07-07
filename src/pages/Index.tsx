@@ -49,7 +49,18 @@ export default function Index() {
             A plataforma financeira completa para você e sua empresa.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+          {/* Prominent Test Button */}
+          <div className="mb-8">
+            <Button 
+              size="lg" 
+              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold px-12 py-4 text-xl rounded-full shadow-2xl transform hover:scale-105 transition-all duration-200"
+              onClick={() => navigate('/cadastro-tipo')}
+            >
+              🚀 TESTE GRÁTIS AGORA
+            </Button>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               size="lg" 
               className="bg-white text-purple-900 hover:bg-gray-100 font-semibold px-8 py-3"
@@ -61,7 +72,7 @@ export default function Index() {
               size="lg" 
               variant="outline" 
               className="border-white text-white hover:bg-white hover:text-purple-900 font-semibold px-8 py-3"
-              onClick={() => navigate('/login')}
+              onClick={() => navigate('/cadastro-tipo')}
             >
               Cadastrar-se
             </Button>
@@ -106,6 +117,23 @@ export default function Index() {
                 Acompanhe seu desempenho financeiro com relatórios detalhados
               </p>
             </div>
+          </div>
+
+          {/* Call to Action */}
+          <div className="text-center mt-16">
+            <h3 className="text-2xl font-bold text-white mb-4">
+              Pronto para começar?
+            </h3>
+            <p className="text-gray-300 mb-8">
+              Crie sua conta gratuita em menos de 2 minutos
+            </p>
+            <Button 
+              size="lg" 
+              className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-bold px-10 py-3 rounded-full"
+              onClick={() => navigate('/cadastro-tipo')}
+            >
+              Começar Agora →
+            </Button>
           </div>
         </div>
       </section>
