@@ -129,6 +129,28 @@ function App() {
                 </ProtectedRoute>
               } />
               
+              {/* New routes */}
+              <Route path="/cripto" element={
+                <ProtectedRoute>
+                  <Cripto />
+                </ProtectedRoute>
+              } />
+              <Route path="/consorcio" element={
+                <ProtectedRoute>
+                  <Consorcio />
+                </ProtectedRoute>
+              } />
+              <Route path="/emprestimo" element={
+                <ProtectedRoute>
+                  <Emprestimo />
+                </ProtectedRoute>
+              } />
+              <Route path="/chatbot" element={
+                <ProtectedRoute>
+                  <Chatbot />
+                </ProtectedRoute>
+              } />
+              
               {/* Financing routes */}
               <Route path="/simulacao" element={
                 <ProtectedRoute>
@@ -198,3 +220,4 @@ function App() {
 }
 
 export default App;
+

@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import BankingHeader from './BankingHeader';
 import { AccountBalance } from './AccountBalance';
 import { QuickActions } from './QuickActions';
 import { RecentTransactions } from './RecentTransactions';
@@ -13,6 +14,9 @@ export const BankingDashboard = () => {
 
   return (
     <div className="space-y-6">
+      {/* Banking Header */}
+      <BankingHeader />
+      
       {/* Account Balance */}
       <AccountBalance />
       
@@ -20,7 +24,7 @@ export const BankingDashboard = () => {
       <QuickActions />
 
       {/* Gift Cards Section */}
-      <Card className="bg-gradient-to-r from-pink-500 to-purple-600 text-white border-none">
+      <Card className="bg-gradient-to-r from-pink-500 to-purple-600 text-white border-none mx-4">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center text-lg">
             <Gift className="mr-2 h-5 w-5" />
@@ -43,7 +47,7 @@ export const BankingDashboard = () => {
       </Card>
 
       {/* Financing Section */}
-      <div className="space-y-3">
+      <div className="space-y-3 mx-4">
         <h3 className="font-semibold text-gray-900 dark:text-white">Financiamento Veicular</h3>
         
         <div className="grid grid-cols-1 gap-3">
@@ -88,7 +92,10 @@ export const BankingDashboard = () => {
       </div>
 
       {/* Recent Transactions */}
-      <RecentTransactions />
+      <div className="mx-4">
+        <RecentTransactions />
+      </div>
     </div>
   );
 };
+
