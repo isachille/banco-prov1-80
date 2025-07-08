@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserStatus } from '@/hooks/useUserStatus';
-import Layout from '@/components/Layout';
+import MobileLayout from '@/components/MobileLayout';
 import { BankingDashboard } from '@/components/BankingDashboard';
 import { Button } from "@/components/ui/button";
 import { Shield } from 'lucide-react';
@@ -28,14 +28,14 @@ const Home = () => {
   const isAdminUser = userData?.role && ['admin', 'dono', 'gerente', 'analista'].includes(userData.role);
 
   return (
-    <Layout>
+    <MobileLayout>
       <div className="space-y-6">
         {/* Admin Panel Button - Only for privileged users */}
         {isAdminUser && (
           <div className="flex justify-center mb-4">
             <Button 
               variant="outline" 
-              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white border-none hover:from-purple-700 hover:to-blue-700"
+              className="w-full bg-gradient-to-r from-[#0047AB] to-[#1E5BA8] text-white border-none hover:from-[#003580] hover:to-[#1A4F96]"
               onClick={() => navigate('/painel-admin')}
             >
               <Shield className="mr-2 h-4 w-4" />
@@ -73,7 +73,7 @@ const Home = () => {
         {/* Banking Dashboard with all features */}
         <BankingDashboard />
       </div>
-    </Layout>
+    </MobileLayout>
   );
 };
 

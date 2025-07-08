@@ -51,7 +51,7 @@ const BankingHeader = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-gradient-to-r from-[#6B46C1] to-[#8B5CF6] text-white p-4 z-50 shadow-lg">
+    <header className="bg-gradient-to-r from-[#0047AB] to-[#1E5BA8] text-white p-4 shadow-lg">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <img 
