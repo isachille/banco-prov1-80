@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -5,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowLeft, Star, CreditCard, Shield, Recycle, Briefcase } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { cleanupAuthState } from '@/utils/authCleanup';
 
 const CadastroPJ = () => {
@@ -80,7 +81,7 @@ const CadastroPJ = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (isLoading) return; // Prevenir múltiplos submits
+    if (isLoading) return;
     
     if (!validarFormulario()) return;
     
@@ -89,20 +90,16 @@ const CadastroPJ = () => {
     try {
       console.log('Iniciando processo de cadastro PJ');
 
-      // Limpar estado anterior para evitar conflitos
       cleanupAuthState();
       
-      // Tentar logout global primeiro (sem aguardar se falhar)
       try {
         await supabase.auth.signOut({ scope: 'global' });
       } catch (err) {
         console.warn('Logout preventivo falhou (continuando):', err);
       }
 
-      // Aguardar um pouco para garantir limpeza
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Cadastrar no Supabase Auth
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.senha,
@@ -140,7 +137,6 @@ const CadastroPJ = () => {
         console.log('Cadastro PJ realizado com sucesso:', data.user.id);
         toast.success('Cadastro realizado! Verifique seu email para confirmar a conta.');
         
-        // Aguardar um pouco antes de navegar
         setTimeout(() => {
           navigate('/confirme-email');
         }, 1000);
@@ -152,13 +148,6 @@ const CadastroPJ = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handlePremiumClick = () => {
-    const whatsappNumber = '5561982021656';
-    const message = 'Olá! Tenho interesse no plano PREMIUM do ProBank. Gostaria de mais informações para ativação.';
-    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
   };
 
   return (
@@ -280,54 +269,6 @@ const CadastroPJ = () => {
                 )}
               </Button>
             </form>
-            
-            <div className="mt-6 p-4 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-              <div className="text-center mb-3">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Star className="h-5 w-5 text-yellow-500" />
-                  <h3 className="text-lg font-bold text-yellow-700 dark:text-yellow-300">PREMIUM</h3>
-                  <Star className="h-5 w-5 text-yellow-500" />
-                </div>
-              </div>
-              
-              <div className="space-y-2 text-sm text-gray-700 dark:text-gray-300 mb-4">
-                <div className="flex items-center gap-2">
-                  <Star className="h-4 w-4 text-yellow-500 flex-shrink-0" />
-                  <span>Cartão Black</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CreditCard className="h-4 w-4 text-yellow-500 flex-shrink-0" />
-                  <span>Limite de até R$10.000</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Shield className="h-4 w-4 text-yellow-500 flex-shrink-0" />
-                  <span>Seguro de vida, celular e compras online</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Recycle className="h-4 w-4 text-yellow-500 flex-shrink-0" />
-                  <span>Cashback sustentável em todas as transações</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Briefcase className="h-4 w-4 text-yellow-500 flex-shrink-0" />
-                  <span>Vantagens exclusivas e atendimento prioritário</span>
-                </div>
-              </div>
-              
-              <div className="text-center mb-3">
-                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                  Valor da anuidade: <span className="text-green-600 dark:text-green-400">R$ 24,99</span>
-                </p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">(cobrados uma vez ao ano)</p>
-              </div>
-              
-              <Button
-                onClick={handlePremiumClick}
-                className="w-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white font-semibold"
-                disabled={isLoading}
-              >
-                Quero ser PREMIUM
-              </Button>
-            </div>
             
             <div className="mt-6 text-center">
               <button
