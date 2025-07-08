@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Star, CreditCard, Shield, Recycle, Briefcase } from 'lucide-react';
+import { cleanupAuthState } from '@/utils/authCleanup';
 
 const CadastroPF = () => {
   const navigate = useNavigate();
@@ -30,25 +30,39 @@ const CadastroPF = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (isLoading) return; // Prevenir múltiplos submits
+    
     setIsLoading(true);
 
-    // Validações básicas
-    if (formData.senha !== formData.confirmarSenha) {
-      toast.error('As senhas não coincidem');
-      setIsLoading(false);
-      return;
-    }
-
-    if (formData.senha.length < 6) {
-      toast.error('A senha deve ter pelo menos 6 caracteres');
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      console.log('Iniciando cadastro PF:', formData);
+      // Validações básicas
+      if (formData.senha !== formData.confirmarSenha) {
+        toast.error('As senhas não coincidem');
+        return;
+      }
 
-      // Cadastrar no Supabase Auth com todos os dados nos metadados
+      if (formData.senha.length < 6) {
+        toast.error('A senha deve ter pelo menos 6 caracteres');
+        return;
+      }
+
+      console.log('Iniciando processo de cadastro PF');
+
+      // Limpar estado anterior para evitar conflitos
+      cleanupAuthState();
+      
+      // Tentar logout global primeiro (sem aguardar se falhar)
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        console.warn('Logout preventivo falhou (continuando):', err);
+      }
+
+      // Aguardar um pouco para garantir limpeza
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Cadastrar no Supabase Auth
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.senha,
@@ -69,24 +83,32 @@ const CadastroPF = () => {
 
       if (error) {
         console.error('Erro no cadastro:', error);
-        if (error.message === 'User already registered') {
+        
+        if (error.message.includes('User already registered')) {
           toast.error('Este e-mail já está cadastrado. Tente fazer login.');
+        } else if (error.message.includes('Invalid email')) {
+          toast.error('E-mail inválido. Verifique o formato.');
+        } else if (error.message.includes('Password')) {
+          toast.error('Senha inválida. Use pelo menos 6 caracteres.');
         } else {
-          toast.error('Erro no cadastro: ' + error.message);
+          toast.error('Erro no cadastro. Tente novamente em alguns momentos.');
         }
         return;
       }
 
-      console.log('Cadastro realizado:', data);
-      
       if (data.user) {
+        console.log('Cadastro realizado com sucesso:', data.user.id);
         toast.success('Cadastro realizado! Verifique seu email para confirmar a conta.');
-        navigate('/confirme-email');
+        
+        // Aguardar um pouco antes de navegar
+        setTimeout(() => {
+          navigate('/confirme-email');
+        }, 1000);
       }
 
     } catch (error) {
-      console.error('Erro no cadastro:', error);
-      toast.error('Erro interno no cadastro');
+      console.error('Erro geral no cadastro:', error);
+      toast.error('Erro interno. Tente novamente em alguns momentos.');
     } finally {
       setIsLoading(false);
     }
@@ -140,6 +162,7 @@ const CadastroPF = () => {
                   onChange={handleInputChange}
                   required
                   className="h-12"
+                  disabled={isLoading}
                 />
               </div>
               <div>
@@ -151,6 +174,7 @@ const CadastroPF = () => {
                   onChange={handleInputChange}
                   required
                   className="h-12"
+                  disabled={isLoading}
                 />
               </div>
               <div>
@@ -163,6 +187,7 @@ const CadastroPF = () => {
                   required
                   className="h-12"
                   maxLength={14}
+                  disabled={isLoading}
                 />
               </div>
               <div>
@@ -175,6 +200,7 @@ const CadastroPF = () => {
                   required
                   className="h-12"
                   maxLength={15}
+                  disabled={isLoading}
                 />
               </div>
               <div>
@@ -186,6 +212,7 @@ const CadastroPF = () => {
                   onChange={handleInputChange}
                   required
                   className="h-12"
+                  disabled={isLoading}
                 />
               </div>
               <div>
@@ -197,6 +224,7 @@ const CadastroPF = () => {
                   onChange={handleInputChange}
                   required
                   className="h-12"
+                  disabled={isLoading}
                 />
               </div>
               <div>
@@ -208,18 +236,25 @@ const CadastroPF = () => {
                   onChange={handleInputChange}
                   required
                   className="h-12"
+                  disabled={isLoading}
                 />
               </div>
               <Button
                 type="submit"
-                className="w-full h-12 bg-[#0057FF] hover:bg-[#0047CC] text-white font-medium"
+                className="w-full h-12 bg-[#0057FF] hover:bg-[#0047CC] text-white font-medium disabled:opacity-50"
                 disabled={isLoading}
               >
-                {isLoading ? 'Cadastrando...' : 'Cadastrar'}
+                {isLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Cadastrando...</span>
+                  </div>
+                ) : (
+                  'Cadastrar'
+                )}
               </Button>
             </form>
             
-            {/* Premium Section */}
             <div className="mt-6 p-4 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
               <div className="text-center mb-3">
                 <div className="flex items-center justify-center gap-2 mb-2">
@@ -262,6 +297,7 @@ const CadastroPF = () => {
               <Button
                 onClick={handlePremiumClick}
                 className="w-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white font-semibold"
+                disabled={isLoading}
               >
                 Quero ser PREMIUM
               </Button>
@@ -270,7 +306,8 @@ const CadastroPF = () => {
             <div className="mt-6 text-center">
               <button
                 onClick={() => navigate('/login')}
-                className="text-[#0057FF] hover:underline"
+                className="text-[#0057FF] hover:underline disabled:opacity-50"
+                disabled={isLoading}
               >
                 Já tem conta? Faça login
               </button>

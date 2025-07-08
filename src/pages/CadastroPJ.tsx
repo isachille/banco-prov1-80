@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft, Star, CreditCard, Shield, Recycle, Briefcase } from 'lucide-react';
+import { cleanupAuthState } from '@/utils/authCleanup';
 
 const CadastroPJ = () => {
   const navigate = useNavigate();
@@ -80,14 +80,29 @@ const CadastroPJ = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (isLoading) return; // Prevenir múltiplos submits
+    
     if (!validarFormulario()) return;
     
     setIsLoading(true);
 
     try {
-      console.log('Iniciando cadastro PJ:', formData);
+      console.log('Iniciando processo de cadastro PJ');
 
-      // Cadastrar no Supabase Auth com todos os dados nos metadados
+      // Limpar estado anterior para evitar conflitos
+      cleanupAuthState();
+      
+      // Tentar logout global primeiro (sem aguardar se falhar)
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        console.warn('Logout preventivo falhou (continuando):', err);
+      }
+
+      // Aguardar um pouco para garantir limpeza
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Cadastrar no Supabase Auth
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.senha,
@@ -108,21 +123,32 @@ const CadastroPJ = () => {
 
       if (error) {
         console.error('Erro no cadastro:', error);
-        if (error.message === 'User already registered') {
-          toast.error('Este email já está cadastrado');
+        
+        if (error.message.includes('User already registered')) {
+          toast.error('Este email já está cadastrado. Tente fazer login.');
+        } else if (error.message.includes('Invalid email')) {
+          toast.error('E-mail inválido. Verifique o formato.');
+        } else if (error.message.includes('Password')) {
+          toast.error('Senha inválida. Use pelo menos 6 caracteres.');
         } else {
-          toast.error('Erro no cadastro: ' + error.message);
+          toast.error('Erro no cadastro. Tente novamente em alguns momentos.');
         }
         return;
       }
 
-      console.log('Cadastro PJ realizado:', data);
-      toast.success('Cadastro realizado! Verifique seu email para confirmar a conta.');
-      navigate('/confirme-email');
+      if (data.user) {
+        console.log('Cadastro PJ realizado com sucesso:', data.user.id);
+        toast.success('Cadastro realizado! Verifique seu email para confirmar a conta.');
+        
+        // Aguardar um pouco antes de navegar
+        setTimeout(() => {
+          navigate('/confirme-email');
+        }, 1000);
+      }
 
     } catch (error) {
-      console.error('Erro no cadastro:', error);
-      toast.error('Erro interno no cadastro');
+      console.error('Erro geral no cadastro:', error);
+      toast.error('Erro interno. Tente novamente em alguns momentos.');
     } finally {
       setIsLoading(false);
     }
@@ -144,6 +170,7 @@ const CadastroPJ = () => {
               <button
                 onClick={() => navigate('/cadastro')}
                 className="absolute left-6 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
+                disabled={isLoading}
               >
                 <ArrowLeft className="w-5 h-5" />
               </button>
@@ -167,6 +194,7 @@ const CadastroPJ = () => {
                   onChange={handleInputChange}
                   required
                   className="h-12"
+                  disabled={isLoading}
                 />
                 <Input
                   type="text"
@@ -177,6 +205,7 @@ const CadastroPJ = () => {
                   required
                   maxLength={18}
                   className="h-12"
+                  disabled={isLoading}
                 />
               </div>
               
@@ -188,6 +217,7 @@ const CadastroPJ = () => {
                 onChange={handleInputChange}
                 required
                 className="h-12"
+                disabled={isLoading}
               />
               
               <Input
@@ -199,6 +229,7 @@ const CadastroPJ = () => {
                 required
                 maxLength={15}
                 className="h-12"
+                disabled={isLoading}
               />
               
               <Input
@@ -209,6 +240,7 @@ const CadastroPJ = () => {
                 onChange={handleInputChange}
                 required
                 className="h-12"
+                disabled={isLoading}
               />
               
               <Input
@@ -219,6 +251,7 @@ const CadastroPJ = () => {
                 onChange={handleInputChange}
                 required
                 className="h-12"
+                disabled={isLoading}
               />
               
               <Input
@@ -229,18 +262,25 @@ const CadastroPJ = () => {
                 onChange={handleInputChange}
                 required
                 className="h-12"
+                disabled={isLoading}
               />
               
               <Button
                 type="submit"
-                className="w-full h-12 bg-[#0057FF] hover:bg-[#0047CC] text-white font-medium"
+                className="w-full h-12 bg-[#0057FF] hover:bg-[#0047CC] text-white font-medium disabled:opacity-50"
                 disabled={isLoading}
               >
-                {isLoading ? 'Cadastrando...' : 'Criar Conta'}
+                {isLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Cadastrando...</span>
+                  </div>
+                ) : (
+                  'Criar Conta'
+                )}
               </Button>
             </form>
             
-            {/* Premium Section */}
             <div className="mt-6 p-4 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
               <div className="text-center mb-3">
                 <div className="flex items-center justify-center gap-2 mb-2">
@@ -283,6 +323,7 @@ const CadastroPJ = () => {
               <Button
                 onClick={handlePremiumClick}
                 className="w-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white font-semibold"
+                disabled={isLoading}
               >
                 Quero ser PREMIUM
               </Button>
@@ -291,7 +332,8 @@ const CadastroPJ = () => {
             <div className="mt-6 text-center">
               <button
                 onClick={() => navigate('/login')}
-                className="text-[#0057FF] hover:underline"
+                className="text-[#0057FF] hover:underline disabled:opacity-50"
+                disabled={isLoading}
               >
                 Já tem conta? Faça login
               </button>

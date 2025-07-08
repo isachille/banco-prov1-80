@@ -8,20 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Eye, EyeOff, LogIn, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-
-// Função para limpar estado de autenticação
-const cleanupAuthState = () => {
-  Object.keys(localStorage).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      localStorage.removeItem(key);
-    }
-  });
-  Object.keys(sessionStorage || {}).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      sessionStorage.removeItem(key);
-    }
-  });
-};
+import { cleanupAuthState } from '@/utils/authCleanup';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -37,20 +24,24 @@ const Login = () => {
   // Verificar se usuário já está logado
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        // Se já está logado, verificar role e redirecionar
-        const { data: userData } = await supabase
-          .from('users')
-          .select('role, status')
-          .eq('id', session.user.id)
-          .single();
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          // Se já está logado, verificar role e redirecionar
+          const { data: userData } = await supabase
+            .from('users')
+            .select('role, status')
+            .eq('id', session.user.id)
+            .single();
 
-        if (userData) {
-          if (userData.status === 'ativo' || ['admin', 'dono'].includes(userData.role)) {
-            navigate('/home');
+          if (userData) {
+            if (userData.status === 'ativo' || ['admin', 'dono'].includes(userData.role)) {
+              navigate('/home');
+            }
           }
         }
+      } catch (error) {
+        console.warn('Erro ao verificar usuário:', error);
       }
     };
     checkUser();
@@ -62,6 +53,9 @@ const Login = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (loading) return; // Prevenir múltiplos submits
+    
     setLoading(true);
 
     try {
@@ -71,8 +65,11 @@ const Login = () => {
       try {
         await supabase.auth.signOut({ scope: 'global' });
       } catch (err) {
-        // Continuar mesmo se falhar
+        console.warn('Logout preventivo falhou (continuando):', err);
       }
+
+      // Aguardar um pouco para garantir limpeza
+      await new Promise(resolve => setTimeout(resolve, 300));
 
       const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
@@ -80,11 +77,16 @@ const Login = () => {
       });
 
       if (error) {
+        console.error('Erro no login:', error);
+        
         if (error.message.includes('Email not confirmed')) {
           toast.error('Por favor, confirme seu email antes de fazer login. Verifique sua caixa de entrada.');
-          return;
+        } else if (error.message.includes('Invalid login credentials')) {
+          toast.error('Email ou senha incorretos. Verifique suas credenciais.');
+        } else {
+          toast.error('Erro no login. Tente novamente em alguns momentos.');
         }
-        throw error;
+        return;
       }
 
       if (data.user) {
@@ -106,7 +108,7 @@ const Login = () => {
           return;
         }
 
-        console.log('Dados do usuário:', userData);
+        console.log('Login realizado com sucesso:', userData);
 
         if (userData.status === 'pendente' && !['admin', 'dono'].includes(userData.role)) {
           toast.info('Sua conta está pendente de aprovação');
@@ -122,18 +124,14 @@ const Login = () => {
 
         toast.success(`Bem-vindo, ${userData.nome_completo || 'usuário'}!`);
         
-        // Redirecionar baseado no role
-        if (['dono', 'admin'].includes(userData.role)) {
-          // Usuários admin/dono vão para home (com acesso ao painel)
+        // Aguardar um pouco antes de redirecionar
+        setTimeout(() => {
           navigate('/home');
-        } else {
-          // Usuários normais vão para home
-          navigate('/home');
-        }
+        }, 500);
       }
     } catch (error: any) {
-      console.error('Erro no login:', error);
-      toast.error(error.message || 'Erro ao fazer login');
+      console.error('Erro geral no login:', error);
+      toast.error('Erro interno. Tente novamente em alguns momentos.');
     } finally {
       setLoading(false);
     }
@@ -141,6 +139,9 @@ const Login = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (loading) return; // Prevenir múltiplos submits
+    
     setLoading(true);
 
     if (formData.password !== formData.confirmPassword) {
@@ -156,8 +157,11 @@ const Login = () => {
       try {
         await supabase.auth.signOut({ scope: 'global' });
       } catch (err) {
-        // Continuar mesmo se falhar
+        console.warn('Logout preventivo falhou (continuando):', err);
       }
+
+      // Aguardar um pouco para garantir limpeza
+      await new Promise(resolve => setTimeout(resolve, 300));
 
       const redirectUrl = `${window.location.origin}/email-confirmado`;
       
@@ -170,20 +174,29 @@ const Login = () => {
       });
 
       if (error) {
+        console.error('Erro no cadastro:', error);
+        
         if (error.message.includes('User already registered')) {
           toast.error('Este email já está cadastrado. Tente fazer login.');
-          return;
+        } else if (error.message.includes('Invalid email')) {
+          toast.error('E-mail inválido. Verifique o formato.');
+        } else {
+          toast.error('Erro no cadastro. Tente novamente em alguns momentos.');
         }
-        throw error;
+        return;
       }
 
       if (data.user) {
         toast.success('Cadastro realizado! Verifique seu email para confirmar a conta.');
-        navigate('/confirme-email');
+        
+        // Aguardar um pouco antes de navegar
+        setTimeout(() => {
+          navigate('/confirme-email');
+        }, 1000);
       }
     } catch (error: any) {
-      console.error('Erro no cadastro:', error);
-      toast.error(error.message || 'Erro ao fazer cadastro');
+      console.error('Erro geral no cadastro:', error);
+      toast.error('Erro interno. Tente novamente em alguns momentos.');
     } finally {
       setLoading(false);
     }
@@ -214,6 +227,7 @@ const Login = () => {
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 required
+                disabled={loading}
               />
             </div>
             
@@ -226,11 +240,13 @@ const Login = () => {
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
                   required
+                  disabled={loading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                  disabled={loading}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -246,13 +262,14 @@ const Login = () => {
                   value={formData.confirmPassword}
                   onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
                   required
+                  disabled={loading}
                 />
               </div>
             )}
 
             <Button
               type="submit"
-              className="w-full bg-[#0057FF] hover:bg-[#0047CC]"
+              className="w-full bg-[#0057FF] hover:bg-[#0047CC] disabled:opacity-50"
               disabled={loading}
             >
               {loading ? (
@@ -273,7 +290,8 @@ const Login = () => {
             <button
               type="button"
               onClick={() => setIsLogin(!isLogin)}
-              className="text-[#0057FF] hover:underline"
+              className="text-[#0057FF] hover:underline disabled:opacity-50"
+              disabled={loading}
             >
               {isLogin ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Faça login'}
             </button>
