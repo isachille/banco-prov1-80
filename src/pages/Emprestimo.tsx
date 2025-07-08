@@ -1,183 +1,164 @@
 
 import React, { useState } from 'react';
-import { ArrowLeft, Banknote, Calculator, Shield, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Shield, Car, Home, TrendingUp, User, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import MobileLayout from '@/components/MobileLayout';
+import { Badge } from '@/components/ui/badge';
 
 const Emprestimo = () => {
   const navigate = useNavigate();
-  const [loanData, setLoanData] = useState({
-    type: '',
-    value: '',
-    installments: ''
-  });
+  const [selectedOption, setSelectedOption] = useState('');
 
-  const loanTypes = [
-    { 
-      value: 'pessoal', 
-      label: 'Empréstimo Pessoal', 
-      rate: '2.5% a.m.',
-      description: 'Sem necessidade de garantia'
-    },
-    { 
-      value: 'fgts', 
-      label: 'Antecipação FGTS', 
-      rate: '1.8% a.m.',
-      description: 'Garantia do saldo do FGTS'
-    },
-    { 
-      value: 'veiculo', 
-      label: 'Com Garantia de Veículo', 
-      rate: '1.2% a.m.',
-      description: 'Veículo como garantia'
-    },
-    { 
-      value: 'imovel', 
-      label: 'Com Garantia de Imóvel', 
-      rate: '0.9% a.m.',
-      description: 'Imóvel como garantia'
+  const loanFeatures = [
+    {
+      icon: Shield,
+      title: 'Saque-aniversário FGTS',
+      description: 'Se você tem fundo de garantia, confira as condições.',
+      badge: 'Não compromete a sua renda',
+      action: 'Saiba mais',
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50 dark:bg-blue-900/20'
     }
   ];
 
-  const calculateLoan = () => {
-    const value = parseFloat(loanData.value.replace(/\D/g, '')) / 100;
-    const installments = parseInt(loanData.installments);
-    const selectedType = loanTypes.find(t => t.value === loanData.type);
-    
-    if (value && installments && selectedType) {
-      const rate = parseFloat(selectedType.rate.replace(/\D/g, '')) / 100;
-      const monthlyPayment = (value * rate * Math.pow(1 + rate, installments)) / 
-                            (Math.pow(1 + rate, installments) - 1);
-      
-      return monthlyPayment.toLocaleString('pt-BR', { 
-        style: 'currency', 
-        currency: 'BRL' 
-      });
+  const loanTypes = [
+    {
+      icon: Car,
+      title: 'Quero um veículo',
+      description: 'Financiamento de veículos',
+      route: '/financiamento'
+    },
+    {
+      icon: Home,
+      title: 'Quero um imóvel',
+      description: 'Financiamento imobiliário',
+      route: '/financiamento-imovel'
     }
-    return 'R$ 0,00';
-  };
+  ];
+
+  const managementOptions = [
+    {
+      icon: User,
+      title: 'Portabilidade de Consignado',
+      description: 'Traga seu empréstimo para cá',
+      bgColor: 'bg-pink-50 dark:bg-pink-900/20'
+    },
+    {
+      icon: TrendingUp,
+      title: 'Meus Limites de Crédito',
+      description: 'Consulte seus limites disponíveis',
+      bgColor: 'bg-pink-50 dark:bg-pink-900/20'
+    }
+  ];
 
   return (
-    <MobileLayout>
-      <div className="space-y-6">
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <h1 className="text-2xl font-bold">Empréstimos</h1>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-pink-500 to-pink-600 text-white p-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => navigate('/home')}
+              className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <h1 className="text-2xl font-bold">Empréstimos</h1>
+              <p className="text-pink-100">Confira o que temos para você</p>
+            </div>
+          </div>
         </div>
+      </div>
 
-        {/* Simulador */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Calculator className="mr-2 h-5 w-5" />
-              Simular Empréstimo
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Tipo de Empréstimo</label>
-              <Select value={loanData.type} onValueChange={(value) => 
-                setLoanData({...loanData, type: value})
-              }>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {loanTypes.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label} - {type.rate}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Valor Desejado (R$)</label>
-              <Input
-                placeholder="R$ 0,00"
-                value={loanData.value}
-                onChange={(e) => setLoanData({...loanData, value: e.target.value})}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Número de Parcelas</label>
-              <Select value={loanData.installments} onValueChange={(value) => 
-                setLoanData({...loanData, installments: value})
-              }>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="12">12 meses</SelectItem>
-                  <SelectItem value="24">24 meses</SelectItem>
-                  <SelectItem value="36">36 meses</SelectItem>
-                  <SelectItem value="48">48 meses</SelectItem>
-                  <SelectItem value="60">60 meses</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {loanData.value && loanData.installments && loanData.type && (
-              <div className="p-4 bg-green-50 rounded-lg">
-                <p className="text-sm text-green-600">Parcela estimada</p>
-                <p className="text-2xl font-bold text-green-800">{calculateLoan()}</p>
-              </div>
-            )}
-
-            <Button className="w-full">
-              Solicitar Empréstimo
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Tipos de Empréstimo */}
-        <div className="space-y-3">
-          {loanTypes.map((type) => (
-            <Card key={type.value} className="cursor-pointer hover:shadow-lg transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Shield className="h-8 w-8 text-blue-500" />
-                    <div>
-                      <p className="font-semibold">{type.label}</p>
-                      <p className="text-sm text-gray-600">{type.description}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold text-blue-600">{type.rate}</p>
-                  </div>
+      <div className="p-6 -mt-4 space-y-6">
+        {/* FGTS Feature */}
+        {loanFeatures.map((feature, index) => (
+          <Card key={index} className="shadow-lg border-l-4 border-blue-500">
+            <CardContent className="p-6">
+              <div className="flex items-start space-x-4">
+                <div className={`w-12 h-12 ${feature.bgColor} rounded-full flex items-center justify-center flex-shrink-0`}>
+                  <feature.icon className={`w-6 h-6 ${feature.color}`} />
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+                <div className="flex-1">
+                  <Badge variant="secondary" className="mb-2 bg-blue-100 text-blue-800">
+                    {feature.badge}
+                  </Badge>
+                  <h3 className="font-bold text-lg text-foreground mb-1">{feature.title}</h3>
+                  <p className="text-muted-foreground mb-3">{feature.description}</p>
+                  <Button variant="link" className="p-0 h-auto text-blue-600">
+                    {feature.action}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+
+        {/* Loan Types */}
+        <div>
+          <h2 className="text-lg font-bold text-foreground mb-4">Conquiste seus bens</h2>
+          <div className="grid grid-cols-2 gap-4">
+            {loanTypes.map((type, index) => (
+              <Card 
+                key={index} 
+                className="cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => navigate(type.route)}
+              >
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <type.icon className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-2">{type.title}</h3>
+                  <p className="text-sm text-muted-foreground">{type.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
 
-        {/* Meus Empréstimos */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <FileText className="mr-2 h-5 w-5" />
-              Meus Empréstimos
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-600 text-center py-8">
-              Você não possui empréstimos ativos
-            </p>
+        {/* Management Options */}
+        <div>
+          <h2 className="text-lg font-bold text-foreground mb-4">Gerencie seus empréstimos</h2>
+          <div className="grid grid-cols-2 gap-4">
+            {managementOptions.map((option, index) => (
+              <Card key={index} className="cursor-pointer hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <div className={`w-12 h-12 ${option.bgColor} rounded-full flex items-center justify-center mb-3`}>
+                    <option.icon className="w-6 h-6 text-pink-600" />
+                  </div>
+                  <h3 className="font-semibold text-sm text-foreground mb-1">{option.title}</h3>
+                  <p className="text-xs text-muted-foreground">{option.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Open Finance */}
+        <Card 
+          className="bg-gradient-to-r from-pink-500 to-pink-600 text-white cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => navigate('/open-finance')}
+        >
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg">Aumente suas chances de ter melhores ofertas de crédito</h3>
+                  <p className="text-pink-100 mt-1">Conecte contas via Open Finance</p>
+                </div>
+              </div>
+              <ChevronRight className="w-6 h-6" />
+            </div>
           </CardContent>
         </Card>
       </div>
-    </MobileLayout>
+    </div>
   );
 };
 
 export default Emprestimo;
-

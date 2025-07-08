@@ -1,30 +1,45 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Zap, Camera } from 'lucide-react';
+import { ArrowLeft, Camera, Zap, Car, CreditCard, Send, Receipt, Calendar, Settings, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 
 const Pagar = () => {
   const navigate = useNavigate();
-  const [codigoBarras, setCodigoBarras] = useState('');
+  const [codigo, setCodigo] = useState('');
 
-  const handlePayment = () => {
-    if (!codigoBarras) {
-      toast.error('Digite o código de barras do boleto');
-      return;
-    }
-    toast.success('Pagamento processado com sucesso!');
-    navigate('/home');
+  const handleScanBarcode = () => {
+    toast.info('Função de escaneamento em desenvolvimento');
   };
 
+  const paymentOptions = [
+    { 
+      icon: Zap, 
+      label: 'Buscador de boletos - DDA', 
+      description: 'Encontre seus boletos automaticamente',
+      route: '/boletos'
+    }
+  ];
+
+  const quickPayments = [
+    { icon: Car, label: 'Débitos de veículos', route: '/debitos-veiculos' },
+    { icon: CreditCard, label: 'Pagar cartão Bradesco', route: '/pagar-cartao' }
+  ];
+
+  const moreServices = [
+    { icon: Send, label: 'Meus limites', bg: 'bg-pink-50 dark:bg-pink-900/20' },
+    { icon: Receipt, label: 'Comprovantes', bg: 'bg-pink-50 dark:bg-pink-900/20' },
+    { icon: Calendar, label: 'Agendamentos', bg: 'bg-pink-50 dark:bg-pink-900/20' },
+    { icon: Settings, label: 'Débito automático', bg: 'bg-pink-50 dark:bg-pink-900/20' }
+  ];
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#001B3A] to-[#003F5C] text-white p-6">
+      <div className="bg-gradient-to-r from-pink-500 to-pink-600 text-white p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <button
@@ -34,85 +49,101 @@ const Pagar = () => {
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
-              <h1 className="text-2xl font-bold">Pagar</h1>
-              <p className="text-blue-100">Boletos e contas</p>
+              <h1 className="text-2xl font-bold">Pagamentos</h1>
             </div>
           </div>
-          <img 
-            src="/lovable-uploads/4712549c-a705-4aad-8498-4702dc3cdd8f.png" 
-            alt="Banco Pro" 
-            className="h-12 w-auto"
-          />
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-white hover:bg-white/20"
+          >
+            <HelpCircle className="w-5 h-5" />
+          </Button>
+        </div>
+
+        <div className="mt-6">
+          <h2 className="text-xl font-semibold mb-4">Como você quer pagar?</h2>
         </div>
       </div>
 
-      <div className="container mx-auto p-6 max-w-md">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Zap className="mr-2 h-5 w-5" />
-              Pagar Boleto
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="codigo">Código de Barras</Label>
-              <Input
-                id="codigo"
-                placeholder="Digite ou escaneie o código de barras"
-                value={codigoBarras}
-                onChange={(e) => setCodigoBarras(e.target.value)}
-              />
+      <div className="p-6 -mt-4 space-y-6">
+        {/* Main Payment Card */}
+        <Card className="shadow-lg">
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div>
+                <Input
+                  placeholder="Digitar ou colar o código"
+                  value={codigo}
+                  onChange={(e) => setCodigo(e.target.value)}
+                  className="text-lg"
+                />
+                <p className="text-sm text-muted-foreground mt-1">
+                  Pode ser um código de barras ou Pix Copia e Cola
+                </p>
+              </div>
+
+              <Button
+                onClick={handleScanBarcode}
+                variant="outline"
+                className="w-full h-auto p-4 flex items-center justify-center space-x-2"
+              >
+                <Camera className="w-6 h-6 text-blue-600" />
+                <span className="font-medium">Ler código de barras</span>
+              </Button>
             </div>
-            
-            <Button 
-              variant="outline"
-              className="w-full"
-              onClick={() => toast.info('Funcionalidade de câmera em desenvolvimento')}
-            >
-              <Camera className="mr-2 h-4 w-4" />
-              Escanear Código de Barras
-            </Button>
-            
-            <Button 
-              onClick={handlePayment}
-              className="w-full bg-gradient-to-r from-[#001B3A] to-[#003F5C] hover:from-[#002A4A] hover:to-[#004F6C]"
-            >
-              Pagar Boleto
-            </Button>
           </CardContent>
         </Card>
 
-        <div className="mt-6 space-y-3">
-          <Card className="cursor-pointer hover:shadow-md transition-shadow">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold">Conta de Luz</h3>
-                  <p className="text-sm text-muted-foreground">Vencimento: 15/01/2024</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold">R$ 89,50</p>
-                  <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">Vencido</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Payment Options */}
+        <div>
+          <h2 className="text-lg font-semibold mb-4 text-foreground">Mais opções</h2>
+          <div className="space-y-3">
+            {paymentOptions.map((option, index) => (
+              <Card key={index} className="cursor-pointer hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-pink-100 dark:bg-pink-900/20 rounded-full flex items-center justify-center">
+                      <option.icon className="w-6 h-6 text-pink-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-foreground">{option.label}</h3>
+                      <p className="text-sm text-muted-foreground">{option.description}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
 
-          <Card className="cursor-pointer hover:shadow-md transition-shadow">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold">Internet</h3>
-                  <p className="text-sm text-muted-foreground">Vencimento: 20/01/2024</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold">R$ 129,90</p>
-                  <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Pendente</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Quick Payments */}
+        <div className="grid grid-cols-2 gap-4">
+          {quickPayments.map((payment, index) => (
+            <Card key={index} className="cursor-pointer hover:shadow-md transition-shadow">
+              <CardContent className="p-4 text-center">
+                <payment.icon className="w-8 h-8 text-pink-600 mx-auto mb-2" />
+                <span className="text-sm font-medium text-foreground">{payment.label}</span>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* More Services */}
+        <div>
+          <h2 className="text-lg font-semibold mb-4 text-foreground">Mais serviços</h2>
+          <div className="grid grid-cols-2 gap-4">
+            {moreServices.map((service, index) => (
+              <Card key={index} className="cursor-pointer hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <div className={`w-12 h-12 ${service.bg} rounded-full flex items-center justify-center mb-3`}>
+                    <service.icon className="w-6 h-6 text-pink-600" />
+                  </div>
+                  <span className="text-sm font-medium text-foreground">{service.label}</span>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       </div>
     </div>

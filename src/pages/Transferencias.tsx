@@ -62,55 +62,70 @@ const Transferencias = () => {
     }
   };
 
+  const transferOptions = [
+    {
+      title: 'Contas Bradesco e Next',
+      description: 'Transferência entre contas do mesmo grupo',
+      icon: '🔄',
+      route: '/transferir'
+    },
+    {
+      title: 'Contas de outros bancos',
+      description: 'TED para outros bancos',
+      icon: '🏦',
+      route: '/ted'
+    },
+    {
+      title: 'Pix',
+      description: 'Transferência instantânea',
+      icon: '⚡',
+      route: '/pix'
+    },
+    {
+      title: 'Conta de pagamento',
+      description: 'Carteiras digitais',
+      icon: '💳',
+      route: '/pagamentos'
+    }
+  ];
+
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center space-x-4">
-        <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <h1 className="text-2xl font-bold">Transferências</h1>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-pink-500 to-pink-600 text-white p-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => navigate('/home')}
+              className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <h1 className="text-2xl font-bold">Transferências</h1>
+          </div>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <ArrowRight className="h-5 w-5" />
-            <span>Nova Transferência</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="conta-destino">Conta de Destino</Label>
-            <Input
-              id="conta-destino"
-              placeholder="Digite o número da conta ou CPF"
-              value={contaDestino}
-              onChange={(e) => setContaDestino(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="valor">Valor (R$)</Label>
-            <Input
-              id="valor"
-              type="number"
-              placeholder="0,00"
-              value={valor}
-              onChange={(e) => setValor(e.target.value)}
-              min="0"
-              step="0.01"
-            />
-          </div>
-
-          <Button 
-            className="w-full"
-            onClick={handleTransfer}
-            disabled={loading}
-          >
-            {loading ? 'Transferindo...' : 'Transferir'}
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="p-6 -mt-4">
+        <div className="space-y-4">
+          {transferOptions.map((option, index) => (
+            <Card key={index} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate(option.route)}>
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-pink-100 dark:bg-pink-900/20 rounded-full flex items-center justify-center">
+                    <span className="text-2xl">{option.icon}</span>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-foreground">{option.title}</h3>
+                    <p className="text-sm text-muted-foreground">{option.description}</p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-muted-foreground" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

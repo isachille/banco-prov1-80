@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { Toaster } from 'sonner';
@@ -46,6 +47,10 @@ import Cripto from '@/pages/Cripto';
 import Consorcio from '@/pages/Consorcio';
 import Emprestimo from '@/pages/Emprestimo';
 import Chatbot from '@/pages/Chatbot';
+import Transferencias from '@/pages/Transferencias';
+import Ted from '@/pages/Ted';
+import OpenFinance from '@/pages/OpenFinance';
+import PixAdmin from '@/pages/PixAdmin';
 
 const queryClient = new QueryClient();
 
@@ -102,9 +107,24 @@ function App() {
                   <Transferir />
                 </ProtectedRoute>
               } />
+              <Route path="/transferencias" element={
+                <ProtectedRoute>
+                  <Transferencias />
+                </ProtectedRoute>
+              } />
+              <Route path="/ted" element={
+                <ProtectedRoute>
+                  <Ted />
+                </ProtectedRoute>
+              } />
               <Route path="/pix" element={
                 <ProtectedRoute>
                   <PIX />
+                </ProtectedRoute>
+              } />
+              <Route path="/pix-admin" element={
+                <ProtectedRoute>
+                  <PixAdmin />
                 </ProtectedRoute>
               } />
               <Route path="/pagar" element={
@@ -130,6 +150,11 @@ function App() {
               <Route path="/gift-cards" element={
                 <ProtectedRoute>
                   <GiftCardsPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/open-finance" element={
+                <ProtectedRoute>
+                  <OpenFinance />
                 </ProtectedRoute>
               } />
               
