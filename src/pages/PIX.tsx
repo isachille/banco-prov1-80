@@ -62,32 +62,115 @@ const PIX = () => {
   };
 
   const pixOptions = [
-    { icon: Star, label: 'Escolher um contato', description: 'Favoritos e recentes' },
-    { icon: Camera, label: 'Digitar agência e conta', description: 'Transferir para conta' }
+    { 
+      icon: Star, 
+      label: 'Escolher um contato', 
+      description: 'Favoritos e recentes',
+      onClick: () => navigate('/pix-contatos')
+    },
+    { 
+      icon: Camera, 
+      label: 'Digitar agência e conta', 
+      description: 'Transferir para conta',
+      onClick: () => navigate('/ted')
+    }
   ];
 
   const moreOptions = [
-    { icon: Copy, label: 'Pix copia e cola', description: 'Cole o código aqui' },
-    { icon: QrCode, label: 'Ler um QR Code', description: 'Escaneie para pagar' },
-    { icon: Send, label: 'Trazer dinheiro', description: 'Receber via PIX' },
-    { icon: Send, label: 'Receber por aproximação', description: 'Via NFC' }
+    { 
+      icon: Copy, 
+      label: 'Pix copia e cola', 
+      description: 'Cole o código aqui',
+      onClick: () => {
+        const clipboardText = prompt('Cole o código PIX aqui:');
+        if (clipboardText) {
+          setChavePix(clipboardText);
+          toast.success('Código PIX colado!');
+        }
+      }
+    },
+    { 
+      icon: QrCode, 
+      label: 'Ler um QR Code', 
+      description: 'Escaneie para pagar',
+      onClick: () => {
+        toast.info('Abrindo câmera para escanear QR Code...');
+        // Simula abertura da câmera
+        setTimeout(() => {
+          setChavePix('qr-code-example@test.com');
+          toast.success('QR Code lido com sucesso!');
+        }, 1000);
+      }
+    },
+    { 
+      icon: Send, 
+      label: 'Trazer dinheiro', 
+      description: 'Receber via PIX',
+      onClick: () => navigate('/pix-receber')
+    },
+    { 
+      icon: Send, 
+      label: 'Receber por aproximação', 
+      description: 'Via NFC',
+      onClick: () => toast.info('Função NFC em desenvolvimento')
+    }
   ];
 
   const otherServices = [
-    { icon: Send, label: 'PIX Automático', bg: 'bg-pink-50 dark:bg-pink-900/20' },
-    { icon: Users, label: 'Extrato PIX', bg: 'bg-pink-50 dark:bg-pink-900/20' },
-    { icon: Star, label: 'Minhas chaves PIX', bg: 'bg-pink-50 dark:bg-pink-900/20' },
-    { icon: Users, label: 'Gerenciar contatos', bg: 'bg-pink-50 dark:bg-pink-900/20' },
-    { icon: Send, label: 'Limites PIX', bg: 'bg-pink-50 dark:bg-pink-900/20' },
-    { icon: Calendar, label: 'PIX agendados', bg: 'bg-pink-50 dark:bg-pink-900/20' },
-    { icon: Clock, label: 'Notificações', bg: 'bg-pink-50 dark:bg-pink-900/20' },
-    { icon: Send, label: 'Contestações', bg: 'bg-pink-50 dark:bg-pink-900/20' }
+    { 
+      icon: Send, 
+      label: 'PIX Automático', 
+      bg: 'bg-blue-50 dark:bg-blue-900/20',
+      onClick: () => toast.info('Função em desenvolvimento')
+    },
+    { 
+      icon: Users, 
+      label: 'Extrato PIX', 
+      bg: 'bg-blue-50 dark:bg-blue-900/20',
+      onClick: () => navigate('/extrato-pix')
+    },
+    { 
+      icon: Star, 
+      label: 'Minhas chaves PIX', 
+      bg: 'bg-blue-50 dark:bg-blue-900/20',
+      onClick: () => navigate('/minhas-chaves-pix')
+    },
+    { 
+      icon: Users, 
+      label: 'Gerenciar contatos', 
+      bg: 'bg-blue-50 dark:bg-blue-900/20',
+      onClick: () => navigate('/gerenciar-contatos-pix')
+    },
+    { 
+      icon: Send, 
+      label: 'Limites PIX', 
+      bg: 'bg-blue-50 dark:bg-blue-900/20',
+      onClick: () => navigate('/limites-pix')
+    },
+    { 
+      icon: Calendar, 
+      label: 'PIX agendados', 
+      bg: 'bg-blue-50 dark:bg-blue-900/20',
+      onClick: () => toast.info('Função em desenvolvimento')
+    },
+    { 
+      icon: Clock, 
+      label: 'Notificações', 
+      bg: 'bg-blue-50 dark:bg-blue-900/20',
+      onClick: () => toast.info('Função em desenvolvimento')
+    },
+    { 
+      icon: Send, 
+      label: 'Contestações', 
+      bg: 'bg-blue-50 dark:bg-blue-900/20',
+      onClick: () => toast.info('Função em desenvolvimento')
+    }
   ];
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <div className="bg-gradient-to-r from-pink-500 to-pink-600 text-white p-6">
+      <div className="bg-gradient-to-r from-[#001B3A] to-[#003F5C] text-white p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <button
@@ -130,6 +213,7 @@ const PIX = () => {
                   <Button
                     key={index}
                     variant="outline"
+                    onClick={option.onClick}
                     className="h-auto p-4 flex flex-col items-center space-y-2 text-center"
                   >
                     <option.icon className="w-6 h-6 text-blue-600" />
@@ -146,9 +230,9 @@ const PIX = () => {
           <h2 className="text-lg font-semibold mb-4 text-foreground">Mais opções</h2>
           <div className="grid grid-cols-2 gap-4">
             {moreOptions.map((option, index) => (
-              <Card key={index} className="cursor-pointer hover:shadow-md transition-shadow">
+              <Card key={index} onClick={option.onClick} className="cursor-pointer hover:shadow-md transition-shadow">
                 <CardContent className="p-4 text-center">
-                  <option.icon className="w-8 h-8 text-pink-600 mx-auto mb-2" />
+                  <option.icon className="w-8 h-8 text-blue-600 mx-auto mb-2" />
                   <h3 className="font-medium text-sm mb-1">{option.label}</h3>
                   <p className="text-xs text-muted-foreground">{option.description}</p>
                 </CardContent>
@@ -162,10 +246,10 @@ const PIX = () => {
           <h2 className="text-lg font-semibold mb-4 text-foreground">Outros serviços</h2>
           <div className="grid grid-cols-2 gap-4">
             {otherServices.map((service, index) => (
-              <Card key={index} className="cursor-pointer hover:shadow-md transition-shadow">
+              <Card key={index} onClick={service.onClick} className="cursor-pointer hover:shadow-md transition-shadow">
                 <CardContent className="p-4">
                   <div className={`w-12 h-12 ${service.bg} rounded-full flex items-center justify-center mb-3`}>
-                    <service.icon className="w-6 h-6 text-pink-600" />
+                    <service.icon className="w-6 h-6 text-blue-600" />
                   </div>
                   <span className="text-sm font-medium text-foreground">{service.label}</span>
                 </CardContent>
@@ -193,7 +277,7 @@ const PIX = () => {
                 </div>
 
                 <Button 
-                  className="w-full bg-pink-600 hover:bg-pink-700"
+                  className="w-full bg-gradient-to-r from-[#001B3A] to-[#003F5C]"
                   onClick={handleSendPix}
                   disabled={loading}
                 >

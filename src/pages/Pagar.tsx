@@ -26,20 +26,20 @@ const Pagar = () => {
 
   const quickPayments = [
     { icon: Car, label: 'Débitos de veículos', route: '/debitos-veiculos' },
-    { icon: CreditCard, label: 'Pagar cartão Bradesco', route: '/pagar-cartao' }
+    { icon: CreditCard, label: 'Pagar cartão', route: '/pagar-cartao' }
   ];
 
   const moreServices = [
-    { icon: Send, label: 'Meus limites', bg: 'bg-pink-50 dark:bg-pink-900/20' },
-    { icon: Receipt, label: 'Comprovantes', bg: 'bg-pink-50 dark:bg-pink-900/20' },
-    { icon: Calendar, label: 'Agendamentos', bg: 'bg-pink-50 dark:bg-pink-900/20' },
-    { icon: Settings, label: 'Débito automático', bg: 'bg-pink-50 dark:bg-pink-900/20' }
+    { icon: Send, label: 'Meus limites', bg: 'bg-blue-50 dark:bg-blue-900/20' },
+    { icon: Receipt, label: 'Comprovantes', bg: 'bg-blue-50 dark:bg-blue-900/20' },
+    { icon: Calendar, label: 'Agendamentos', bg: 'bg-blue-50 dark:bg-blue-900/20' },
+    { icon: Settings, label: 'Débito automático', bg: 'bg-blue-50 dark:bg-blue-900/20' }
   ];
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <div className="bg-gradient-to-r from-pink-500 to-pink-600 text-white p-6">
+      <div className="bg-gradient-to-r from-[#001B3A] to-[#003F5C] text-white p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <button
@@ -103,8 +103,8 @@ const Pagar = () => {
               <Card key={index} className="cursor-pointer hover:shadow-md transition-shadow">
                 <CardContent className="p-4">
                   <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-pink-100 dark:bg-pink-900/20 rounded-full flex items-center justify-center">
-                      <option.icon className="w-6 h-6 text-pink-600" />
+                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
+                      <option.icon className="w-6 h-6 text-blue-600" />
                     </div>
                     <div className="flex-1">
                       <h3 className="font-semibold text-foreground">{option.label}</h3>
@@ -120,12 +120,12 @@ const Pagar = () => {
         {/* Quick Payments */}
         <div className="grid grid-cols-2 gap-4">
           {quickPayments.map((payment, index) => (
-            <Card key={index} className="cursor-pointer hover:shadow-md transition-shadow">
-              <CardContent className="p-4 text-center">
-                <payment.icon className="w-8 h-8 text-pink-600 mx-auto mb-2" />
-                <span className="text-sm font-medium text-foreground">{payment.label}</span>
-              </CardContent>
-            </Card>
+              <Card key={index} className="cursor-pointer hover:shadow-md transition-shadow">
+                <CardContent className="p-4 text-center">
+                  <payment.icon className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+                  <span className="text-sm font-medium text-foreground">{payment.label}</span>
+                </CardContent>
+              </Card>
           ))}
         </div>
 
@@ -137,7 +137,7 @@ const Pagar = () => {
               <Card key={index} className="cursor-pointer hover:shadow-md transition-shadow">
                 <CardContent className="p-4">
                   <div className={`w-12 h-12 ${service.bg} rounded-full flex items-center justify-center mb-3`}>
-                    <service.icon className="w-6 h-6 text-pink-600" />
+                    <service.icon className="w-6 h-6 text-blue-600" />
                   </div>
                   <span className="text-sm font-medium text-foreground">{service.label}</span>
                 </CardContent>

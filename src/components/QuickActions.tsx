@@ -85,6 +85,13 @@ export const QuickActions = () => {
     },
   ];
 
+  // Dividir ações em grupos de 8
+  const actionsPerPage = 8;
+  const actionPages = [];
+  for (let i = 0; i < actions.length; i += actionsPerPage) {
+    actionPages.push(actions.slice(i, i + actionsPerPage));
+  }
+
   return (
     <Card className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 mx-4">
       <CardHeader className="pb-3">
@@ -92,16 +99,20 @@ export const QuickActions = () => {
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto pb-2">
-          <div className="flex space-x-3 min-w-max">
-            {actions.map((action, index) => (
-              <button
-                key={index}
-                onClick={() => navigate(action.path)}
-                className={`flex-shrink-0 w-20 h-20 flex flex-col items-center justify-center space-y-1 bg-gradient-to-r ${action.color} hover:opacity-90 text-white rounded-xl transition-all duration-200 hover:scale-105`}
-              >
-                <action.icon className="h-5 w-5" />
-                <span className="text-xs font-medium text-center leading-tight">{action.label}</span>
-              </button>
+          <div className="flex space-x-4">
+            {actionPages.map((page, pageIndex) => (
+              <div key={pageIndex} className="flex-shrink-0 grid grid-cols-4 gap-3 min-w-[320px]">
+                {page.map((action, index) => (
+                  <button
+                    key={index}
+                    onClick={() => navigate(action.path)}
+                    className={`w-18 h-18 flex flex-col items-center justify-center space-y-1 bg-gradient-to-r ${action.color} hover:opacity-90 text-white rounded-xl transition-all duration-200 hover:scale-105`}
+                  >
+                    <action.icon className="h-4 w-4" />
+                    <span className="text-xs font-medium text-center leading-tight">{action.label}</span>
+                  </button>
+                ))}
+              </div>
             ))}
           </div>
         </div>

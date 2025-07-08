@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import MobileLayout from '@/components/MobileLayout';
+import { toast } from 'sonner';
 
 const Cripto = () => {
   const navigate = useNavigate();
@@ -23,8 +24,12 @@ const Cripto = () => {
   ];
 
   const connectWallet = (provider: string) => {
-    setConnectedWallet(provider);
-    // Aqui seria implementada a integração real com a carteira
+    // Simular integração com carteira
+    toast.info(`Conectando com ${provider}...`);
+    setTimeout(() => {
+      setConnectedWallet(provider);
+      toast.success(`Conectado com ${provider}!`);
+    }, 1500);
   };
 
   return (
@@ -51,8 +56,14 @@ const Cripto = () => {
                 <p className="text-green-600">Conectado com {connectedWallet}</p>
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <p className="text-sm text-gray-600">Saldo disponível</p>
-                  <p className="text-2xl font-bold">R$ 0,00</p>
+                  <p className="text-2xl font-bold">R$ 1.250,00</p>
                 </div>
+                <Button 
+                  onClick={() => navigate('/cripto-exchange')}
+                  className="w-full mt-4 bg-gradient-to-r from-[#001B3A] to-[#003F5C]"
+                >
+                  Ir para Exchange
+                </Button>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-3">

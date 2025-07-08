@@ -301,34 +301,32 @@ const FinancingSimulation = () => {
       </div>
 
       <div className="container mx-auto p-6 max-w-6xl">
-        {canSimulateForOthers && (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <User className="mr-2 h-5 w-5" />
-                Tipo de Simulação
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <RadioGroup value={simulationType} onValueChange={(value: 'proprio' | 'terceiro') => setSimulationType(value)}>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="proprio" id="proprio" />
-                  <Label htmlFor="proprio" className="flex items-center">
-                    <User className="mr-2 h-4 w-4" />
-                    Simulação para mim
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="terceiro" id="terceiro" />
-                  <Label htmlFor="terceiro" className="flex items-center">
-                    <Building2 className="mr-2 h-4 w-4" />
-                    Simulação para terceiro
-                  </Label>
-                </div>
-              </RadioGroup>
-            </CardContent>
-          </Card>
-        )}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <User className="mr-2 h-5 w-5" />
+              Para quem é esta proposta?
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <RadioGroup value={simulationType} onValueChange={(value: 'proprio' | 'terceiro') => setSimulationType(value)}>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="proprio" id="proprio" />
+                <Label htmlFor="proprio" className="flex items-center">
+                  <User className="mr-2 h-4 w-4" />
+                  Para mim
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="terceiro" id="terceiro" />
+                <Label htmlFor="terceiro" className="flex items-center">
+                  <Building2 className="mr-2 h-4 w-4" />
+                  Para outra pessoa
+                </Label>
+              </div>
+            </RadioGroup>
+          </CardContent>
+        </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Dados do Cliente */}

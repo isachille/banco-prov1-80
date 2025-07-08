@@ -1,9 +1,10 @@
 
 import React from 'react';
-import { ArrowLeft, TrendingUp, DollarSign, BarChart3 } from 'lucide-react';
+import { ArrowLeft, TrendingUp, DollarSign, BarChart3, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
 
 const Investimentos = () => {
   const navigate = useNavigate();
@@ -51,6 +52,33 @@ const Investimentos = () => {
         </CardContent>
       </Card>
 
+      {/* Perfil do Investidor */}
+      <Card className="border-2 border-blue-200">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <User className="w-8 h-8 text-blue-600" />
+              <div>
+                <p className="font-medium">Perfil do Investidor</p>
+                <p className="text-sm text-gray-600">
+                  {localStorage.getItem('investor_profile') 
+                    ? `Perfil: ${localStorage.getItem('investor_profile')?.charAt(0).toUpperCase()}${localStorage.getItem('investor_profile')?.slice(1)}`
+                    : 'Defina seu perfil de investidor'
+                  }
+                </p>
+              </div>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate('/perfil-investidor')}
+            >
+              {localStorage.getItem('investor_profile') ? 'Refazer' : 'Definir'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       <div>
         <h3 className="text-lg font-semibold mb-4">Produtos Disponíveis</h3>
         <div className="space-y-4">
@@ -75,7 +103,17 @@ const Investimentos = () => {
                       </div>
                     </div>
                   </div>
-                  <Button size="sm">
+                  <Button 
+                    size="sm"
+                    onClick={() => {
+                      const profile = localStorage.getItem('investor_profile');
+                      if (!profile) {
+                        navigate('/perfil-investidor');
+                      } else {
+                        toast.success('Investimento realizado!');
+                      }
+                    }}
+                  >
                     Investir
                   </Button>
                 </div>
