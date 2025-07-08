@@ -42,6 +42,10 @@ import TransacoesGlobais from '@/pages/TransacoesGlobais';
 import Configuracoes from '@/pages/Configuracoes';
 import Perfil from '@/pages/Perfil';
 import Ajuda from '@/pages/Ajuda';
+import Cripto from '@/pages/Cripto';
+import Consorcio from '@/pages/Consorcio';
+import Emprestimo from '@/pages/Emprestimo';
+import Chatbot from '@/pages/Chatbot';
 
 const queryClient = new QueryClient();
 
@@ -220,4 +224,3 @@ function App() {
 }
 
 export default App;
-
