@@ -1,68 +1,67 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-
-interface Card {
-  id: string;
-  final_number: string;
-  type: 'Débito' | 'Crédito';
-  brand: 'Visa' | 'Master';
-  status: 'Ativo' | 'Bloqueado';
-}
+import { supabase } from '@/integrations/supabase/client';
 
 const Cartoes = () => {
   const navigate = useNavigate();
-  const [cards, setCards] = useState<Card[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchCards = async () => {
-      try {
-        // Mock data
-        setTimeout(() => {
-          setCards([
-            {
-              id: '1',
-              final_number: '4521',
-              type: 'Débito',
-              brand: 'Visa',
-              status: 'Ativo'
-            },
-            {
-              id: '2',
-              final_number: '8765',
-              type: 'Crédito',
-              brand: 'Master',
-              status: 'Ativo'
-            }
-          ]);
-          setLoading(false);
-        }, 1000);
-      } catch (error) {
-        console.error('Erro ao buscar cartões:', error);
-        setLoading(false);
+  const handleRequestCard = async () => {
+    setLoading(true);
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('Usuário não autenticado');
+        return;
       }
-    };
 
-    fetchCards();
-  }, []);
+      // Verificar saldo
+      const { data: walletData, error: walletError } = await supabase
+        .from('wallets')
+        .select('saldo')
+        .eq('user_id', user.id)
+        .single();
 
-  const handleRequestCard = () => {
-    toast.success('Solicitação enviada! Você receberá seu cartão em até 7 dias úteis.');
-  };
+      if (walletError || !walletData) {
+        toast.error('Erro ao verificar saldo');
+        return;
+      }
 
-  const getBrandColor = (brand: string) => {
-    return brand === 'Visa' ? 'text-blue-600' : 'text-red-600';
+      if (walletData.saldo < 19.99) {
+        toast.error('Saldo insuficiente. Valor da emissão: R$ 19,99');
+        return;
+      }
+
+      // Descontar taxa de emissão
+      const { error: updateError } = await supabase
+        .from('wallets')
+        .update({ saldo: walletData.saldo - 19.99 })
+        .eq('user_id', user.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      toast.success('Cartão solicitado com sucesso! Taxa de R$ 19,99 debitada. Você receberá seu cartão em até 7 dias úteis.');
+      
+    } catch (error) {
+      console.error('Erro ao solicitar cartão:', error);
+      toast.error('Erro ao processar solicitação');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#001B3A] to-[#003F5C] text-white p-6">
+      <div className="bg-gradient-to-r from-[#6B46C1] to-[#8B5CF6] text-white p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <button
@@ -73,7 +72,7 @@ const Cartoes = () => {
             </button>
             <div>
               <h1 className="text-2xl font-bold">Meus Cartões</h1>
-              <p className="text-blue-100">Gerencie seus cartões</p>
+              <p className="text-purple-100">Gerencie seus cartões</p>
             </div>
           </div>
           <img 
@@ -85,58 +84,51 @@ const Cartoes = () => {
       </div>
 
       <div className="container mx-auto p-6 max-w-4xl">
-        {loading ? (
-          <div className="space-y-4">
-            {[1, 2].map((i) => (
-              <Card key={i} className="animate-pulse">
-                <CardContent className="p-6">
-                  <div className="h-32 bg-gray-200 rounded-xl"></div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-4 mb-6">
-            {cards.map((card) => (
-              <Card key={card.id} className="overflow-hidden">
-                <CardContent className="p-0">
-                  <div className="bg-gradient-to-r from-[#001B3A] to-[#003F5C] text-white p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <p className="text-sm opacity-80">Final do cartão</p>
-                        <p className="text-xl font-bold">•••• •••• •••• {card.final_number}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className={`text-lg font-bold ${getBrandColor(card.brand)}`}>
-                          {card.brand}
-                        </p>
-                        <p className="text-sm opacity-80">{card.type}</p>
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm opacity-80">Status: {card.status}</span>
-                      <span className="text-sm opacity-80">Banco Pro</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Solicitar Novo Cartão</CardTitle>
+        <Card className="mb-6">
+          <CardHeader className="text-center">
+            <div className="mx-auto w-16 h-16 bg-gradient-to-r from-[#6B46C1] to-[#8B5CF6] rounded-full flex items-center justify-center mb-4">
+              <CreditCard className="h-8 w-8 text-white" />
+            </div>
+            <CardTitle>Solicite seu Cartão</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Solicite um novo cartão de débito ou crédito para sua conta.
-            </p>
+          <CardContent className="space-y-4">
+            <div className="text-center space-y-2">
+              <p className="text-sm text-muted-foreground">
+                Tenha acesso ao seu cartão de débito Banco Pro
+              </p>
+              <div className="bg-gradient-to-r from-[#6B46C1]/10 to-[#8B5CF6]/10 p-4 rounded-lg">
+                <p className="font-semibold text-[#6B46C1]">Taxa de emissão: R$ 19,99</p>
+                <p className="text-xs text-gray-600 mt-1">
+                  Valor será debitado do seu saldo disponível
+                </p>
+              </div>
+            </div>
+            
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span>Cartão de débito internacional</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span>Aceito em todo o mundo</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span>Entrega em até 7 dias úteis</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span>Sem anuidade</span>
+              </div>
+            </div>
+
             <Button
               onClick={handleRequestCard}
-              className="w-full bg-gradient-to-r from-[#001B3A] to-[#003F5C] hover:from-[#002A4A] hover:to-[#004F6C]"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-[#6B46C1] to-[#8B5CF6] hover:from-[#553C9A] hover:to-[#7C3AED]"
             >
-              Solicitar novo cartão
+              {loading ? 'Processando...' : 'Solicitar Cartão - R$ 19,99'}
             </Button>
           </CardContent>
         </Card>

@@ -5,10 +5,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useUserStatus } from '@/hooks/useUserStatus';
 import Layout from '@/components/Layout';
 import { BankingDashboard } from '@/components/BankingDashboard';
-import { RecargaCelular } from '@/components/RecargaCelular';
 import { Button } from "@/components/ui/button";
 import { Shield } from 'lucide-react';
-import { toast } from 'sonner';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -71,9 +69,6 @@ const Home = () => {
             )}
           </div>
         ) : null}
-
-        {/* Recarga de Celular */}
-        <RecargaCelular />
 
         {/* Banking Dashboard with all features */}
         <BankingDashboard />

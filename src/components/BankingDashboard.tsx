@@ -4,10 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { AccountBalance } from './AccountBalance';
 import { QuickActions } from './QuickActions';
 import { RecentTransactions } from './RecentTransactions';
-import { CreditCards } from './CreditCards';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Gift, Calculator, FileText, Headphones, PiggyBank, TrendingUp } from 'lucide-react';
+import { Gift, Calculator, FileText, PiggyBank, TrendingUp } from 'lucide-react';
 
 export const BankingDashboard = () => {
   const navigate = useNavigate();
@@ -124,9 +123,6 @@ export const BankingDashboard = () => {
           </CardContent>
         </Card>
       </div>
-
-      {/* Credit Cards */}
-      <CreditCards />
 
       {/* Recent Transactions */}
       <RecentTransactions />

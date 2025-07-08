@@ -1,41 +1,45 @@
 
 import React from 'react';
-import { CreditCard, Plus } from 'lucide-react';
+import { CreditCard } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 export const CreditCards = () => {
+  const navigate = useNavigate();
+
   return (
-    <Card className="bg-slate-800/50 backdrop-blur border-blue-500/20">
+    <Card className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700">
       <CardHeader>
-        <CardTitle className="text-white flex items-center justify-between">
+        <CardTitle className="text-gray-900 dark:text-white flex items-center justify-between">
           <span>Meus Cartões</span>
-          <Button variant="ghost" size="icon" className="text-blue-400 hover:bg-blue-500/20">
-            <Plus className="h-4 w-4" />
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-[#6B46C1] hover:bg-[#6B46C1]/10"
+            onClick={() => navigate('/cartoes')}
+          >
+            Ver todos
           </Button>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="bg-gradient-to-r from-slate-700 to-slate-600 p-4 rounded-lg">
-          <div className="flex items-center justify-between mb-3">
-            <CreditCard className="h-6 w-6 text-blue-400" />
-            <span className="text-blue-400 text-sm font-medium">DÉBITO</span>
+        <div className="text-center py-8">
+          <div className="mx-auto w-16 h-16 bg-gradient-to-r from-[#6B46C1] to-[#8B5CF6] rounded-full flex items-center justify-center mb-4">
+            <CreditCard className="h-8 w-8 text-white" />
           </div>
-          <div className="space-y-2">
-            <p className="text-white text-sm">**** 1234</p>
-            <p className="text-gray-300 text-xs">Cartão Principal</p>
-          </div>
-        </div>
-        
-        <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-4 rounded-lg">
-          <div className="flex items-center justify-between mb-3">
-            <CreditCard className="h-6 w-6 text-white" />
-            <span className="text-white text-sm font-medium">CRÉDITO</span>
-          </div>
-          <div className="space-y-2">
-            <p className="text-white text-sm">**** 5678</p>
-            <p className="text-blue-100 text-xs">Limite: R$ 5.000,00</p>
-          </div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+            Você ainda não possui cartões
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            Solicite seu primeiro cartão e tenha mais praticidade no dia a dia
+          </p>
+          <Button
+            onClick={() => navigate('/cartoes')}
+            className="bg-gradient-to-r from-[#6B46C1] to-[#8B5CF6] hover:from-[#553C9A] hover:to-[#7C3AED]"
+          >
+            Solicitar Cartão
+          </Button>
         </div>
       </CardContent>
     </Card>

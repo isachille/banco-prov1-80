@@ -1,8 +1,9 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Send, Smartphone, QrCode, CreditCard } from 'lucide-react';
+import { Send, QrCode, CreditCard, Receipt } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { RecargaCelularButton } from './RecargaCelularButton';
 
 export const QuickActions = () => {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ export const QuickActions = () => {
       path: '/pix'
     },
     { 
-      icon: Smartphone, 
+      icon: Receipt, 
       label: 'Pagar', 
       color: 'from-orange-500 to-orange-600',
       path: '/pagar'
@@ -51,6 +52,9 @@ export const QuickActions = () => {
               <span className="text-sm font-medium">{action.label}</span>
             </button>
           ))}
+        </div>
+        <div className="mt-3">
+          <RecargaCelularButton />
         </div>
       </CardContent>
     </Card>
