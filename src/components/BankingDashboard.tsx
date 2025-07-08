@@ -6,7 +6,7 @@ import { QuickActions } from './QuickActions';
 import { RecentTransactions } from './RecentTransactions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Gift, Calculator, FileText, PiggyBank, TrendingUp } from 'lucide-react';
+import { Gift, Calculator, FileText } from 'lucide-react';
 
 export const BankingDashboard = () => {
   const navigate = useNavigate();
@@ -85,43 +85,6 @@ export const BankingDashboard = () => {
             </CardContent>
           </Card>
         </div>
-      </div>
-
-      {/* Investment Section */}
-      <div className="grid grid-cols-2 gap-3">
-        <Card 
-          className="cursor-pointer hover:shadow-lg transition-shadow bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700"
-          onClick={() => navigate('/cofrinho')}
-        >
-          <CardContent className="p-4">
-            <div className="text-center">
-              <div className="bg-pink-100 dark:bg-pink-900/30 p-3 rounded-lg mb-2 inline-block">
-                <PiggyBank className="h-6 w-6 text-pink-600 dark:text-pink-400" />
-              </div>
-              <h4 className="font-semibold text-gray-900 dark:text-white text-sm">Cofrinho</h4>
-              <p className="text-xs text-gray-600 dark:text-gray-400">
-                Economize para objetivos
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card 
-          className="cursor-pointer hover:shadow-lg transition-shadow bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700"
-          onClick={() => navigate('/investimentos')}
-        >
-          <CardContent className="p-4">
-            <div className="text-center">
-              <div className="bg-emerald-100 dark:bg-emerald-900/30 p-3 rounded-lg mb-2 inline-block">
-                <TrendingUp className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <h4 className="font-semibold text-gray-900 dark:text-white text-sm">Investimentos</h4>
-              <p className="text-xs text-gray-600 dark:text-gray-400">
-                Faça seu dinheiro render
-              </p>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Recent Transactions */}

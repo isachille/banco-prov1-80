@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Send, QrCode, CreditCard, Receipt } from 'lucide-react';
+import { Send, QrCode, CreditCard, Receipt, PiggyBank, TrendingUp, Phone } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RecargaCelularButton } from './RecargaCelularButton';
 
@@ -33,6 +33,18 @@ export const QuickActions = () => {
       color: 'from-purple-500 to-purple-600',
       path: '/cartoes'
     },
+    { 
+      icon: PiggyBank, 
+      label: 'Cofrinho', 
+      color: 'from-pink-500 to-pink-600',
+      path: '/cofrinho'
+    },
+    { 
+      icon: TrendingUp, 
+      label: 'Investir', 
+      color: 'from-emerald-500 to-emerald-600',
+      path: '/investimentos'
+    },
   ];
 
   return (
@@ -41,15 +53,15 @@ export const QuickActions = () => {
         <CardTitle className="text-lg text-gray-900 dark:text-white">Ações Rápidas</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           {actions.map((action, index) => (
             <button
               key={index}
               onClick={() => navigate(action.path)}
               className={`h-20 flex flex-col items-center justify-center space-y-2 bg-gradient-to-r ${action.color} hover:opacity-90 text-white rounded-xl transition-all duration-200 hover:scale-105`}
             >
-              <action.icon className="h-6 w-6" />
-              <span className="text-sm font-medium">{action.label}</span>
+              <action.icon className="h-5 w-5" />
+              <span className="text-xs font-medium text-center">{action.label}</span>
             </button>
           ))}
         </div>
