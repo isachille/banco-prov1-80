@@ -53,7 +53,7 @@ import OpenFinance from '@/pages/OpenFinance';
 import PixAdmin from '@/pages/PixAdmin';
 import RecargaCelular from '@/pages/RecargaCelular';
 import InvestorProfile from '@/pages/InvestorProfile';
-import CriptoExchange from '@/pages/CriptoExchange';
+
 import ExtratoPix from '@/pages/ExtratoPix';
 import LimitesPix from '@/pages/LimitesPix';
 
@@ -164,7 +164,7 @@ function App() {
               } />
               <Route path="/recarga" element={<ProtectedRoute><RecargaCelular /></ProtectedRoute>} />
               <Route path="/perfil-investidor" element={<ProtectedRoute><InvestorProfile /></ProtectedRoute>} />
-              <Route path="/cripto-exchange" element={<ProtectedRoute><CriptoExchange /></ProtectedRoute>} />
+              
               <Route path="/extrato-pix" element={<ProtectedRoute><ExtratoPix /></ProtectedRoute>} />
               <Route path="/limites-pix" element={<ProtectedRoute><LimitesPix /></ProtectedRoute>} />
               
