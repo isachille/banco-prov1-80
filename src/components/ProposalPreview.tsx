@@ -160,6 +160,35 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               </div>
             </div>
 
+            {/* Dados do Operador */}
+            <div className="bg-green-50 p-6 rounded-lg mb-6 border border-green-200">
+              <h3 className="text-green-800 font-bold text-center mb-4">DADOS DO OPERADOR RESPONSÁVEL</h3>
+              <div className="bg-white border border-gray-300 rounded-lg overflow-hidden">
+                <div className="grid grid-cols-3 gap-0">
+                  {/* Headers */}
+                  <div className="bg-gray-100 border-r border-gray-300 p-3 text-center font-bold text-gray-800 text-sm">OPERADOR</div>
+                  <div className="bg-gray-100 border-r border-gray-300 p-3 text-center font-bold text-gray-800 text-sm">TELEFONE</div>
+                  <div className="bg-gray-100 p-3 text-center font-bold text-gray-800 text-sm">PROTOCOLO</div>
+                  
+                  {/* Data */}
+                  <div className="border-r border-gray-300 border-t p-3 text-center text-gray-900 font-semibold">
+                    {proposal.operador?.nome || 'PRO MOTORS'}
+                  </div>
+                  <div className="border-r border-gray-300 border-t p-3 text-center text-gray-900 font-semibold">
+                    {proposal.operador?.telefone || '(61) 98154-8624'}
+                  </div>
+                  <div className="border-t p-3 text-center text-gray-900 font-semibold">
+                    {proposal.codigo}
+                  </div>
+                </div>
+              </div>
+              <div className="text-center mt-4">
+                <p className="text-green-700 text-sm font-medium">
+                  Para dúvidas ou mais informações, entre em contato com o operador responsável
+                </p>
+              </div>
+            </div>
+
             {/* Dados do Bem Desejado com Imagem */}
             <div className="bg-blue-50 p-6 rounded-lg mb-6 border border-blue-200">
               <h3 className="text-blue-800 font-bold text-center mb-4">DADOS DO BEM. DESEJADO COM CRÉDITO BANCÁRIO</h3>
