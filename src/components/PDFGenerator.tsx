@@ -59,9 +59,9 @@ const createPDFContent = (data: PDFData): string => {
         <div style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 25px; border-radius: 10px; margin-bottom: 20px;">
           <div style="display: flex; align-items: center; justify-content: center; gap: 20px;">
             <img 
-              src="/lovable-uploads/4712549c-a705-4aad-8498-4702dc3cdd8f.png" 
+              src="/src/assets/pro-motors-logo.png" 
               alt="Pro Motors Logo" 
-              style="width: 80px; height: 80px; background: white; border-radius: 8px; padding: 8px;"
+              style="width: 80px; height: 80px; border-radius: 8px;"
             />
             <div>
               <h1 style="margin: 0; font-size: 38px; font-weight: bold;">PRO MOTORS</h1>
@@ -78,14 +78,14 @@ const createPDFContent = (data: PDFData): string => {
           </p>
         </div>
         
-        <!-- Bancos -->
-        <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
-          <div style="width: 70px; height: 45px; background: #FF6600; color: white; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-weight: bold; font-size: 13px;">ITAÚ</div>
-          <div style="width: 70px; height: 45px; background: #FFED00; color: #333; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-weight: bold; font-size: 9px;">BANCO<br/>DO BRASIL</div>
-          <div style="width: 70px; height: 45px; background: #E31E24; color: white; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-weight: bold; font-size: 10px;">SANTANDER</div>
-          <div style="width: 70px; height: 45px; background: #00A859; color: white; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-weight: bold; font-size: 12px;">SICREDI</div>
-          <div style="width: 70px; height: 45px; background: #1976D2; color: white; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-weight: bold; font-size: 12px;">SAFRA</div>
-          <div style="width: 70px; height: 45px; background: #662D91; color: white; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-weight: bold; font-size: 12px;">NUBANK</div>
+        <!-- Bancos - Layout Descompactado -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; max-width: 600px; margin-left: auto; margin-right: auto;">
+          <div style="background: #FF6600; color: white; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: bold; font-size: 13px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">ITAÚ</div>
+          <div style="background: #FFED00; color: #333; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: bold; font-size: 10px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">BANCO<br/>DO BRASIL</div>
+          <div style="background: #E31E24; color: white; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: bold; font-size: 11px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">SANTANDER</div>
+          <div style="background: #00A859; color: white; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: bold; font-size: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">SICREDI</div>
+          <div style="background: #1976D2; color: white; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: bold; font-size: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">SAFRA</div>
+          <div style="background: #662D91; color: white; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: bold; font-size: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">NUBANK</div>
         </div>
       </div>
 
@@ -98,12 +98,14 @@ const createPDFContent = (data: PDFData): string => {
       <!-- Dados do Cliente -->
       <div style="margin-bottom: 25px;">
         <h3 style="color: #1e40af; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 15px;">Dados do Cliente</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-          <div><strong>Nome:</strong> ${data.cliente.nome}</div>
-          <div><strong>CPF:</strong> ${data.cliente.cpf}</div>
-          <div><strong>Nascimento:</strong> ${data.cliente.nascimento}</div>
-          <div><strong>Nome da Mãe:</strong> ${data.cliente.mae}</div>
-          <div style="grid-column: span 2;"><strong>Profissão:</strong> ${data.cliente.profissao}</div>
+        <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div style="color: #374151;"><strong style="color: #1e40af;">Nome:</strong> ${data.cliente.nome}</div>
+            <div style="color: #374151;"><strong style="color: #1e40af;">CPF:</strong> ${data.cliente.cpf}</div>
+            <div style="color: #374151;"><strong style="color: #1e40af;">Nascimento:</strong> ${data.cliente.nascimento}</div>
+            <div style="color: #374151;"><strong style="color: #1e40af;">Nome da Mãe:</strong> ${data.cliente.mae}</div>
+            <div style="grid-column: span 2; color: #374151;"><strong style="color: #1e40af;">Profissão:</strong> ${data.cliente.profissao}</div>
+          </div>
         </div>
       </div>
 

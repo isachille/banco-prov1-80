@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { ProposalActions } from '@/components/proposal/ProposalActions';
+import proMotorsLogo from '@/assets/pro-motors-logo.png';
 
 interface ProposalPreviewProps {
   proposal: {
@@ -50,9 +51,9 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             <div className="bg-gradient-to-r from-blue-800 to-blue-600 text-white p-6 rounded-lg mb-4">
               <div className="flex items-center justify-center gap-4">
                 <img 
-                  src="/lovable-uploads/4712549c-a705-4aad-8498-4702dc3cdd8f.png" 
+                  src={proMotorsLogo} 
                   alt="Pro Motors Logo" 
-                  className="w-16 h-16 bg-white rounded-lg p-2"
+                  className="w-16 h-16 rounded-lg"
                 />
                 <div>
                   <h1 className="text-3xl font-bold">PRO MOTORS</h1>
@@ -69,14 +70,26 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               </p>
             </div>
             
-            {/* Logos dos Bancos */}
-            <div className="flex justify-center items-center gap-3 mb-4 flex-wrap">
-              <div className="w-16 h-10 bg-orange-500 text-white flex items-center justify-center rounded text-xs font-bold">ITAÚ</div>
-              <div className="w-16 h-10 bg-yellow-400 text-black flex items-center justify-center rounded text-xs font-bold">BB</div>
-              <div className="w-16 h-10 bg-red-600 text-white flex items-center justify-center rounded text-xs font-bold">SANTANDER</div>
-              <div className="w-16 h-10 bg-green-600 text-white flex items-center justify-center rounded text-xs font-bold">SICREDI</div>
-              <div className="w-16 h-10 bg-blue-600 text-white flex items-center justify-center rounded text-xs font-bold">SAFRA</div>
-              <div className="w-16 h-10 bg-purple-600 text-white flex items-center justify-center rounded text-xs font-bold">NUBANK</div>
+            {/* Logos dos Bancos - Layout Descompactado */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+              <div className="bg-orange-500 text-white flex items-center justify-center rounded-lg p-4 h-16 shadow-md hover:shadow-lg transition-shadow">
+                <span className="text-sm font-bold">ITAÚ</span>
+              </div>
+              <div className="bg-yellow-400 text-black flex items-center justify-center rounded-lg p-4 h-16 shadow-md hover:shadow-lg transition-shadow">
+                <span className="text-sm font-bold">BANCO DO BRASIL</span>
+              </div>
+              <div className="bg-red-600 text-white flex items-center justify-center rounded-lg p-4 h-16 shadow-md hover:shadow-lg transition-shadow">
+                <span className="text-sm font-bold">SANTANDER</span>
+              </div>
+              <div className="bg-green-600 text-white flex items-center justify-center rounded-lg p-4 h-16 shadow-md hover:shadow-lg transition-shadow">
+                <span className="text-sm font-bold">SICREDI</span>
+              </div>
+              <div className="bg-blue-600 text-white flex items-center justify-center rounded-lg p-4 h-16 shadow-md hover:shadow-lg transition-shadow">
+                <span className="text-sm font-bold">SAFRA</span>
+              </div>
+              <div className="bg-purple-600 text-white flex items-center justify-center rounded-lg p-4 h-16 shadow-md hover:shadow-lg transition-shadow">
+                <span className="text-sm font-bold">NUBANK</span>
+              </div>
             </div>
           </div>
 
@@ -91,12 +104,14 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
           {/* Dados do Cliente */}
           <div className="mb-6">
             <h3 className="text-blue-600 text-lg font-bold border-b border-gray-200 pb-2 mb-4">Dados do Cliente</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div><strong>Nome:</strong> {kycData.nome_completo}</div>
-              <div><strong>CPF:</strong> {kycData.cpf}</div>
-              <div><strong>Nascimento:</strong> {new Date(kycData.data_nascimento).toLocaleDateString('pt-BR')}</div>
-              <div><strong>Nome da Mãe:</strong> {kycData.nome_mae}</div>
-              <div className="md:col-span-2"><strong>Profissão:</strong> {kycData.profissao}</div>
+            <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="text-gray-800"><strong className="text-blue-600">Nome:</strong> {kycData.nome_completo}</div>
+                <div className="text-gray-800"><strong className="text-blue-600">CPF:</strong> {kycData.cpf}</div>
+                <div className="text-gray-800"><strong className="text-blue-600">Nascimento:</strong> {new Date(kycData.data_nascimento).toLocaleDateString('pt-BR')}</div>
+                <div className="text-gray-800"><strong className="text-blue-600">Nome da Mãe:</strong> {kycData.nome_mae}</div>
+                <div className="md:col-span-2 text-gray-800"><strong className="text-blue-600">Profissão:</strong> {kycData.profissao}</div>
+              </div>
             </div>
           </div>
 
