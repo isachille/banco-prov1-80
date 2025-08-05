@@ -29,6 +29,7 @@ interface VehicleData {
   modelo: string;
   ano: number;
   valor: number;
+  valorFipe?: number;
   categoria: string;
 }
 
@@ -456,16 +457,58 @@ const FinancingSimulation = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
                   <Label htmlFor="valor">Valor do Veículo</Label>
                   <Input
                     id="valor"
-                    type="text"
-                    value={formatCurrency(formData.veiculo.valor)}
-                    disabled
-                    className="bg-gray-100"
+                    type="number"
+                    value={formData.veiculo.valor}
+                    onChange={(e) => setFormData(prev => ({ 
+                      ...prev, 
+                      veiculo: { ...prev.veiculo, valor: Number(e.target.value) }
+                    }))}
+                    placeholder="Digite o valor do veículo"
                   />
+                </div>
+
+                <div>
+                  <Label htmlFor="valorFipe">Valor FIPE</Label>
+                  <Input
+                    id="valorFipe"
+                    type="number"
+                    value={formData.veiculo.valorFipe || ''}
+                    onChange={(e) => setFormData(prev => ({ 
+                      ...prev, 
+                      veiculo: { ...prev.veiculo, valorFipe: Number(e.target.value) }
+                    }))}
+                    placeholder="Valor da tabela FIPE"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="anoVeiculo">Ano do Veículo</Label>
+                  <Select 
+                    value={String(formData.veiculo.ano)} 
+                    onValueChange={(value) => setFormData(prev => ({ 
+                      ...prev, 
+                      veiculo: { ...prev.veiculo, ano: Number(value) }
+                    }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o ano" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 15 }, (_, i) => {
+                        const year = new Date().getFullYear() - i;
+                        return (
+                          <SelectItem key={year} value={String(year)}>
+                            {year} {i === 0 && "(0 KM)"}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div>
@@ -478,7 +521,9 @@ const FinancingSimulation = () => {
                     placeholder="0"
                   />
                 </div>
+              </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="parcelas">Número de Parcelas</Label>
                   <Select value={String(formData.parcelas)} onValueChange={(value) => setFormData(prev => ({ ...prev, parcelas: Number(value) }))}>
