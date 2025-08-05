@@ -16,14 +16,36 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { user_id, giftcard_name, valor } = await req.json();
+    // Get user from JWT token - SECURITY FIX
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ status: 'error', message: 'Token de autorização necessário' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
-    if (!user_id || !giftcard_name || !valor) {
+    const { data: { user }, error: authError } = await supabase.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    );
+
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ status: 'error', message: 'Token inválido' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { giftcard_name, valor } = await req.json();
+
+    if (!giftcard_name || !valor) {
       return new Response(
         JSON.stringify({ status: 'error', message: 'Dados incompletos' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    const user_id = user.id;
 
     // Verificar saldo
     const { data: walletData, error: walletError } = await supabase
@@ -47,7 +69,7 @@ Deno.serve(async (req) => {
       .from('giftcards')
       .insert({
         user_id: user_id,
-        nome: giftcard_name,
+        giftcard_name: giftcard_name,
         valor: valor,
         codigo: codigo,
         status: 'ativo'

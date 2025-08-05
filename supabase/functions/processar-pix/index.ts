@@ -16,14 +16,36 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { user_id, chave_pix, valor } = await req.json();
+    // Get user from JWT token - SECURITY FIX
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ status: 'error', message: 'Token de autorização necessário' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
-    if (!user_id || !chave_pix || !valor) {
+    const { data: { user }, error: authError } = await supabase.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    );
+
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ status: 'error', message: 'Token inválido' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { chave_pix, valor } = await req.json();
+
+    if (!chave_pix || !valor) {
       return new Response(
         JSON.stringify({ status: 'error', message: 'Dados incompletos' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    const user_id = user.id;
 
     // Simular validação da chave PIX
     const validKeys = [

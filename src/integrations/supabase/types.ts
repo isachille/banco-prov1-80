@@ -10,10 +10,186 @@ export type Database = {
   // Allows to automatically instanciate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "13.0.4"
   }
   public: {
     Tables: {
+      binance_transactions: {
+        Row: {
+          chave_pix: string | null
+          created_at: string
+          id: string
+          metadata: Json | null
+          moeda: string
+          status: string
+          tipo: string
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          chave_pix?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          moeda?: string
+          status?: string
+          tipo: string
+          user_id: string
+          valor: number
+        }
+        Update: {
+          chave_pix?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          moeda?: string
+          status?: string
+          tipo?: string
+          user_id?: string
+          valor?: number
+        }
+        Relationships: []
+      }
+      binance_wallets: {
+        Row: {
+          balance: number
+          created_at: string
+          crypto_balance: Json | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          crypto_balance?: Json | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          crypto_balance?: Json | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      giftcards: {
+        Row: {
+          codigo: string
+          created_at: string
+          giftcard_name: string
+          id: string
+          status: string
+          used_at: string | null
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          codigo: string
+          created_at?: string
+          giftcard_name: string
+          id?: string
+          status?: string
+          used_at?: string | null
+          user_id: string
+          valor: number
+        }
+        Update: {
+          codigo?: string
+          created_at?: string
+          giftcard_name?: string
+          id?: string
+          status?: string
+          used_at?: string | null
+          user_id?: string
+          valor?: number
+        }
+        Relationships: []
+      }
+      subcontas: {
+        Row: {
+          agencia: string | null
+          banco: string | null
+          conta: string | null
+          created_at: string
+          id: string
+          nome: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          agencia?: string | null
+          banco?: string | null
+          conta?: string | null
+          created_at?: string
+          id?: string
+          nome: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          agencia?: string | null
+          banco?: string | null
+          conta?: string | null
+          created_at?: string
+          id?: string
+          nome?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      transacoes: {
+        Row: {
+          created_at: string
+          descricao: string | null
+          id: string
+          status: string
+          subconta_id: string | null
+          taxa_efi: number | null
+          taxa_sua: number | null
+          tipo: string
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          status?: string
+          subconta_id?: string | null
+          taxa_efi?: number | null
+          taxa_sua?: number | null
+          tipo: string
+          user_id: string
+          valor: number
+        }
+        Update: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          status?: string
+          subconta_id?: string | null
+          taxa_efi?: number | null
+          taxa_sua?: number | null
+          tipo?: string
+          user_id?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transacoes_subconta_id_fkey"
+            columns: ["subconta_id"]
+            isOneToOne: false
+            referencedRelation: "subcontas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           cep: string | null

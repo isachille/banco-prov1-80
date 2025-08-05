@@ -19,19 +19,28 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Parse request body
-    const { user_id } = await req.json();
-    console.log('User ID recebido:', user_id);
-
-    if (!user_id) {
+    // Get user from JWT token - SECURITY FIX
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
       return new Response(
-        JSON.stringify({ status: 'error', message: 'User ID é obrigatório' }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        JSON.stringify({ status: 'error', message: 'Token de autorização necessário' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    );
+
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ status: 'error', message: 'Token inválido' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const user_id = user.id;
+    console.log('User ID autenticado:', user_id);
 
     // Verificar se o usuário tem uma wallet cripto
     const { data: cryptoWallet, error: cryptoError } = await supabase
