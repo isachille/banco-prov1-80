@@ -49,9 +49,9 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
           <div className="bg-gradient-to-r from-blue-800 to-blue-600 text-white p-8">
             <div className="flex items-center justify-center gap-6 mb-6">
               <img 
-                src="/lovable-uploads/643c1e1f-e6af-466b-a105-cbabe342f414.png" 
+                src="/lovable-uploads/ffb83455-1b27-47d5-819d-980104813842.png" 
                 alt="Banco Pro Logo" 
-                className="w-32 h-20 object-contain bg-white rounded-lg p-2"
+                className="w-40 h-24 object-contain"
               />
               <div className="text-center">
                 <h1 className="text-4xl font-bold text-white">BANCO PRO</h1>
