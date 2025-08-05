@@ -173,7 +173,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                     sedanImage
                   }
                   alt={`${proposal.marca} ${proposal.modelo}`}
-                  className="w-48 h-36 object-contain bg-white rounded-lg shadow-md border-2 border-gray-200"
+                  className="w-48 h-36 object-contain"
                 />
               </div>
 
