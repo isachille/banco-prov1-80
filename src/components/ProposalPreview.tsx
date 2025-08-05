@@ -45,169 +45,219 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
       
       <div className="container mx-auto p-6 max-w-4xl pt-20">
         {/* Proposta Preview Content */}
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          {/* Header com Logo */}
-          <div className="text-center mb-8 border-b-2 border-blue-600 pb-6">
-            <div className="bg-gradient-to-r from-blue-800 to-blue-600 text-white p-6 rounded-lg mb-4">
-              <div className="flex items-center justify-center gap-4">
-                <img 
-                  src={proMotorsLogo} 
-                  alt="Pro Motors Logo" 
-                  className="w-16 h-16 rounded-lg"
-                />
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+          {/* Header com Logo - Estilo Profissional */}
+          <div className="bg-gradient-to-r from-blue-800 to-blue-600 text-white p-8">
+            <div className="flex items-center justify-center gap-6 mb-6">
+              <img 
+                src={proMotorsLogo} 
+                alt="Pro Motors Logo" 
+                className="w-20 h-20 rounded-lg bg-white/10 p-2"
+              />
+              <div className="text-center">
+                <h1 className="text-4xl font-bold">PRO MOTORS</h1>
+                <p className="text-blue-100 text-lg">Financiamento Veicular</p>
+              </div>
+            </div>
+            
+            <div className="text-center">
+              <h2 className="text-xl font-bold mb-2">PROTOCOLO DA PROPOSTA {proposal.codigo}</h2>
+            </div>
+          </div>
+
+          {/* Logos dos Bancos - Formato Profissional */}
+          <div className="bg-gray-100 p-6">
+            <div className="flex justify-center items-center gap-2 mb-4 flex-wrap">
+              <div className="bg-black text-white px-3 py-2 rounded text-xs font-bold">BANCO PAN</div>
+              <div className="bg-orange-600 text-white px-3 py-2 rounded text-xs font-bold">C6 BANK</div>
+              <div className="bg-blue-800 text-white px-3 py-2 rounded text-xs font-bold">BANCO SAFRA</div>
+              <div className="bg-purple-600 text-white px-3 py-2 rounded text-xs font-bold">BV</div>
+              <div className="bg-yellow-500 text-black px-3 py-2 rounded text-xs font-bold">BANCO DO BRASIL</div>
+              <div className="bg-orange-500 text-white px-3 py-2 rounded text-xs font-bold">ITAÚ</div>
+              <div className="bg-green-600 text-white px-3 py-2 rounded text-xs font-bold">SICREDI</div>
+              <div className="bg-blue-500 text-white px-3 py-2 rounded text-xs font-bold">CAIXA</div>
+              <div className="bg-red-600 text-white px-3 py-2 rounded text-xs font-bold">BRADESCO</div>
+              <div className="bg-red-800 text-white px-3 py-2 rounded text-xs font-bold">SANTANDER</div>
+            </div>
+            
+            {/* Status da Proposta */}
+            <div className="text-center mb-4">
+              <h3 className="text-lg font-bold text-gray-700 mb-3">SITUAÇÃO DO PERFIL AVALIADO</h3>
+              <div className="flex justify-center gap-4">
+                <div className="bg-red-100 border border-red-300 px-6 py-2 text-red-700 font-bold text-sm">RECUSADO</div>
+                <div className="bg-green-400 border border-green-500 px-6 py-2 text-white font-bold text-sm">PRÉ-APROVADO</div>
+                <div className="bg-gray-100 border border-gray-300 px-6 py-2 text-gray-700 font-bold text-sm">APROVADO</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-8">
+            {/* Dados Empresariais */}
+            <div className="bg-blue-50 p-6 rounded-lg mb-6 border border-blue-200">
+              <h3 className="text-blue-800 font-bold text-center mb-4">DADOS EMPRESARIAIS</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div className="text-center">
+                  <div className="font-bold text-gray-700">CNPJ:</div>
+                  <div className="bg-white p-2 border rounded">54.039.082/0001-07</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-bold text-gray-700">EMPRESA</div>
+                  <div>PRO MOTORS - LTDA</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-bold text-gray-700">CENTRAL SAC</div>
+                  <div>61 98154-8624</div>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4">
+                <div className="text-center">
+                  <div className="font-bold text-gray-700">CIDADE</div>
+                  <div>CEILÂNDIA - BRASÍLIA<br/>SAMAMBAIA - BRASÍLIA</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-bold text-gray-700">ENDEREÇO / SED</div>
+                  <div>QNO 10/12 CONJ. A LOTE 02, ST "O", BRASÍLIA - DF<br/>QS 406 - SAMAMBAIA, BRASÍLIA - DF</div>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4">
+                <div className="text-center">
+                  <div className="font-bold text-gray-700">CEP</div>
+                  <div>72.255-540<br/>72.318-200</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Dados Consultados */}
+            <div className="bg-blue-50 p-6 rounded-lg mb-6 border border-blue-200">
+              <h3 className="text-blue-800 font-bold text-center mb-4">DADOS CONSULTADOS</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="text-center">
+                  <div className="font-bold text-gray-700 mb-2">CPF / CNPJ</div>
+                  <div className="bg-white p-3 border rounded font-mono">{kycData.cpf}</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-bold text-gray-700 mb-2">NOME COMPLETO</div>
+                  <div className="bg-white p-3 border rounded">{kycData.nome_completo}</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-bold text-gray-700 mb-2">DATA DE NASCIMENTO</div>
+                  <div className="bg-white p-3 border rounded">{new Date(kycData.data_nascimento).toLocaleDateString('pt-BR')}</div>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div className="text-center">
+                  <div className="font-bold text-gray-700 mb-2">NOME DA MÃE</div>
+                  <div className="bg-white p-3 border rounded">{kycData.nome_mae}</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-bold text-gray-700 mb-2">PROFISSÃO</div>
+                  <div className="bg-white p-3 border rounded">{kycData.profissao}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Dados do Bem Desejado */}
+            <div className="bg-blue-50 p-6 rounded-lg mb-6 border border-blue-200">
+              <h3 className="text-blue-800 font-bold text-center mb-4">DADOS DO BEM. DESEJADO COM CRÉDITO BANCÁRIO</h3>
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4 text-center">
                 <div>
-                  <h1 className="text-3xl font-bold">PRO MOTORS</h1>
-                  <p className="text-blue-100">Financiamento Veicular</p>
+                  <div className="font-bold text-gray-700 mb-2">MARCA</div>
+                  <div className="bg-white p-3 border rounded">{proposal.marca}</div>
                 </div>
-              </div>
-            </div>
-            
-            {/* Open Finance */}
-            <div className="bg-blue-50 p-4 rounded-lg mb-4 border border-blue-200">
-              <h4 className="text-blue-800 font-bold text-sm mb-2">🔒 ANÁLISE VIA OPEN FINANCE</h4>
-              <p className="text-blue-700 text-xs">
-                Nosso sistema utiliza tecnologia Open Finance para avaliar seu perfil de crédito em tempo real junto aos principais bancos do país.
-              </p>
-            </div>
-            
-            {/* Logos dos Bancos - Layout Descompactado */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-              <div className="bg-orange-500 text-white flex items-center justify-center rounded-lg p-4 h-16 shadow-md hover:shadow-lg transition-shadow">
-                <span className="text-sm font-bold">ITAÚ</span>
-              </div>
-              <div className="bg-yellow-400 text-black flex items-center justify-center rounded-lg p-4 h-16 shadow-md hover:shadow-lg transition-shadow">
-                <span className="text-sm font-bold">BANCO DO BRASIL</span>
-              </div>
-              <div className="bg-red-600 text-white flex items-center justify-center rounded-lg p-4 h-16 shadow-md hover:shadow-lg transition-shadow">
-                <span className="text-sm font-bold">SANTANDER</span>
-              </div>
-              <div className="bg-green-600 text-white flex items-center justify-center rounded-lg p-4 h-16 shadow-md hover:shadow-lg transition-shadow">
-                <span className="text-sm font-bold">SICREDI</span>
-              </div>
-              <div className="bg-blue-600 text-white flex items-center justify-center rounded-lg p-4 h-16 shadow-md hover:shadow-lg transition-shadow">
-                <span className="text-sm font-bold">SAFRA</span>
-              </div>
-              <div className="bg-purple-600 text-white flex items-center justify-center rounded-lg p-4 h-16 shadow-md hover:shadow-lg transition-shadow">
-                <span className="text-sm font-bold">NUBANK</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Status da Proposta */}
-          <div className="text-center mb-6">
-            <div className="bg-yellow-500 text-white px-8 py-4 rounded-full inline-block text-xl font-bold mb-3">
-              PRÉ-APROVADO
-            </div>
-            <p className="text-gray-600">Código da Proposta: <strong className="text-blue-600">{proposal.codigo}</strong></p>
-          </div>
-
-          {/* Dados do Cliente */}
-          <div className="mb-6">
-            <h3 className="text-blue-600 text-lg font-bold border-b border-gray-200 pb-2 mb-4">Dados do Cliente</h3>
-            <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="text-gray-800"><strong className="text-blue-600">Nome:</strong> {kycData.nome_completo}</div>
-                <div className="text-gray-800"><strong className="text-blue-600">CPF:</strong> {kycData.cpf}</div>
-                <div className="text-gray-800"><strong className="text-blue-600">Nascimento:</strong> {new Date(kycData.data_nascimento).toLocaleDateString('pt-BR')}</div>
-                <div className="text-gray-800"><strong className="text-blue-600">Nome da Mãe:</strong> {kycData.nome_mae}</div>
-                <div className="md:col-span-2 text-gray-800"><strong className="text-blue-600">Profissão:</strong> {kycData.profissao}</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Veículo */}
-          <div className="mb-6">
-            <h3 className="text-blue-600 text-lg font-bold border-b border-gray-200 pb-2 mb-4">Veículo Selecionado</h3>
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
                 <div>
-                  <h4 className="text-xl font-bold text-blue-600 mb-2">{proposal.marca} {proposal.modelo}</h4>
-                  <p className="text-gray-600">Ano: <strong>{proposal.ano}</strong></p>
-                  {proposal.ano === new Date().getFullYear() && (
-                    <p className="text-green-600 text-sm font-bold mt-1">🆕 Veículo 0 KM</p>
-                  )}
+                  <div className="font-bold text-gray-700 mb-2">VALOR</div>
+                  <div className="bg-white p-3 border rounded">R$ {new Intl.NumberFormat('pt-BR').format(proposal.valorVeiculo)},00</div>
                 </div>
-                <div className="text-right">
-                  <div className="text-3xl font-bold text-blue-600">
-                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.valorVeiculo)}
-                  </div>
-                  <p className="text-gray-500 text-sm">Valor de mercado</p>
+                <div>
+                  <div className="font-bold text-gray-700 mb-2">VALOR FINAN.</div>
+                  <div className="bg-white p-3 border rounded">R$ {new Intl.NumberFormat('pt-BR').format(proposal.valorVeiculo - proposal.valorEntrada)},00</div>
                 </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Financiamento */}
-          <div className="mb-6">
-            <h3 className="text-blue-600 text-lg font-bold border-b border-gray-200 pb-2 mb-4">Simulação de Financiamento</h3>
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div className="text-center bg-white p-4 rounded-lg">
-                  <div className="text-sm text-gray-600 mb-2 font-bold">ENTRADA</div>
-                  <div className="text-2xl font-bold text-blue-600">
-                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.valorEntrada)}
-                  </div>
+                <div>
+                  <div className="font-bold text-gray-700 mb-2">COR</div>
+                  <div className="bg-white p-3 border rounded">-</div>
                 </div>
-                <div className="text-center bg-white p-4 rounded-lg">
-                  <div className="text-sm text-gray-600 mb-2 font-bold">PARCELAS</div>
-                  <div className="text-2xl font-bold text-blue-600">{proposal.parcelas}x</div>
-                  <div className="text-gray-600 mt-1">
-                    de {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.valorParcela)}
-                  </div>
+                <div>
+                  <div className="font-bold text-gray-700 mb-2">ANO DE FAB.</div>
+                  <div className="bg-white p-3 border rounded">{proposal.ano}</div>
                 </div>
               </div>
-              <div className="text-center bg-gradient-to-r from-blue-800 to-blue-600 text-white p-6 rounded-lg">
-                <div className="text-sm mb-2">VALOR TOTAL DO FINANCIAMENTO</div>
-                <div className="text-3xl font-bold">
-                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposal.valorTotal)}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Operador */}
-          {proposal.operador && (
-            <div className="mb-6">
-              <h3 className="text-blue-600 text-lg font-bold border-b border-gray-200 pb-2 mb-4">Operador Responsável</h3>
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <p className="font-bold text-lg">{proposal.operador.nome}</p>
-                <p className="text-gray-600">{proposal.operador.telefone}</p>
-              </div>
-            </div>
-          )}
-
-          {/* Footer */}
-          <div className="mt-8 text-center border-t border-gray-200 pt-6">
-            <p className="text-sm text-gray-600 mb-4">
-              Proposta pré-aprovada. Entre em contato para finalizar o processo.
-            </p>
-            <div className="bg-blue-600 text-white p-3 rounded inline-block mb-4">
-              <strong>{proposal.operador?.telefone || '(61) 98483-3965'}</strong>
-            </div>
-            
-            {/* Informações da Empresa */}
-            <div className="bg-gray-50 p-4 rounded-lg text-left">
-              <h4 className="text-blue-600 font-bold text-center mb-3">PRO MOTORS LTDA</h4>
-              <div className="text-xs text-gray-600 grid grid-cols-1 md:grid-cols-2 gap-2">
-                <p><strong>CNPJ:</strong> 12.345.678/0001-90</p>
-                <p><strong>Telefone:</strong> (61) 3333-4444</p>
-                <p className="md:col-span-2"><strong>Endereço:</strong> SIA Trecho 1, Lote 123 - Guará, Brasília - DF, CEP: 71200-000</p>
-                <p><strong>E-mail:</strong> contato@promotors.com.br</p>
+              <div className="text-center mt-4">
+                <div className="font-bold text-gray-700 mb-2">NOME/MODELO</div>
+                <div className="bg-white p-3 border rounded">{proposal.modelo}</div>
               </div>
             </div>
 
-            {/* LGPD */}
-            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-3 mt-4 rounded">
-              <p className="text-xs text-yellow-800 text-left">
+            {/* Parcelamento Simulado */}
+            <div className="bg-blue-50 p-6 rounded-lg mb-6 border border-blue-200">
+              <h3 className="text-blue-800 font-bold text-center mb-4">PARCELAMENTO SIMULADO</h3>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center text-sm">
+                <div className="font-bold">12X<br/>R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.12 / 12))},00</div>
+                <div className="font-bold">24X<br/>R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.24 / 24))},00</div>
+                <div className="font-bold">36X<br/>R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.36 / 36))},00</div>
+                <div className="font-bold">48X<br/>R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.48 / 48))},00</div>
+                <div className="font-bold">60X<br/>R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.60 / 60))},00</div>
+              </div>
+            </div>
+
+            {/* Financiamento Escolhido */}
+            <div className="bg-blue-600 text-white p-6 rounded-lg mb-6 text-center">
+              <h3 className="font-bold text-xl mb-4">FINANCIAMENTO SOB REGULARIZAÇÃO</h3>
+              <div className="text-sm mb-2">VALOR DE ENTRADA</div>
+              <div className="text-4xl font-bold">R$ {new Intl.NumberFormat('pt-BR').format(proposal.valorEntrada)},00</div>
+              <div className="text-sm mt-4 opacity-90">
+                <div className="font-bold">PROPONENTE</div>
+                <div>{kycData.nome_completo}</div>
+              </div>
+            </div>
+
+            {/* Componentes com Necessidade de Regularização */}
+            <div className="bg-red-50 p-6 rounded-lg mb-6 border-l-4 border-red-500">
+              <h3 className="text-red-700 font-bold mb-4">COMPONENTES COM NECESSIDADE DE REGULARIZAÇÃO</h3>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-start gap-2"><span className="text-red-500">•</span> Dados inconsistentes com o sistema. Confirmação necessária para correção.</li>
+                <li className="flex items-start gap-2"><span className="text-red-500">•</span> Renda não atualizada no sistema. Enviar documentação recente para regularização.</li>
+                <li className="flex items-start gap-2"><span className="text-red-500">•</span> Histórico de consumo dos últimos 24 meses, com média de movimentação verificada.</li>
+                <li className="flex items-start gap-2"><span className="text-red-500">•</span> Confirmação necessária para atualizar o perfil cadastral do proponente de financiamento.</li>
+              </ul>
+            </div>
+
+            {/* Cotações Promocionais */}
+            <div className="bg-green-50 p-6 rounded-lg mb-6 border-l-4 border-green-500">
+              <h3 className="text-green-700 font-bold mb-4">COTAÇÕES PROMOCIONAIS DISPONÍVEIS POR PRAZO LIMITADO</h3>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-start gap-2"><span className="text-green-500">•</span> <strong>1° PLANO CDC</strong> COM CONDIÇÕES ESPECIAIS INCLUSO DURANTE TODO O PERÍODO DE FINANCIAMENTO</li>
+                <li className="flex items-start gap-2"><span className="text-green-500">•</span> <strong>2° GARANTIA ESTENDIDA</strong> DE 3 MESES PARA TODOS OS VEÍCULOS, OFERECENDO MAIS SEGURANÇA PARA VOCÊ</li>
+                <li className="flex items-start gap-2"><span className="text-green-500">•</span> <strong>3° ACOMPANHAMENTO FINANCEIRO</strong> COMPLETO E SUPORTE TOTAL NA COMPLEMENTAÇÃO DOCUMENTAL</li>
+                <li className="flex items-start gap-2"><span className="text-green-500">•</span> <strong>4° COMECE A PAGAR EM ATÉ</strong> 60 DIAS APÓS A ASSINATURA DO CONTRATO. MAIS FLEXIBILIDADE PARA O SEU BOLSO</li>
+                <li className="flex items-start gap-2"><span className="text-green-500">•</span> <strong>5° FRETE GRATUITO VIA CEGONHA</strong> OU GUINCHO PARA CLIENTES SELECIONADOS. CONSULTE CONDIÇÕES</li>
+              </ul>
+            </div>
+
+            {/* Footer com Data */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="text-center">
+                <div className="font-bold text-gray-700 mb-2">PROPOSTA ABERTA EM:</div>
+                <div className="bg-white p-3 border rounded">{new Date().toLocaleDateString('pt-BR')}</div>
+              </div>
+              <div className="text-center">
+                <div className="font-bold text-gray-700 mb-2">EXPIRA EM:</div>
+                <div className="bg-white p-3 border rounded">{new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR')}</div>
+              </div>
+            </div>
+
+            {/* Footer Legal */}
+            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="text-yellow-600 font-bold text-sm">SPC BRASIL</div>
+                <div className="text-sm text-gray-700">LEI N 13.709 2018 BUSCA GARANTIR A QUALQUER PESSOA O DIREITO SOBRE OS SEUS DADOS PESSOAIS</div>
+                <div className="text-blue-600 font-bold text-sm">LGPD</div>
+              </div>
+              <p className="text-xs text-gray-600">
                 <strong>LGPD - Lei Geral de Proteção de Dados:</strong> Seus dados pessoais são tratados em conformidade com a LGPD (Lei 13.709/2018). 
                 Utilizamos suas informações exclusivamente para processar sua solicitação de financiamento. Para exercer seus direitos ou obter mais informações 
                 sobre o tratamento de seus dados, entre em contato conosco através dos canais oficiais.
               </p>
             </div>
-            
-            <p className="text-xs text-gray-500 mt-4">
-              Documento gerado em {new Date().toLocaleDateString('pt-BR')} - Pro Motors Financiamentos
-            </p>
           </div>
         </div>
       </div>
