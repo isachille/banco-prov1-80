@@ -217,39 +217,60 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                   <div className="bg-gray-100 p-3 text-center font-bold text-gray-800 text-sm">ANO DE FAB.</div>
                   
                   {/* Data */}
-                  <div className="border-r border-gray-300 border-t p-3 text-center text-gray-900 font-semibold">{proposal.marca}</div>
-                  <div className="border-r border-gray-300 border-t p-3 text-center text-gray-900 font-semibold">R$ {new Intl.NumberFormat('pt-BR').format(proposal.valorVeiculo)},00</div>
-                  <div className="border-r border-gray-300 border-t p-3 text-center text-gray-900 font-semibold">R$ {new Intl.NumberFormat('pt-BR').format(proposal.valorVeiculo - proposal.valorEntrada)},00</div>
-                  <div className="border-r border-gray-300 border-t p-3 text-center text-gray-900 font-semibold">-</div>
-                  <div className="border-t p-3 text-center text-gray-900 font-semibold">{proposal.ano}</div>
+                  <div className="border-r border-gray-300 border-t p-3 text-center text-gray-900 font-semibold">{proposal.marca || 'N/A'}</div>
+                  <div className="border-r border-gray-300 border-t p-3 text-center text-gray-900 font-semibold">R$ {new Intl.NumberFormat('pt-BR').format(proposal.valorVeiculo || 0)},00</div>
+                  <div className="border-r border-gray-300 border-t p-3 text-center text-gray-900 font-semibold">R$ {new Intl.NumberFormat('pt-BR').format((proposal.valorVeiculo || 0) - (proposal.valorEntrada || 0))},00</div>
+                  <div className="border-r border-gray-300 border-t p-3 text-center text-gray-900 font-semibold">A DEFINIR</div>
+                  <div className="border-t p-3 text-center text-gray-900 font-semibold">{proposal.ano || 'N/A'}</div>
                 </div>
                 
                 {/* Modelo em linha separada */}
                 <div className="grid grid-cols-1 border-t border-gray-300">
                   <div className="bg-gray-100 p-3 text-center font-bold text-gray-800 text-sm">NOME/MODELO</div>
-                  <div className="p-3 text-center text-gray-900 font-semibold">{proposal.modelo}</div>
+                  <div className="p-3 text-center text-gray-900 font-semibold">{proposal.modelo || 'N/A'}</div>
                 </div>
               </div>
             </div>
 
-            {/* Parcelamento Simulado - Estilo Excel */}
+            {/* Parcelamento Simulado - Reorganizado */}
             <div className="bg-blue-50 p-6 rounded-lg mb-6 border border-blue-200">
               <h3 className="text-blue-800 font-bold text-center mb-4">PARCELAMENTO SIMULADO</h3>
-              <div className="bg-white border border-gray-300 rounded-lg overflow-hidden">
-                <div className="grid grid-cols-5 gap-0">
+              
+              {/* Primeira linha: 12X, 24X, 36X */}
+              <div className="bg-white border border-gray-300 rounded-lg overflow-hidden mb-4">
+                <div className="grid grid-cols-3 gap-0">
                   {/* Headers */}
-                  <div className="bg-gray-100 border-r border-gray-300 p-3 text-center font-bold text-gray-800 text-sm">12X</div>
-                  <div className="bg-gray-100 border-r border-gray-300 p-3 text-center font-bold text-gray-800 text-sm">24X</div>
-                  <div className="bg-gray-100 border-r border-gray-300 p-3 text-center font-bold text-gray-800 text-sm">36X</div>
-                  <div className="bg-gray-100 border-r border-gray-300 p-3 text-center font-bold text-gray-800 text-sm">48X</div>
-                  <div className="bg-gray-100 p-3 text-center font-bold text-gray-800 text-sm">60X</div>
+                  <div className="bg-gray-100 border-r border-gray-300 p-4 text-center font-bold text-gray-800">12X</div>
+                  <div className="bg-gray-100 border-r border-gray-300 p-4 text-center font-bold text-gray-800">24X</div>
+                  <div className="bg-gray-100 p-4 text-center font-bold text-gray-800">36X</div>
                   
                   {/* Values */}
-                  <div className="border-r border-gray-300 border-t p-3 text-center text-gray-900 font-bold">R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.12 / 12))},00</div>
-                  <div className="border-r border-gray-300 border-t p-3 text-center text-gray-900 font-bold">R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.24 / 24))},00</div>
-                  <div className="border-r border-gray-300 border-t p-3 text-center text-gray-900 font-bold">R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.36 / 36))},00</div>
-                  <div className="border-r border-gray-300 border-t p-3 text-center text-gray-900 font-bold">R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.48 / 48))},00</div>
-                  <div className="border-t p-3 text-center text-gray-900 font-bold">R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.60 / 60))},00</div>
+                  <div className="border-r border-gray-300 border-t p-4 text-center text-gray-900 font-bold text-lg">
+                    R$ {new Intl.NumberFormat('pt-BR').format(Math.round(((proposal.valorVeiculo || 0) - (proposal.valorEntrada || 0)) * 1.12 / 12))},00
+                  </div>
+                  <div className="border-r border-gray-300 border-t p-4 text-center text-gray-900 font-bold text-lg">
+                    R$ {new Intl.NumberFormat('pt-BR').format(Math.round(((proposal.valorVeiculo || 0) - (proposal.valorEntrada || 0)) * 1.24 / 24))},00
+                  </div>
+                  <div className="border-t p-4 text-center text-gray-900 font-bold text-lg">
+                    R$ {new Intl.NumberFormat('pt-BR').format(Math.round(((proposal.valorVeiculo || 0) - (proposal.valorEntrada || 0)) * 1.36 / 36))},00
+                  </div>
+                </div>
+              </div>
+
+              {/* Segunda linha: 48X, 60X */}
+              <div className="bg-white border border-gray-300 rounded-lg overflow-hidden">
+                <div className="grid grid-cols-2 gap-0">
+                  {/* Headers */}
+                  <div className="bg-gray-100 border-r border-gray-300 p-4 text-center font-bold text-gray-800">48X</div>
+                  <div className="bg-gray-100 p-4 text-center font-bold text-gray-800">60X</div>
+                  
+                  {/* Values */}
+                  <div className="border-r border-gray-300 border-t p-4 text-center text-gray-900 font-bold text-lg">
+                    R$ {new Intl.NumberFormat('pt-BR').format(Math.round(((proposal.valorVeiculo || 0) - (proposal.valorEntrada || 0)) * 1.48 / 48))},00
+                  </div>
+                  <div className="border-t p-4 text-center text-gray-900 font-bold text-lg">
+                    R$ {new Intl.NumberFormat('pt-BR').format(Math.round(((proposal.valorVeiculo || 0) - (proposal.valorEntrada || 0)) * 1.60 / 60))},00
+                  </div>
                 </div>
               </div>
             </div>
