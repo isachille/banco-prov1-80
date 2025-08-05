@@ -4,6 +4,8 @@ import { Download, MessageCircle, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { generateFinancingPDF, shareWhatsApp } from '@/components/PDFGenerator';
 import { toast } from 'sonner';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 interface ProposalActionsProps {
   proposal: any;
@@ -17,32 +19,91 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({ proposal, kycD
   const handleGeneratePDF = async () => {
     setGeneratingPDF(true);
     try {
-      const pdfData = {
-        codigoProposta: proposal.codigo,
-        cliente: {
-          nome: kycData.nome_completo,
-          cpf: kycData.cpf,
-          nascimento: kycData.data_nascimento ? new Date(kycData.data_nascimento).toLocaleDateString('pt-BR') : 'Não informado',
-          mae: kycData.nome_mae,
-          profissao: kycData.profissao
-        },
-        veiculo: {
-          marca: proposal.marca,
-          modelo: proposal.modelo,
-          ano: proposal.ano,
-          valor: proposal.valorVeiculo
-        },
-        financiamento: {
-          entrada: proposal.entrada,
-          parcelas: proposal.parcelas,
-          valorParcela: proposal.valorParcela,
-          valorTotal: proposal.valorTotal
-        },
-        operador: proposal.operador,
-        status: 'PRE_APROVADO' as const
-      };
+      // Encontra o container da proposta na tela
+      const proposalContainer = document.querySelector('.proposal-preview-container');
+      
+      if (!proposalContainer) {
+        // Fallback para capturar toda a página se não encontrar o container específico
+        const pageContent = document.querySelector('.min-h-screen.bg-background');
+        if (!pageContent) {
+          throw new Error('Não foi possível encontrar o conteúdo da proposta');
+        }
+        
+        const canvas = await html2canvas(pageContent as HTMLElement, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          logging: false,
+          foreignObjectRendering: true,
+          height: pageContent.scrollHeight,
+          width: pageContent.scrollWidth
+        });
 
-      const pdfBlob = await generateFinancingPDF(pdfData);
+        const imgData = canvas.toDataURL('image/png', 1.0);
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        
+        const imgWidth = 210;
+        const pageHeight = 297;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        let heightLeft = imgHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+
+        while (heightLeft >= 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+        }
+
+        const pdfBlob = pdf.output('blob');
+        
+        const url = URL.createObjectURL(pdfBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Proposta_${proposal.codigo}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        toast.success('PDF gerado com sucesso!');
+        return;
+      }
+
+      // Se encontrou o container específico, usa ele
+      const canvas = await html2canvas(proposalContainer as HTMLElement, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        foreignObjectRendering: true
+      });
+
+      const imgData = canvas.toDataURL('image/png', 1.0);
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      const imgWidth = 210;
+      const pageHeight = 297;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      const pdfBlob = pdf.output('blob');
       
       const url = URL.createObjectURL(pdfBlob);
       const link = document.createElement('a');
@@ -56,7 +117,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({ proposal, kycD
       toast.success('PDF gerado com sucesso!');
     } catch (error) {
       console.error('Erro ao gerar PDF:', error);
-      toast.error('Erro ao gerar PDF');
+      toast.error('Erro ao gerar PDF. Tente novamente.');
     } finally {
       setGeneratingPDF(false);
     }

@@ -47,7 +47,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
       
       <div className="container mx-auto p-6 max-w-4xl pt-20">
         {/* Proposta Preview Content */}
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden proposal-preview-container">
           {/* Header com Logo - Estilo Profissional - Reduzido */}
           <div className="bg-gradient-to-r from-blue-800 to-blue-600 text-white p-4">
             <div className="flex items-center justify-center gap-4 mb-3">
