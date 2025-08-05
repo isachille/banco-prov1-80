@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { ProposalActions } from '@/components/proposal/ProposalActions';
-import proMotorsLogo from '@/assets/pro-motors-logo.png';
 
 interface ProposalPreviewProps {
   proposal: {
@@ -50,12 +49,12 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
           <div className="bg-gradient-to-r from-blue-800 to-blue-600 text-white p-8">
             <div className="flex items-center justify-center gap-6 mb-6">
               <img 
-                src={proMotorsLogo} 
-                alt="Pro Motors Logo" 
-                className="w-20 h-20 rounded-lg bg-white/10 p-2"
+                src="/lovable-uploads/643c1e1f-e6af-466b-a105-cbabe342f414.png" 
+                alt="Banco Pro Logo" 
+                className="w-24 h-16 object-contain"
               />
               <div className="text-center">
-                <h1 className="text-4xl font-bold">PRO MOTORS</h1>
+                <h1 className="text-4xl font-bold text-white">BANCO PRO</h1>
                 <p className="text-blue-100 text-lg">Financiamento Veicular</p>
               </div>
             </div>
@@ -132,26 +131,26 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               <h3 className="text-blue-800 font-bold text-center mb-4">DADOS CONSULTADOS</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="text-center">
-                  <div className="font-bold text-gray-700 mb-2">CPF / CNPJ</div>
-                  <div className="bg-white p-3 border rounded font-mono">{kycData.cpf}</div>
+                  <div className="font-bold text-gray-800 mb-2">CPF / CNPJ</div>
+                  <div className="bg-white p-3 border rounded font-mono text-gray-900">{kycData.cpf}</div>
                 </div>
                 <div className="text-center">
-                  <div className="font-bold text-gray-700 mb-2">NOME COMPLETO</div>
-                  <div className="bg-white p-3 border rounded">{kycData.nome_completo}</div>
+                  <div className="font-bold text-gray-800 mb-2">NOME COMPLETO</div>
+                  <div className="bg-white p-3 border rounded text-gray-900">{kycData.nome_completo}</div>
                 </div>
                 <div className="text-center">
-                  <div className="font-bold text-gray-700 mb-2">DATA DE NASCIMENTO</div>
-                  <div className="bg-white p-3 border rounded">{new Date(kycData.data_nascimento).toLocaleDateString('pt-BR')}</div>
+                  <div className="font-bold text-gray-800 mb-2">DATA DE NASCIMENTO</div>
+                  <div className="bg-white p-3 border rounded text-gray-900">{new Date(kycData.data_nascimento).toLocaleDateString('pt-BR')}</div>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <div className="text-center">
-                  <div className="font-bold text-gray-700 mb-2">NOME DA MÃE</div>
-                  <div className="bg-white p-3 border rounded">{kycData.nome_mae}</div>
+                  <div className="font-bold text-gray-800 mb-2">NOME DA MÃE</div>
+                  <div className="bg-white p-3 border rounded text-gray-900">{kycData.nome_mae}</div>
                 </div>
                 <div className="text-center">
-                  <div className="font-bold text-gray-700 mb-2">PROFISSÃO</div>
-                  <div className="bg-white p-3 border rounded">{kycData.profissao}</div>
+                  <div className="font-bold text-gray-800 mb-2">PROFISSÃO</div>
+                  <div className="bg-white p-3 border rounded text-gray-900">{kycData.profissao}</div>
                 </div>
               </div>
             </div>
