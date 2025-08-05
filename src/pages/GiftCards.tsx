@@ -54,14 +54,15 @@ const GiftCards = () => {
         return;
       }
 
+      const { data: { session } } = await supabase.auth.getSession();
+      
       const response = await fetch('https://hjcvpozwjyydbegrcskq.functions.supabase.co/sync-binance-saldo', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`,
         },
-        body: JSON.stringify({
-          user_id: user.id
-        })
+        body: JSON.stringify({})
       });
 
       if (!response.ok) {
@@ -109,9 +110,7 @@ const GiftCards = () => {
       // Tentar usar o método do Supabase primeiro
       try {
         const { data, error } = await supabase.functions.invoke('criar-subconta', {
-          body: {
-            user_id: user.id
-          }
+          body: {}
         });
 
         if (error) {
@@ -138,9 +137,7 @@ const GiftCards = () => {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
           },
-          body: JSON.stringify({
-            user_id: user.id
-          })
+          body: JSON.stringify({})
         });
 
         console.log('Status da resposta:', response.status);
