@@ -1,6 +1,9 @@
 
 import React from 'react';
 import { ProposalActions } from '@/components/proposal/ProposalActions';
+import sedanImage from '@/assets/sedan-3d.png';
+import suvImage from '@/assets/suv-3d.png';
+import motoImage from '@/assets/moto-3d.png';
 
 interface ProposalPreviewProps {
   proposal: {
@@ -45,22 +48,22 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
       <div className="container mx-auto p-6 max-w-4xl pt-20">
         {/* Proposta Preview Content */}
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          {/* Header com Logo - Estilo Profissional */}
-          <div className="bg-gradient-to-r from-blue-800 to-blue-600 text-white p-8">
-            <div className="flex items-center justify-center gap-6 mb-6">
+          {/* Header com Logo - Estilo Profissional - Reduzido */}
+          <div className="bg-gradient-to-r from-blue-800 to-blue-600 text-white p-4">
+            <div className="flex items-center justify-center gap-4 mb-3">
               <img 
                 src="/lovable-uploads/ffb83455-1b27-47d5-819d-980104813842.png" 
                 alt="Banco Pro Logo" 
-                className="w-40 h-24 object-contain"
+                className="w-32 h-20 object-contain"
               />
               <div className="text-center">
-                <h1 className="text-4xl font-bold text-white">BANCO PRO</h1>
-                <p className="text-blue-100 text-lg">Financiamento Veicular</p>
+                <h1 className="text-2xl font-bold text-white">BANCO PRO</h1>
+                <p className="text-blue-100 text-sm">Financiamento Veicular</p>
               </div>
             </div>
             
             <div className="text-center">
-              <h2 className="text-xl font-bold mb-2">PROTOCOLO DA PROPOSTA {proposal.codigo}</h2>
+              <h2 className="text-lg font-bold mb-1">PROTOCOLO DA PROPOSTA {proposal.codigo}</h2>
             </div>
           </div>
 
@@ -110,18 +113,20 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4">
                 <div className="text-center">
-                  <div className="font-bold text-gray-800 mb-1">CIDADE</div>
-                  <div className="text-gray-900 font-medium">CEILÂNDIA - BRASÍLIA<br/>SAMAMBAIA - BRASÍLIA</div>
+                  <div className="font-bold text-gray-800 mb-1">UNIDADE 1</div>
+                  <div className="bg-white p-3 border rounded text-gray-900 font-semibold">
+                    <div>TAGUATINGA-DF</div>
+                    <div>QNM 34 ÁREA ESPECIAL 01</div>
+                    <div>CEP: 72145-450</div>
+                  </div>
                 </div>
                 <div className="text-center">
-                  <div className="font-bold text-gray-800 mb-1">ENDEREÇO / SED</div>
-                  <div className="text-gray-900 font-medium">QNO 10/12 CONJ. A LOTE 02, ST "O", BRASÍLIA - DF<br/>QS 406 - SAMAMBAIA, BRASÍLIA - DF</div>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4">
-                <div className="text-center">
-                  <div className="font-bold text-gray-800 mb-1">CEP</div>
-                  <div className="text-gray-900 font-medium">72.255-540<br/>72.318-200</div>
+                  <div className="font-bold text-gray-800 mb-1">UNIDADE 2</div>
+                  <div className="bg-white p-3 border rounded text-gray-900 font-semibold">
+                    <div>SAMAMBAIA - BRASÍLIA</div>
+                    <div>QS 406 - SAMAMBAIA</div>
+                    <div>CEP: 72318-200</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -155,46 +160,68 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               </div>
             </div>
 
-            {/* Dados do Bem Desejado */}
+            {/* Dados do Bem Desejado com Imagem */}
             <div className="bg-blue-50 p-6 rounded-lg mb-6 border border-blue-200">
               <h3 className="text-blue-800 font-bold text-center mb-4">DADOS DO BEM. DESEJADO COM CRÉDITO BANCÁRIO</h3>
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-4 text-center">
-                <div>
-                  <div className="font-bold text-gray-800 mb-2">MARCA</div>
-                  <div className="bg-white p-3 border rounded text-gray-900 font-semibold">{proposal.marca}</div>
-                </div>
-                <div>
-                  <div className="font-bold text-gray-800 mb-2">VALOR</div>
-                  <div className="bg-white p-3 border rounded text-gray-900 font-semibold">R$ {new Intl.NumberFormat('pt-BR').format(proposal.valorVeiculo)},00</div>
-                </div>
-                <div>
-                  <div className="font-bold text-gray-800 mb-2">VALOR FINAN.</div>
-                  <div className="bg-white p-3 border rounded text-gray-900 font-semibold">R$ {new Intl.NumberFormat('pt-BR').format(proposal.valorVeiculo - proposal.valorEntrada)},00</div>
-                </div>
-                <div>
-                  <div className="font-bold text-gray-800 mb-2">COR</div>
-                  <div className="bg-white p-3 border rounded text-gray-900 font-semibold">-</div>
-                </div>
-                <div>
-                  <div className="font-bold text-gray-800 mb-2">ANO DE FAB.</div>
-                  <div className="bg-white p-3 border rounded text-gray-900 font-semibold">{proposal.ano}</div>
-                </div>
+              
+              {/* Imagem do Veículo */}
+              <div className="flex justify-center mb-6">
+                <img 
+                  src={
+                    proposal.modelo.toLowerCase().includes('moto') || proposal.modelo.toLowerCase().includes('motorcycle') ? motoImage :
+                    proposal.modelo.toLowerCase().includes('suv') || proposal.modelo.toLowerCase().includes('pickup') ? suvImage :
+                    sedanImage
+                  }
+                  alt={`${proposal.marca} ${proposal.modelo}`}
+                  className="w-48 h-36 object-contain bg-white rounded-lg shadow-md border-2 border-gray-200"
+                />
               </div>
-              <div className="text-center mt-4">
-                <div className="font-bold text-gray-800 mb-2">NOME/MODELO</div>
-                <div className="bg-white p-3 border rounded text-gray-900 font-semibold">{proposal.modelo}</div>
+
+              {/* Dados em Grid Estilo Excel */}
+              <div className="bg-white border border-gray-300 rounded-lg overflow-hidden">
+                <div className="grid grid-cols-5 gap-0">
+                  {/* Headers */}
+                  <div className="bg-gray-100 border-r border-gray-300 p-3 text-center font-bold text-gray-800 text-sm">MARCA</div>
+                  <div className="bg-gray-100 border-r border-gray-300 p-3 text-center font-bold text-gray-800 text-sm">VALOR</div>
+                  <div className="bg-gray-100 border-r border-gray-300 p-3 text-center font-bold text-gray-800 text-sm">VALOR FINAN.</div>
+                  <div className="bg-gray-100 border-r border-gray-300 p-3 text-center font-bold text-gray-800 text-sm">COR</div>
+                  <div className="bg-gray-100 p-3 text-center font-bold text-gray-800 text-sm">ANO DE FAB.</div>
+                  
+                  {/* Data */}
+                  <div className="border-r border-gray-300 border-t p-3 text-center text-gray-900 font-semibold">{proposal.marca}</div>
+                  <div className="border-r border-gray-300 border-t p-3 text-center text-gray-900 font-semibold">R$ {new Intl.NumberFormat('pt-BR').format(proposal.valorVeiculo)},00</div>
+                  <div className="border-r border-gray-300 border-t p-3 text-center text-gray-900 font-semibold">R$ {new Intl.NumberFormat('pt-BR').format(proposal.valorVeiculo - proposal.valorEntrada)},00</div>
+                  <div className="border-r border-gray-300 border-t p-3 text-center text-gray-900 font-semibold">-</div>
+                  <div className="border-t p-3 text-center text-gray-900 font-semibold">{proposal.ano}</div>
+                </div>
+                
+                {/* Modelo em linha separada */}
+                <div className="grid grid-cols-1 border-t border-gray-300">
+                  <div className="bg-gray-100 p-3 text-center font-bold text-gray-800 text-sm">NOME/MODELO</div>
+                  <div className="p-3 text-center text-gray-900 font-semibold">{proposal.modelo}</div>
+                </div>
               </div>
             </div>
 
-            {/* Parcelamento Simulado */}
+            {/* Parcelamento Simulado - Estilo Excel */}
             <div className="bg-blue-50 p-6 rounded-lg mb-6 border border-blue-200">
               <h3 className="text-blue-800 font-bold text-center mb-4">PARCELAMENTO SIMULADO</h3>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center text-sm">
-                <div className="font-bold text-gray-900"><span className="text-gray-800">12X</span><br/>R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.12 / 12))},00</div>
-                <div className="font-bold text-gray-900"><span className="text-gray-800">24X</span><br/>R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.24 / 24))},00</div>
-                <div className="font-bold text-gray-900"><span className="text-gray-800">36X</span><br/>R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.36 / 36))},00</div>
-                <div className="font-bold text-gray-900"><span className="text-gray-800">48X</span><br/>R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.48 / 48))},00</div>
-                <div className="font-bold text-gray-900"><span className="text-gray-800">60X</span><br/>R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.60 / 60))},00</div>
+              <div className="bg-white border border-gray-300 rounded-lg overflow-hidden">
+                <div className="grid grid-cols-5 gap-0">
+                  {/* Headers */}
+                  <div className="bg-gray-100 border-r border-gray-300 p-3 text-center font-bold text-gray-800 text-sm">12X</div>
+                  <div className="bg-gray-100 border-r border-gray-300 p-3 text-center font-bold text-gray-800 text-sm">24X</div>
+                  <div className="bg-gray-100 border-r border-gray-300 p-3 text-center font-bold text-gray-800 text-sm">36X</div>
+                  <div className="bg-gray-100 border-r border-gray-300 p-3 text-center font-bold text-gray-800 text-sm">48X</div>
+                  <div className="bg-gray-100 p-3 text-center font-bold text-gray-800 text-sm">60X</div>
+                  
+                  {/* Values */}
+                  <div className="border-r border-gray-300 border-t p-3 text-center text-gray-900 font-bold">R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.12 / 12))},00</div>
+                  <div className="border-r border-gray-300 border-t p-3 text-center text-gray-900 font-bold">R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.24 / 24))},00</div>
+                  <div className="border-r border-gray-300 border-t p-3 text-center text-gray-900 font-bold">R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.36 / 36))},00</div>
+                  <div className="border-r border-gray-300 border-t p-3 text-center text-gray-900 font-bold">R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.48 / 48))},00</div>
+                  <div className="border-t p-3 text-center text-gray-900 font-bold">R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.60 / 60))},00</div>
+                </div>
               </div>
             </div>
 
@@ -232,15 +259,15 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               </ul>
             </div>
 
-            {/* Footer com Data */}
+            {/* Footer com Data - Visibilidade Melhorada */}
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div className="text-center">
-                <div className="font-bold text-gray-700 mb-2">PROPOSTA ABERTA EM:</div>
-                <div className="bg-white p-3 border rounded">{new Date().toLocaleDateString('pt-BR')}</div>
+                <div className="font-bold text-gray-900 mb-2 text-lg">PROPOSTA ABERTA EM:</div>
+                <div className="bg-white p-3 border-2 border-gray-400 rounded text-gray-900 font-bold text-lg">{new Date().toLocaleDateString('pt-BR')}</div>
               </div>
               <div className="text-center">
-                <div className="font-bold text-gray-700 mb-2">EXPIRA EM:</div>
-                <div className="bg-white p-3 border rounded">{new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR')}</div>
+                <div className="font-bold text-red-700 mb-2 text-lg">EXPIRA EM:</div>
+                <div className="bg-red-100 p-3 border-2 border-red-400 rounded text-red-700 font-bold text-lg">{new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR')}</div>
               </div>
             </div>
 
