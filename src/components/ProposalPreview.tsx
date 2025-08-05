@@ -160,29 +160,29 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               <h3 className="text-blue-800 font-bold text-center mb-4">DADOS DO BEM. DESEJADO COM CRÉDITO BANCÁRIO</h3>
               <div className="grid grid-cols-1 md:grid-cols-5 gap-4 text-center">
                 <div>
-                  <div className="font-bold text-gray-700 mb-2">MARCA</div>
-                  <div className="bg-white p-3 border rounded">{proposal.marca}</div>
+                  <div className="font-bold text-gray-800 mb-2">MARCA</div>
+                  <div className="bg-white p-3 border rounded text-gray-900 font-semibold">{proposal.marca}</div>
                 </div>
                 <div>
-                  <div className="font-bold text-gray-700 mb-2">VALOR</div>
-                  <div className="bg-white p-3 border rounded">R$ {new Intl.NumberFormat('pt-BR').format(proposal.valorVeiculo)},00</div>
+                  <div className="font-bold text-gray-800 mb-2">VALOR</div>
+                  <div className="bg-white p-3 border rounded text-gray-900 font-semibold">R$ {new Intl.NumberFormat('pt-BR').format(proposal.valorVeiculo)},00</div>
                 </div>
                 <div>
-                  <div className="font-bold text-gray-700 mb-2">VALOR FINAN.</div>
-                  <div className="bg-white p-3 border rounded">R$ {new Intl.NumberFormat('pt-BR').format(proposal.valorVeiculo - proposal.valorEntrada)},00</div>
+                  <div className="font-bold text-gray-800 mb-2">VALOR FINAN.</div>
+                  <div className="bg-white p-3 border rounded text-gray-900 font-semibold">R$ {new Intl.NumberFormat('pt-BR').format(proposal.valorVeiculo - proposal.valorEntrada)},00</div>
                 </div>
                 <div>
-                  <div className="font-bold text-gray-700 mb-2">COR</div>
-                  <div className="bg-white p-3 border rounded">-</div>
+                  <div className="font-bold text-gray-800 mb-2">COR</div>
+                  <div className="bg-white p-3 border rounded text-gray-900 font-semibold">-</div>
                 </div>
                 <div>
-                  <div className="font-bold text-gray-700 mb-2">ANO DE FAB.</div>
-                  <div className="bg-white p-3 border rounded">{proposal.ano}</div>
+                  <div className="font-bold text-gray-800 mb-2">ANO DE FAB.</div>
+                  <div className="bg-white p-3 border rounded text-gray-900 font-semibold">{proposal.ano}</div>
                 </div>
               </div>
               <div className="text-center mt-4">
-                <div className="font-bold text-gray-700 mb-2">NOME/MODELO</div>
-                <div className="bg-white p-3 border rounded">{proposal.modelo}</div>
+                <div className="font-bold text-gray-800 mb-2">NOME/MODELO</div>
+                <div className="bg-white p-3 border rounded text-gray-900 font-semibold">{proposal.modelo}</div>
               </div>
             </div>
 
@@ -190,11 +190,11 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             <div className="bg-blue-50 p-6 rounded-lg mb-6 border border-blue-200">
               <h3 className="text-blue-800 font-bold text-center mb-4">PARCELAMENTO SIMULADO</h3>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center text-sm">
-                <div className="font-bold">12X<br/>R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.12 / 12))},00</div>
-                <div className="font-bold">24X<br/>R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.24 / 24))},00</div>
-                <div className="font-bold">36X<br/>R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.36 / 36))},00</div>
-                <div className="font-bold">48X<br/>R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.48 / 48))},00</div>
-                <div className="font-bold">60X<br/>R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.60 / 60))},00</div>
+                <div className="font-bold text-gray-900"><span className="text-gray-800">12X</span><br/>R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.12 / 12))},00</div>
+                <div className="font-bold text-gray-900"><span className="text-gray-800">24X</span><br/>R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.24 / 24))},00</div>
+                <div className="font-bold text-gray-900"><span className="text-gray-800">36X</span><br/>R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.36 / 36))},00</div>
+                <div className="font-bold text-gray-900"><span className="text-gray-800">48X</span><br/>R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.48 / 48))},00</div>
+                <div className="font-bold text-gray-900"><span className="text-gray-800">60X</span><br/>R$ {new Intl.NumberFormat('pt-BR').format(Math.round((proposal.valorVeiculo - proposal.valorEntrada) * 1.60 / 60))},00</div>
               </div>
             </div>
 
