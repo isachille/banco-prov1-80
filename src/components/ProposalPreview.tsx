@@ -51,7 +51,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               <img 
                 src="/lovable-uploads/643c1e1f-e6af-466b-a105-cbabe342f414.png" 
                 alt="Banco Pro Logo" 
-                className="w-24 h-16 object-contain"
+                className="w-32 h-20 object-contain bg-white rounded-lg p-2"
               />
               <div className="text-center">
                 <h1 className="text-4xl font-bold text-white">BANCO PRO</h1>
@@ -94,34 +94,34 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             {/* Dados Empresariais */}
             <div className="bg-blue-50 p-6 rounded-lg mb-6 border border-blue-200">
               <h3 className="text-blue-800 font-bold text-center mb-4">DADOS EMPRESARIAIS</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm mb-4">
                 <div className="text-center">
-                  <div className="font-bold text-gray-700">CNPJ:</div>
-                  <div className="bg-white p-2 border rounded">54.039.082/0001-07</div>
+                  <div className="font-bold text-gray-800 mb-1">CNPJ:</div>
+                  <div className="bg-white p-2 border rounded text-gray-900 font-semibold">54.039.082/0001-07</div>
                 </div>
                 <div className="text-center">
-                  <div className="font-bold text-gray-700">EMPRESA</div>
-                  <div>PRO MOTORS - LTDA</div>
+                  <div className="font-bold text-gray-800 mb-1">EMPRESA</div>
+                  <div className="text-gray-900 font-semibold">PRO MOTORS - LTDA</div>
                 </div>
                 <div className="text-center">
-                  <div className="font-bold text-gray-700">CENTRAL SAC</div>
-                  <div>61 98154-8624</div>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4">
-                <div className="text-center">
-                  <div className="font-bold text-gray-700">CIDADE</div>
-                  <div>CEILÂNDIA - BRASÍLIA<br/>SAMAMBAIA - BRASÍLIA</div>
-                </div>
-                <div className="text-center">
-                  <div className="font-bold text-gray-700">ENDEREÇO / SED</div>
-                  <div>QNO 10/12 CONJ. A LOTE 02, ST "O", BRASÍLIA - DF<br/>QS 406 - SAMAMBAIA, BRASÍLIA - DF</div>
+                  <div className="font-bold text-gray-800 mb-1">CENTRAL SAC</div>
+                  <div className="text-gray-900 font-semibold">61 98154-8624</div>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4">
                 <div className="text-center">
-                  <div className="font-bold text-gray-700">CEP</div>
-                  <div>72.255-540<br/>72.318-200</div>
+                  <div className="font-bold text-gray-800 mb-1">CIDADE</div>
+                  <div className="text-gray-900 font-medium">CEILÂNDIA - BRASÍLIA<br/>SAMAMBAIA - BRASÍLIA</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-bold text-gray-800 mb-1">ENDEREÇO / SED</div>
+                  <div className="text-gray-900 font-medium">QNO 10/12 CONJ. A LOTE 02, ST "O", BRASÍLIA - DF<br/>QS 406 - SAMAMBAIA, BRASÍLIA - DF</div>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4">
+                <div className="text-center">
+                  <div className="font-bold text-gray-800 mb-1">CEP</div>
+                  <div className="text-gray-900 font-medium">72.255-540<br/>72.318-200</div>
                 </div>
               </div>
             </div>
@@ -212,23 +212,23 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             {/* Componentes com Necessidade de Regularização */}
             <div className="bg-red-50 p-6 rounded-lg mb-6 border-l-4 border-red-500">
               <h3 className="text-red-700 font-bold mb-4">COMPONENTES COM NECESSIDADE DE REGULARIZAÇÃO</h3>
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-start gap-2"><span className="text-red-500">•</span> Dados inconsistentes com o sistema. Confirmação necessária para correção.</li>
-                <li className="flex items-start gap-2"><span className="text-red-500">•</span> Renda não atualizada no sistema. Enviar documentação recente para regularização.</li>
-                <li className="flex items-start gap-2"><span className="text-red-500">•</span> Histórico de consumo dos últimos 24 meses, com média de movimentação verificada.</li>
-                <li className="flex items-start gap-2"><span className="text-red-500">•</span> Confirmação necessária para atualizar o perfil cadastral do proponente de financiamento.</li>
+              <ul className="space-y-2 text-sm text-gray-800">
+                <li className="flex items-start gap-2"><span className="text-red-500 font-bold">•</span> <span className="text-gray-900">Dados inconsistentes com o sistema. Confirmação necessária para correção.</span></li>
+                <li className="flex items-start gap-2"><span className="text-red-500 font-bold">•</span> <span className="text-gray-900">Renda não atualizada no sistema. Enviar documentação recente para regularização.</span></li>
+                <li className="flex items-start gap-2"><span className="text-red-500 font-bold">•</span> <span className="text-gray-900">Histórico de consumo dos últimos 24 meses, com média de movimentação verificada.</span></li>
+                <li className="flex items-start gap-2"><span className="text-red-500 font-bold">•</span> <span className="text-gray-900">Confirmação necessária para atualizar o perfil cadastral do proponente de financiamento.</span></li>
               </ul>
             </div>
 
             {/* Cotações Promocionais */}
             <div className="bg-green-50 p-6 rounded-lg mb-6 border-l-4 border-green-500">
               <h3 className="text-green-700 font-bold mb-4">COTAÇÕES PROMOCIONAIS DISPONÍVEIS POR PRAZO LIMITADO</h3>
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-start gap-2"><span className="text-green-500">•</span> <strong>1° PLANO CDC</strong> COM CONDIÇÕES ESPECIAIS INCLUSO DURANTE TODO O PERÍODO DE FINANCIAMENTO</li>
-                <li className="flex items-start gap-2"><span className="text-green-500">•</span> <strong>2° GARANTIA ESTENDIDA</strong> DE 3 MESES PARA TODOS OS VEÍCULOS, OFERECENDO MAIS SEGURANÇA PARA VOCÊ</li>
-                <li className="flex items-start gap-2"><span className="text-green-500">•</span> <strong>3° ACOMPANHAMENTO FINANCEIRO</strong> COMPLETO E SUPORTE TOTAL NA COMPLEMENTAÇÃO DOCUMENTAL</li>
-                <li className="flex items-start gap-2"><span className="text-green-500">•</span> <strong>4° COMECE A PAGAR EM ATÉ</strong> 60 DIAS APÓS A ASSINATURA DO CONTRATO. MAIS FLEXIBILIDADE PARA O SEU BOLSO</li>
-                <li className="flex items-start gap-2"><span className="text-green-500">•</span> <strong>5° FRETE GRATUITO VIA CEGONHA</strong> OU GUINCHO PARA CLIENTES SELECIONADOS. CONSULTE CONDIÇÕES</li>
+              <ul className="space-y-2 text-sm text-gray-800">
+                <li className="flex items-start gap-2"><span className="text-green-500 font-bold">•</span> <span className="text-gray-900"><strong>1° PLANO CDC</strong> COM CONDIÇÕES ESPECIAIS INCLUSO DURANTE TODO O PERÍODO DE FINANCIAMENTO</span></li>
+                <li className="flex items-start gap-2"><span className="text-green-500 font-bold">•</span> <span className="text-gray-900"><strong>2° GARANTIA ESTENDIDA</strong> DE 3 MESES PARA TODOS OS VEÍCULOS, OFERECENDO MAIS SEGURANÇA PARA VOCÊ</span></li>
+                <li className="flex items-start gap-2"><span className="text-green-500 font-bold">•</span> <span className="text-gray-900"><strong>3° ACOMPANHAMENTO FINANCEIRO</strong> COMPLETO E SUPORTE TOTAL NA COMPLEMENTAÇÃO DOCUMENTAL</span></li>
+                <li className="flex items-start gap-2"><span className="text-green-500 font-bold">•</span> <span className="text-gray-900"><strong>4° COMECE A PAGAR EM ATÉ</strong> 60 DIAS APÓS A ASSINATURA DO CONTRATO. MAIS FLEXIBILIDADE PARA O SEU BOLSO</span></li>
+                <li className="flex items-start gap-2"><span className="text-green-500 font-bold">•</span> <span className="text-gray-900"><strong>5° FRETE GRATUITO VIA CEGONHA</strong> OU GUINCHO PARA CLIENTES SELECIONADOS. CONSULTE CONDIÇÕES</span></li>
               </ul>
             </div>
 
