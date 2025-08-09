@@ -30,25 +30,16 @@ const PIX = () => {
 
       const valorNumerico = parseFloat(valor.replace(',', '.'));
 
-      // Verificar saldo na tabela wallets
-      const { data: walletData } = await supabase
-        .from('wallets')
-        .select('saldo')
-        .eq('user_id', user.id)
-        .single();
-
-      if (!walletData || walletData.saldo < valorNumerico) {
-        toast.error('Saldo insuficiente');
-        return;
+      // Processa o PIX via Edge Function segura
+      const { data, error } = await supabase.functions.invoke('processar-pix', {
+        body: { chave_pix: chavePix, valor: valorNumerico }
+      });
+      if (error) {
+        throw error;
       }
-
-      // Atualizar saldo na carteira
-      const { error } = await supabase
-        .from('wallets')
-        .update({ saldo: walletData.saldo - valorNumerico })
-        .eq('user_id', user.id);
-
-      if (error) throw error;
+      if (data?.status !== 'success') {
+        throw new Error(data?.message || 'Falha ao processar PIX');
+      }
 
       toast.success('PIX enviado com sucesso!');
       setChavePix('');

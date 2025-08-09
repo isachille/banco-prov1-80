@@ -224,7 +224,6 @@ const GiftCards = () => {
     }
 
     setIsLoading(true);
-    
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -232,41 +231,46 @@ const GiftCards = () => {
         return;
       }
 
-      // Buscar saldo atual da carteira
-      const { data: walletData, error: walletError } = await supabase
-        .from('wallets')
-        .select('saldo')
-        .eq('user_id', user.id)
-        .single();
+      // Executa a compra via Edge Function segura
+      try {
+        const { data, error } = await supabase.functions.invoke('comprar-giftcard', {
+          body: { giftcard_name: service, valor: value }
+        });
 
-      if (walletError || !walletData) {
-        toast.error('Erro ao verificar saldo');
-        return;
+        if (error) throw error;
+        if (data?.status !== 'success') {
+          throw new Error(data?.message || 'Falha ao comprar gift card');
+        }
+
+        // Sincroniza saldos para refletir no wallet principal
+        await syncBinanceBalance();
+
+        toast.success(`Gift Card ${service} de ${formatCurrency(value)} comprado! Código: ${data?.codigo ?? 'gerado'}`);
+      } catch (invokeError) {
+        // Fallback para chamada direta com token, caso invoke falhe
+        const { data: { session } } = await supabase.auth.getSession();
+        const resp = await fetch('https://hjcvpozwjyydbegrcskq.functions.supabase.co/comprar-giftcard', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({ giftcard_name: service, valor: value })
+        });
+        if (!resp.ok) {
+          const txt = await resp.text();
+          throw new Error(txt || 'Erro ao comprar gift card');
+        }
+        const result = await resp.json();
+        if (result.status !== 'success') {
+          throw new Error(result.message || 'Falha ao comprar gift card');
+        }
+        await syncBinanceBalance();
+        toast.success(`Gift Card ${service} de ${formatCurrency(value)} comprado! Código: ${result.codigo ?? 'gerado'}`);
       }
-
-      if (walletData.saldo < value) {
-        toast.error('Saldo insuficiente');
-        return;
-      }
-
-      // Atualizar saldo na carteira
-      const { error: updateError } = await supabase
-        .from('wallets')
-        .update({ saldo: walletData.saldo - value })
-        .eq('user_id', user.id);
-
-      if (updateError) {
-        throw updateError;
-      }
-
-      // Atualizar saldo local
-      setUserBalance(prev => prev - value);
-      
-      toast.success(`Gift Card ${service} de R$ ${value} comprado com sucesso!`);
-      
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro na compra:', error);
-      toast.error('Erro ao processar a compra');
+      toast.error(error?.message || 'Erro ao processar a compra');
     } finally {
       setIsLoading(false);
     }
