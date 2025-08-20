@@ -110,6 +110,84 @@ export type Database = {
         }
         Relationships: []
       }
+      pixley_transactions: {
+        Row: {
+          created_at: string
+          explorer_url: string | null
+          external_id: string | null
+          fees: Json | null
+          id: string
+          metadata: Json | null
+          network: string | null
+          pix_key: string | null
+          pix_key_type: string | null
+          qr_code: string | null
+          recipient_document: string | null
+          recipient_name: string | null
+          source_amount: number
+          source_currency: string
+          status: string
+          target_amount: number | null
+          target_currency: string
+          transaction_id: string | null
+          tx_hash: string | null
+          type: string
+          updated_at: string
+          user_id: string
+          wallet_address: string | null
+        }
+        Insert: {
+          created_at?: string
+          explorer_url?: string | null
+          external_id?: string | null
+          fees?: Json | null
+          id?: string
+          metadata?: Json | null
+          network?: string | null
+          pix_key?: string | null
+          pix_key_type?: string | null
+          qr_code?: string | null
+          recipient_document?: string | null
+          recipient_name?: string | null
+          source_amount: number
+          source_currency: string
+          status?: string
+          target_amount?: number | null
+          target_currency: string
+          transaction_id?: string | null
+          tx_hash?: string | null
+          type: string
+          updated_at?: string
+          user_id: string
+          wallet_address?: string | null
+        }
+        Update: {
+          created_at?: string
+          explorer_url?: string | null
+          external_id?: string | null
+          fees?: Json | null
+          id?: string
+          metadata?: Json | null
+          network?: string | null
+          pix_key?: string | null
+          pix_key_type?: string | null
+          qr_code?: string | null
+          recipient_document?: string | null
+          recipient_name?: string | null
+          source_amount?: number
+          source_currency?: string
+          status?: string
+          target_amount?: number | null
+          target_currency?: string
+          transaction_id?: string | null
+          tx_hash?: string | null
+          type?: string
+          updated_at?: string
+          user_id?: string
+          wallet_address?: string | null
+        }
+        Relationships: []
+      }
       subcontas: {
         Row: {
           agencia: string | null
