@@ -186,7 +186,15 @@ const PropostasHistorico = () => {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => navigate(`/proposta/${proposta.id}`)}
+                        onClick={() => {
+                          if (proposta.status === 'aprovado') {
+                            navigate(`/proposta-aprovada/${proposta.codigo}`);
+                          } else if (proposta.status === 'recusado') {
+                            navigate(`/proposta-recusada/${proposta.codigo}`);
+                          } else {
+                            navigate(`/proposta/${proposta.id}`);
+                          }
+                        }}
                       >
                         <Eye className="h-4 w-4 mr-1" />
                         Ver Detalhes

@@ -54,6 +54,8 @@ import PixAdmin from '@/pages/PixAdmin';
 import RecargaCelular from '@/pages/RecargaCelular';
 import InvestorProfile from '@/pages/InvestorProfile';
 import PixleyPage from '@/pages/PixleyPage';
+import PropostaAprovada from '@/pages/PropostaAprovada';
+import PropostaRecusada from '@/pages/PropostaRecusada';
 
 import ExtratoPix from '@/pages/ExtratoPix';
 import LimitesPix from '@/pages/LimitesPix';
@@ -168,7 +170,9 @@ function App() {
               
               <Route path="/extrato-pix" element={<ProtectedRoute><ExtratoPix /></ProtectedRoute>} />
               <Route path="/limites-pix" element={<ProtectedRoute><LimitesPix /></ProtectedRoute>} />
-              <Route path="/pixley" element={<ProtectedRoute><PixleyPage /></ProtectedRoute>} />
+          <Route path="/pixley" element={<ProtectedRoute><PixleyPage /></ProtectedRoute>} />
+          <Route path="/proposta-aprovada/:id" element={<ProtectedRoute><PropostaAprovada /></ProtectedRoute>} />
+          <Route path="/proposta-recusada/:id" element={<ProtectedRoute><PropostaRecusada /></ProtectedRoute>} />
               
               {/* New routes */}
               <Route path="/cripto" element={

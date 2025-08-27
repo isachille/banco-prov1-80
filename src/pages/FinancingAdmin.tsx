@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Users, Clock, CheckCircle, Eye, UserPlus } from 'lucide-react';
+import { ArrowLeft, Users, Clock, CheckCircle, Eye, UserPlus, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -114,6 +114,30 @@ const FinancingAdmin = () => {
     } catch (error) {
       console.error('Erro ao atribuir operador:', error);
       toast.error('Erro ao atribuir operador à proposta');
+    }
+  };
+
+  const processarDecisao = async (propostaId: string, decisao: 'aprovado' | 'recusado') => {
+    try {
+      const { data, error } = await supabase.functions.invoke('process-proposal-decision', {
+        body: { 
+          proposal_id: propostaId, 
+          decision: decisao 
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      toast.success(`Proposta ${decisao === 'aprovado' ? 'aprovada' : 'recusada'} com sucesso!`);
+      queryClient.invalidateQueries({ queryKey: ['propostas_financiamento'] });
+    } catch (error) {
+      console.error('Erro ao processar decisão:', error);
+      toast.error('Erro ao processar decisão da proposta');
     }
   };
 
@@ -305,6 +329,28 @@ const FinancingAdmin = () => {
                               </Button>
                             </div>
                           )}
+                          
+                          {proposta.status === 'em_andamento' && (
+                            <div className="flex items-center space-x-2">
+                              <Button
+                                size="sm"
+                                onClick={() => processarDecisao(proposta.id, 'aprovado')}
+                                className="bg-green-600 hover:bg-green-700 text-white"
+                              >
+                                <Check className="h-4 w-4 mr-1" />
+                                Aprovar
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={() => processarDecisao(proposta.id, 'recusado')}
+                                className="bg-red-600 hover:bg-red-700 text-white"
+                              >
+                                <X className="h-4 w-4 mr-1" />
+                                Recusar
+                              </Button>
+                            </div>
+                          )}
+                          
                           <Button
                             size="sm"
                             variant="outline"
