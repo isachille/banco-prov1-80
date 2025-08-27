@@ -414,6 +414,10 @@ export type Database = {
         Args: { user_id: string }
         Returns: boolean
       }
+      process_proposal_decision: {
+        Args: { admin_user_id: string; decision: string; proposal_id: string }
+        Returns: Json
+      }
       transferir_saldo: {
         Args: { p_de: string; p_para: string; p_valor: number }
         Returns: Json
