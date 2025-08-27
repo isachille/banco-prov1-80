@@ -1,12 +1,34 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { CheckCircle, Phone, ArrowLeft } from 'lucide-react';
+import { CheckCircle, Phone, ArrowLeft, Car, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+interface ProposalData {
+  id: string;
+  codigo: string;
+  cliente_nome: string;
+  cliente_cpf: string;
+  veiculo: string;
+  valor_veiculo: number;
+  valor_entrada: number;
+  parcelas: number;
+  valor_parcela: number;
+}
 
 const PropostaAprovada = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const [proposalData, setProposalData] = useState<ProposalData | null>(null);
+
+  useEffect(() => {
+    if (id) {
+      const data = localStorage.getItem(`proposta_${id}`);
+      if (data) {
+        setProposalData(JSON.parse(data));
+      }
+    }
+  }, [id]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-6">
@@ -21,12 +43,69 @@ const PropostaAprovada = () => {
             Parabéns! Proposta Aprovada
           </CardTitle>
           <p className="text-muted-foreground text-sm">
-            Código: <span className="font-medium text-green-600">#{id}</span>
+            Código: <span className="font-medium text-green-600">#{proposalData?.codigo || id}</span>
           </p>
         </CardHeader>
         
-        <CardContent className="text-center space-y-6">
-          <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+        <CardContent className="space-y-6">
+          {proposalData && (
+            <>
+              {/* Dados do Cliente */}
+              <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                <div className="flex items-center gap-2 mb-3">
+                  <User className="w-5 h-5 text-blue-600" />
+                  <h3 className="font-semibold text-blue-800">Dados do Cliente</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-600">Nome:</span>
+                    <div className="text-gray-900">{proposalData.cliente_nome}</div>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-600">CPF:</span>
+                    <div className="text-gray-900">{proposalData.cliente_cpf}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Dados do Veículo */}
+              <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                <div className="flex items-center gap-2 mb-3">
+                  <Car className="w-5 h-5 text-blue-600" />
+                  <h3 className="font-semibold text-blue-800">Veículo Financiado</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-600">Veículo:</span>
+                    <div className="text-gray-900">{proposalData.veiculo}</div>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-600">Valor:</span>
+                    <div className="text-gray-900">
+                      {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposalData.valor_veiculo)}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-600">Entrada:</span>
+                    <div className="text-gray-900">
+                      {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposalData.valor_entrada)}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-600">Parcelas:</span>
+                    <div className="text-gray-900">
+                      {proposalData.parcelas}x de {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposalData.valor_parcela)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          <div className="bg-green-50 rounded-lg p-4 border border-green-200 text-center">
+            <div className="flex justify-center mb-3">
+              <CheckCircle className="w-8 h-8 text-green-600" />
+            </div>
             <h3 className="font-semibold text-green-800 mb-2">
               Próximos Passos
             </h3>
