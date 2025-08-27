@@ -170,9 +170,9 @@ function App() {
               
               <Route path="/extrato-pix" element={<ProtectedRoute><ExtratoPix /></ProtectedRoute>} />
               <Route path="/limites-pix" element={<ProtectedRoute><LimitesPix /></ProtectedRoute>} />
-          <Route path="/pixley" element={<ProtectedRoute><PixleyPage /></ProtectedRoute>} />
-          <Route path="/proposta-aprovada/:id" element={<ProtectedRoute><PropostaAprovada /></ProtectedRoute>} />
-          <Route path="/proposta-recusada/:id" element={<ProtectedRoute><PropostaRecusada /></ProtectedRoute>} />
+              <Route path="/pixley" element={<ProtectedRoute><PixleyPage /></ProtectedRoute>} />
+              <Route path="/proposta-aprovada/:id" element={<ProtectedRoute><PropostaAprovada /></ProtectedRoute>} />
+              <Route path="/proposta-recusada/:id" element={<ProtectedRoute><PropostaRecusada /></ProtectedRoute>} />
               
               {/* New routes */}
               <Route path="/cripto" element={
