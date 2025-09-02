@@ -99,88 +99,92 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({ proposal, kycD
   const handleGeneratePDF = async () => {
     setGeneratingPDF(true);
     try {
-      // Encontra o container da proposta na tela
-      const proposalContainer = document.querySelector('.proposal-preview-container');
+      // Primeiro tenta encontrar o container da proposta
+      let targetElement = document.querySelector('.proposal-preview-container');
       
-      if (!proposalContainer) {
-        // Fallback para capturar toda a página se não encontrar o container específico
-        const pageContent = document.querySelector('.min-h-screen.bg-background');
-        if (!pageContent) {
-          throw new Error('Não foi possível encontrar o conteúdo da proposta');
-        }
-        
-        const canvas = await html2canvas(pageContent as HTMLElement, {
-          scale: 2,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: '#ffffff',
-          logging: false,
-          foreignObjectRendering: true,
-          height: pageContent.scrollHeight,
-          width: pageContent.scrollWidth
-        });
-
-        const imgData = canvas.toDataURL('image/png', 1.0);
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        
-        const imgWidth = 210;
-        const pageHeight = 297;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        let heightLeft = imgHeight;
-        let position = 0;
-
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-
-        while (heightLeft >= 0) {
-          position = heightLeft - imgHeight;
-          pdf.addPage();
-          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-          heightLeft -= pageHeight;
-        }
-
-        const pdfBlob = pdf.output('blob');
-        
-        const url = URL.createObjectURL(pdfBlob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `Proposta_${proposal.codigo}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-
-        toast.success('PDF gerado com sucesso!');
-        return;
+      if (!targetElement) {
+        // Se não encontrar, procura por containers alternativos
+        targetElement = document.querySelector('[class*="proposal"]') || 
+                      document.querySelector('.space-y-6') ||
+                      document.querySelector('main') ||
+                      document.body;
+      }
+      
+      if (!targetElement) {
+        throw new Error('Não foi possível encontrar o conteúdo da proposta');
       }
 
-      // Se encontrou o container específico, usa ele
-      const canvas = await html2canvas(proposalContainer as HTMLElement, {
-        scale: 2,
+      // Aguarda um pouco para garantir que todo o conteúdo seja renderizado
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Configura o canvas com dimensões otimizadas para capturar todo o conteúdo
+      const canvas = await html2canvas(targetElement as HTMLElement, {
+        scale: 1.5, // Reduz um pouco a escala para melhor performance
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff',
         logging: false,
-        foreignObjectRendering: true
+        foreignObjectRendering: true,
+        scrollX: 0,
+        scrollY: 0,
+        width: targetElement.scrollWidth,
+        height: targetElement.scrollHeight,
+        windowWidth: window.innerWidth,
+        windowHeight: window.innerHeight,
+        ignoreElements: (element) => {
+          // Ignora elementos que podem causar problemas na captura
+          return element.classList.contains('sticky') || 
+                 element.classList.contains('fixed') ||
+                 element.tagName === 'SCRIPT';
+        }
       });
 
-      const imgData = canvas.toDataURL('image/png', 1.0);
+      const imgData = canvas.toDataURL('image/jpeg', 0.95); // Usa JPEG com alta qualidade
       const pdf = new jsPDF('p', 'mm', 'a4');
       
-      const imgWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+      const pdfWidth = 210; // Largura A4 em mm
+      const pdfHeight = 297; // Altura A4 em mm
+      const imgAspectRatio = canvas.height / canvas.width;
+      
+      // Calcula as dimensões da imagem no PDF mantendo a proporção
+      let imgWidth = pdfWidth - 20; // Margem de 10mm de cada lado
+      let imgHeight = imgWidth * imgAspectRatio;
+      
+      // Se a imagem for muito alta, ajusta para caber na página
+      if (imgHeight > pdfHeight - 20) {
+        imgHeight = pdfHeight - 20;
+        imgWidth = imgHeight / imgAspectRatio;
+      }
+      
+      // Centraliza a imagem na página
+      const xPosition = (pdfWidth - imgWidth) / 2;
+      const yPosition = 10; // Margem superior
+      
+      // Calcula quantas páginas serão necessárias
+      const totalPages = Math.ceil(imgHeight / (pdfHeight - 20));
+      
+      for (let i = 0; i < totalPages; i++) {
+        if (i > 0) {
+          pdf.addPage();
+        }
+        
+        const sourceY = i * (pdfHeight - 20) * (canvas.height / imgHeight);
+        const sourceHeight = Math.min((pdfHeight - 20) * (canvas.height / imgHeight), canvas.height - sourceY);
+        
+        // Cria um canvas temporário para a seção atual
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCanvas.width = canvas.width;
+        tempCanvas.height = sourceHeight;
+        
+        if (tempCtx) {
+          tempCtx.fillStyle = '#ffffff';
+          tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+          tempCtx.drawImage(canvas, 0, -sourceY);
+          
+          const tempImgData = tempCanvas.toDataURL('image/jpeg', 0.95);
+          pdf.addImage(tempImgData, 'JPEG', xPosition, yPosition, imgWidth, Math.min(pdfHeight - 20, imgHeight - i * (pdfHeight - 20)));
+        }
       }
 
       const pdfBlob = pdf.output('blob');
