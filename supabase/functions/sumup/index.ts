@@ -1,12 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.3';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
-
-const SUMUP_API_BASE_URL = 'https://api.sumup.com/v0.1';
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -15,86 +13,81 @@ serve(async (req) => {
   }
 
   try {
-    const sumupApiKey = Deno.env.get('SUMUP_API_KEY');
-    if (!sumupApiKey) {
-      throw new Error('SUMUP_API_KEY is not configured');
-    }
-
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get user from Authorization header
-    const authorization = req.headers.get('Authorization');
-    if (!authorization) {
+    // Get user from JWT token
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
       return new Response(JSON.stringify({ error: 'Authorization header required' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const token = authorization.replace('Bearer ', '');
+    const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    
+
     if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Invalid authentication' }), {
+      return new Response(JSON.stringify({ error: 'Invalid token' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
+    // Get SumUp API key
+    const sumupApiKey = Deno.env.get('SUMUP_API_KEY');
+    if (!sumupApiKey) {
+      return new Response(JSON.stringify({ error: 'SumUp API key not configured' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Parse URL to get the path
     const url = new URL(req.url);
-    const path = url.pathname.replace('/sumup', '');
-    const method = req.method;
+    const pathSegments = url.pathname.split('/').filter(Boolean);
+    const operation = pathSegments[pathSegments.length - 1]; // Last segment after /sumup
 
-    console.log(`SumUp API call: ${method} ${path}`);
+    console.log(`SumUp API operation: ${operation}`);
 
-    // Route handling
-    let response;
-    switch (path) {
-      case '/customers':
-        if (method === 'POST') {
-          response = await handleCreateCustomer(req, user.id, sumupApiKey, supabase);
-        } else {
-          throw new Error('Method not allowed for /customers');
+    // Handle different operations
+    switch (operation) {
+      case 'customers':
+        if (req.method === 'POST') {
+          return await handleCreateCustomer(req, user.id, sumupApiKey, supabase);
         }
         break;
 
-      case '/checkouts':
-        if (method === 'POST') {
-          response = await handleCreateCheckout(req, user.id, sumupApiKey, supabase);
-        } else {
-          throw new Error('Method not allowed for /checkouts');
+      case 'checkouts':
+        if (req.method === 'POST') {
+          return await handleCreateCheckout(req, user.id, sumupApiKey, supabase);
         }
         break;
 
-      case '/me/transactions':
-        if (method === 'GET') {
-          response = await handleListTransactions(req, sumupApiKey);
-        } else {
-          throw new Error('Method not allowed for /me/transactions');
+      case 'transactions':
+        if (req.method === 'GET') {
+          return await handleListTransactions(req, sumupApiKey);
         }
         break;
 
-      case '/me/refunds':
-        if (method === 'POST') {
-          response = await handleCreateRefund(req, user.id, sumupApiKey, supabase);
-        } else {
-          throw new Error('Method not allowed for /me/refunds');
+      case 'refunds':
+        if (req.method === 'POST') {
+          return await handleCreateRefund(req, user.id, sumupApiKey, supabase);
         }
         break;
 
       default:
-        throw new Error(`Unknown endpoint: ${path}`);
+        return new Response(JSON.stringify({ error: `Operation ${operation} not supported` }), {
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
     }
 
-    return new Response(JSON.stringify(response), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-
   } catch (error) {
-    console.error('Error in sumup function:', error);
+    console.error('Error in SumUp function:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -103,175 +96,216 @@ serve(async (req) => {
 });
 
 async function handleCreateCustomer(req: Request, userId: string, apiKey: string, supabase: any) {
-  const body = await req.json();
-  
-  // Call SumUp API to create customer
-  const sumupResponse = await fetch(`${SUMUP_API_BASE_URL}/customers`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      customer_id: `user_${userId}`,
-      personal_details: {
+  try {
+    const body = await req.json();
+    
+    // Create customer in SumUp
+    const response = await fetch('https://api.sumup.com/v0.1/customers', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        customer_id: body.customer_id || `user_${userId}`,
+        personal_details: body.personal_details
+      }),
+    });
+
+    const sumupResponse = await response.json();
+    
+    if (!response.ok) {
+      console.error('SumUp API error:', sumupResponse);
+      return new Response(JSON.stringify({ error: sumupResponse }), {
+        status: response.status,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Save to database
+    const { error: dbError } = await supabase
+      .from('sumup_customers')
+      .insert({
+        id: sumupResponse.id,
+        user_id: userId,
         first_name: body.personal_details?.first_name,
         last_name: body.personal_details?.last_name,
         email: body.personal_details?.email,
-      }
-    }),
-  });
+        raw: sumupResponse
+      });
 
-  if (!sumupResponse.ok) {
-    const errorText = await sumupResponse.text();
-    console.error('SumUp API error:', errorText);
-    throw new Error(`SumUp API error: ${sumupResponse.status} ${errorText}`);
-  }
+    if (dbError) {
+      console.error('Database error:', dbError);
+    }
 
-  const sumupData = await sumupResponse.json();
-
-  // Save to database
-  const { error: dbError } = await supabase
-    .from('sumup_customers')
-    .insert({
-      id: sumupData.id,
-      user_id: userId,
-      first_name: body.personal_details?.first_name,
-      last_name: body.personal_details?.last_name,
-      email: body.personal_details?.email,
-      raw: sumupData,
+    return new Response(JSON.stringify(sumupResponse), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
-  if (dbError) {
-    console.error('Database error:', dbError);
-    throw new Error('Failed to save customer to database');
+  } catch (error) {
+    console.error('Error creating customer:', error);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
-
-  return sumupData;
 }
 
 async function handleCreateCheckout(req: Request, userId: string, apiKey: string, supabase: any) {
-  const body = await req.json();
-  
-  // Call SumUp API to create checkout
-  const sumupResponse = await fetch(`${SUMUP_API_BASE_URL}/checkouts`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      checkout_reference: body.checkout_reference || crypto.randomUUID(),
-      amount: body.amount,
-      currency: body.currency || 'BRL',
-      description: body.description,
-      customer_id: body.customer_id,
-    }),
-  });
-
-  if (!sumupResponse.ok) {
-    const errorText = await sumupResponse.text();
-    console.error('SumUp API error:', errorText);
-    throw new Error(`SumUp API error: ${sumupResponse.status} ${errorText}`);
-  }
-
-  const sumupData = await sumupResponse.json();
-
-  // Save to database
-  const { error: dbError } = await supabase
-    .from('sumup_checkouts')
-    .insert({
-      id: sumupData.id,
-      user_id: userId,
-      checkout_reference: sumupData.checkout_reference,
-      amount: sumupData.amount,
-      currency: sumupData.currency,
-      description: sumupData.description,
-      status: sumupData.status,
-      raw: sumupData,
+  try {
+    const body = await req.json();
+    
+    // Create checkout in SumUp
+    const response = await fetch('https://api.sumup.com/v0.1/checkouts', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        checkout_reference: body.checkout_reference || crypto.randomUUID(),
+        amount: body.amount,
+        currency: body.currency || 'BRL',
+        description: body.description,
+        customer_id: body.customer_id
+      }),
     });
 
-  if (dbError) {
-    console.error('Database error:', dbError);
-    throw new Error('Failed to save checkout to database');
-  }
+    const sumupResponse = await response.json();
+    
+    if (!response.ok) {
+      console.error('SumUp API error:', sumupResponse);
+      return new Response(JSON.stringify({ error: sumupResponse }), {
+        status: response.status,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
-  return sumupData;
+    // Save to database
+    const { error: dbError } = await supabase
+      .from('sumup_checkouts')
+      .insert({
+        id: sumupResponse.id,
+        user_id: userId,
+        checkout_reference: sumupResponse.checkout_reference,
+        amount: sumupResponse.amount,
+        currency: sumupResponse.currency,
+        description: sumupResponse.description,
+        status: sumupResponse.status,
+        raw: sumupResponse
+      });
+
+    if (dbError) {
+      console.error('Database error:', dbError);
+    }
+
+    return new Response(JSON.stringify(sumupResponse), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
+  } catch (error) {
+    console.error('Error creating checkout:', error);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
 }
 
 async function handleListTransactions(req: Request, apiKey: string) {
-  const url = new URL(req.url);
-  const searchParams = new URLSearchParams();
-  
-  // Forward query parameters
-  const limit = url.searchParams.get('limit');
-  const from = url.searchParams.get('from');
-  const to = url.searchParams.get('to');
-  
-  if (limit) searchParams.set('limit', limit);
-  if (from) searchParams.set('from', from);
-  if (to) searchParams.set('to', to);
+  try {
+    const url = new URL(req.url);
+    const limit = url.searchParams.get('limit') || '20';
+    const from = url.searchParams.get('from');
+    const to = url.searchParams.get('to');
 
-  const sumupResponse = await fetch(`${SUMUP_API_BASE_URL}/me/transactions?${searchParams}`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-  });
+    let apiUrl = `https://api.sumup.com/v0.1/me/transactions?limit=${limit}`;
+    if (from) apiUrl += `&from=${from}`;
+    if (to) apiUrl += `&to=${to}`;
 
-  if (!sumupResponse.ok) {
-    const errorText = await sumupResponse.text();
-    console.error('SumUp API error:', errorText);
-    throw new Error(`SumUp API error: ${sumupResponse.status} ${errorText}`);
+    const response = await fetch(apiUrl, {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+      },
+    });
+
+    const sumupResponse = await response.json();
+    
+    if (!response.ok) {
+      console.error('SumUp API error:', sumupResponse);
+      return new Response(JSON.stringify({ error: sumupResponse }), {
+        status: response.status,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    return new Response(JSON.stringify(sumupResponse), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
+  } catch (error) {
+    console.error('Error listing transactions:', error);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
-
-  const sumupData = await sumupResponse.json();
-  return sumupData.items || sumupData;
 }
 
 async function handleCreateRefund(req: Request, userId: string, apiKey: string, supabase: any) {
-  const body = await req.json();
-  
-  // Call SumUp API to create refund
-  const sumupResponse = await fetch(`${SUMUP_API_BASE_URL}/me/refunds`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      transaction_id: body.transaction_id,
-      amount: body.amount,
-      currency: body.currency || 'BRL',
-    }),
-  });
-
-  if (!sumupResponse.ok) {
-    const errorText = await sumupResponse.text();
-    console.error('SumUp API error:', errorText);
-    throw new Error(`SumUp API error: ${sumupResponse.status} ${errorText}`);
-  }
-
-  const sumupData = await sumupResponse.json();
-
-  // Save to database
-  const { error: dbError } = await supabase
-    .from('sumup_refunds')
-    .insert({
-      id: sumupData.id,
-      user_id: userId,
-      transaction_id: body.transaction_id,
-      amount: body.amount,
-      currency: body.currency || 'BRL',
-      status: sumupData.status,
-      raw: sumupData,
+  try {
+    const body = await req.json();
+    
+    // Create refund in SumUp
+    const response = await fetch('https://api.sumup.com/v0.1/me/refunds', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        transaction_id: body.transaction_id,
+        amount: body.amount,
+        currency: body.currency || 'BRL'
+      }),
     });
 
-  if (dbError) {
-    console.error('Database error:', dbError);
-    throw new Error('Failed to save refund to database');
-  }
+    const sumupResponse = await response.json();
+    
+    if (!response.ok) {
+      console.error('SumUp API error:', sumupResponse);
+      return new Response(JSON.stringify({ error: sumupResponse }), {
+        status: response.status,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
-  return sumupData;
+    // Save to database
+    const { error: dbError } = await supabase
+      .from('sumup_refunds')
+      .insert({
+        id: sumupResponse.id,
+        user_id: userId,
+        transaction_id: body.transaction_id,
+        amount: body.amount,
+        currency: body.currency || 'BRL',
+        status: sumupResponse.status,
+        raw: sumupResponse
+      });
+
+    if (dbError) {
+      console.error('Database error:', dbError);
+    }
+
+    return new Response(JSON.stringify(sumupResponse), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
+  } catch (error) {
+    console.error('Error creating refund:', error);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
 }
