@@ -221,6 +221,114 @@ export type Database = {
         }
         Relationships: []
       }
+      sumup_checkouts: {
+        Row: {
+          amount: number
+          checkout_reference: string | null
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          raw: Json | null
+          status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          checkout_reference?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id: string
+          raw?: Json | null
+          status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          checkout_reference?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          raw?: Json | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sumup_customers: {
+        Row: {
+          created_at: string
+          email: string | null
+          first_name: string | null
+          id: string
+          last_name: string | null
+          raw: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          first_name?: string | null
+          id: string
+          last_name?: string | null
+          raw?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          raw?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sumup_refunds: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          id: string
+          raw: Json | null
+          status: string | null
+          transaction_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          id: string
+          raw?: Json | null
+          status?: string | null
+          transaction_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          raw?: Json | null
+          status?: string | null
+          transaction_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       transacoes: {
         Row: {
           created_at: string
