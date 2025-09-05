@@ -119,7 +119,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({ proposal, kycD
 
       // Configura o canvas com dimensões otimizadas para capturar todo o conteúdo
       const canvas = await html2canvas(targetElement as HTMLElement, {
-        scale: 1.5, // Reduz um pouco a escala para melhor performance
+        scale: 2, // Aumenta a escala para melhor qualidade
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff',
@@ -127,10 +127,10 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({ proposal, kycD
         foreignObjectRendering: true,
         scrollX: 0,
         scrollY: 0,
-        width: targetElement.scrollWidth,
+        width: 794, // Largura fixa para A4
         height: targetElement.scrollHeight,
-        windowWidth: window.innerWidth,
-        windowHeight: window.innerHeight,
+        windowWidth: 794,
+        windowHeight: 1123,
         ignoreElements: (element) => {
           // Ignora elementos que podem causar problemas na captura
           return element.classList.contains('sticky') || 
@@ -139,7 +139,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({ proposal, kycD
         }
       });
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.95); // Usa JPEG com alta qualidade
+      const imgData = canvas.toDataURL('image/jpeg', 1.0); // Usa JPEG com máxima qualidade
       const pdf = new jsPDF('p', 'mm', 'a4');
       
       const pdfWidth = 210; // Largura A4 em mm
@@ -147,29 +147,29 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({ proposal, kycD
       const imgAspectRatio = canvas.height / canvas.width;
       
       // Calcula as dimensões da imagem no PDF mantendo a proporção
-      let imgWidth = pdfWidth - 20; // Margem de 10mm de cada lado
+      let imgWidth = pdfWidth - 10; // Margem menor de 5mm de cada lado
       let imgHeight = imgWidth * imgAspectRatio;
       
       // Se a imagem for muito alta, ajusta para caber na página
-      if (imgHeight > pdfHeight - 20) {
-        imgHeight = pdfHeight - 20;
+      if (imgHeight > pdfHeight - 10) {
+        imgHeight = pdfHeight - 10;
         imgWidth = imgHeight / imgAspectRatio;
       }
       
       // Centraliza a imagem na página
       const xPosition = (pdfWidth - imgWidth) / 2;
-      const yPosition = 10; // Margem superior
+      const yPosition = 5; // Margem superior menor
       
       // Calcula quantas páginas serão necessárias
-      const totalPages = Math.ceil(imgHeight / (pdfHeight - 20));
+      const totalPages = Math.ceil(imgHeight / (pdfHeight - 10));
       
       for (let i = 0; i < totalPages; i++) {
         if (i > 0) {
           pdf.addPage();
         }
         
-        const sourceY = i * (pdfHeight - 20) * (canvas.height / imgHeight);
-        const sourceHeight = Math.min((pdfHeight - 20) * (canvas.height / imgHeight), canvas.height - sourceY);
+        const sourceY = i * (pdfHeight - 10) * (canvas.height / imgHeight);
+        const sourceHeight = Math.min((pdfHeight - 10) * (canvas.height / imgHeight), canvas.height - sourceY);
         
         // Cria um canvas temporário para a seção atual
         const tempCanvas = document.createElement('canvas');
@@ -182,8 +182,8 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({ proposal, kycD
           tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
           tempCtx.drawImage(canvas, 0, -sourceY);
           
-          const tempImgData = tempCanvas.toDataURL('image/jpeg', 0.95);
-          pdf.addImage(tempImgData, 'JPEG', xPosition, yPosition, imgWidth, Math.min(pdfHeight - 20, imgHeight - i * (pdfHeight - 20)));
+          const tempImgData = tempCanvas.toDataURL('image/jpeg', 1.0);
+          pdf.addImage(tempImgData, 'JPEG', xPosition, yPosition, imgWidth, Math.min(pdfHeight - 10, imgHeight - i * (pdfHeight - 10)));
         }
       }
 

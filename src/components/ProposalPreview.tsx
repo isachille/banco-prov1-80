@@ -45,25 +45,25 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
         onBack={onBack}
       />
       
-      <div className="container mx-auto p-6 max-w-4xl pt-20">
+      <div className="container mx-auto p-6 max-w-6xl pt-20">
         {/* Proposta Preview Content */}
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden proposal-preview-container">
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden proposal-preview-container" style={{ width: '794px', minHeight: '1123px', margin: '0 auto', padding: '40px' }}>
           {/* Header com Logo - Estilo Profissional - Reduzido */}
-          <div className="bg-gradient-to-r from-blue-800 to-blue-600 text-white p-4">
-            <div className="flex items-center justify-center gap-4 mb-3">
+          <div className="bg-gradient-to-r from-blue-800 to-blue-600 text-white p-6">
+            <div className="flex items-center justify-center gap-6 mb-4">
               <img 
                 src="/lovable-uploads/ffb83455-1b27-47d5-819d-980104813842.png" 
                 alt="Banco Pro Logo" 
-                className="w-32 h-20 object-contain"
+                className="w-40 h-24 object-contain"
               />
               <div className="text-center">
-                <h1 className="text-2xl font-bold text-white">BANCO PRO</h1>
-                <p className="text-blue-100 text-sm">Financiamento Veicular</p>
+                <h1 className="text-3xl font-bold text-white">BANCO PRO</h1>
+                <p className="text-blue-100 text-base">Financiamento Veicular</p>
               </div>
             </div>
             
             <div className="text-center">
-              <h2 className="text-lg font-bold mb-1">PROTOCOLO DA PROPOSTA {proposal.codigo}</h2>
+              <h2 className="text-xl font-bold mb-2">PROTOCOLO DA PROPOSTA {proposal.codigo}</h2>
             </div>
           </div>
 
@@ -93,7 +93,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             </div>
           </div>
 
-          <div className="p-8">
+          <div className="p-6">
             {/* Dados Empresariais */}
             <div className="bg-blue-50 p-6 rounded-lg mb-6 border border-blue-200">
               <h3 className="text-blue-800 font-bold text-center mb-4">DADOS EMPRESARIAIS</h3>
