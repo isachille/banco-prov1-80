@@ -77,6 +77,71 @@ export type Database = {
         }
         Relationships: []
       }
+      contratos_financiamento: {
+        Row: {
+          assinado_em: string | null
+          assinatura_cliente: string | null
+          banco_promotor: string | null
+          cliente_cpf: string
+          cliente_data_nascimento: string | null
+          cliente_nome: string
+          cliente_nome_mae: string | null
+          codigo_contrato: string
+          created_at: string
+          email_enviado: boolean | null
+          id: string
+          link_assinatura: string | null
+          proposta_id: string
+          status_contrato: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assinado_em?: string | null
+          assinatura_cliente?: string | null
+          banco_promotor?: string | null
+          cliente_cpf: string
+          cliente_data_nascimento?: string | null
+          cliente_nome: string
+          cliente_nome_mae?: string | null
+          codigo_contrato: string
+          created_at?: string
+          email_enviado?: boolean | null
+          id?: string
+          link_assinatura?: string | null
+          proposta_id: string
+          status_contrato?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assinado_em?: string | null
+          assinatura_cliente?: string | null
+          banco_promotor?: string | null
+          cliente_cpf?: string
+          cliente_data_nascimento?: string | null
+          cliente_nome?: string
+          cliente_nome_mae?: string | null
+          codigo_contrato?: string
+          created_at?: string
+          email_enviado?: boolean | null
+          id?: string
+          link_assinatura?: string | null
+          proposta_id?: string
+          status_contrato?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contratos_financiamento_proposta_id_fkey"
+            columns: ["proposta_id"]
+            isOneToOne: false
+            referencedRelation: "propostas_financiamento"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       giftcards: {
         Row: {
           codigo: string
@@ -107,6 +172,33 @@ export type Database = {
           used_at?: string | null
           user_id?: string
           valor?: number
+        }
+        Relationships: []
+      }
+      operadores: {
+        Row: {
+          ativo: boolean | null
+          created_at: string
+          email: string | null
+          id: string
+          nome: string
+          telefone: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          nome: string
+          telefone?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          nome?: string
+          telefone?: string | null
         }
         Relationships: []
       }
@@ -185,6 +277,60 @@ export type Database = {
           updated_at?: string
           user_id?: string
           wallet_address?: string | null
+        }
+        Relationships: []
+      }
+      propostas_financiamento: {
+        Row: {
+          admin_id: string | null
+          ano: number
+          codigo: string
+          created_at: string
+          id: string
+          marca: string
+          modelo: string
+          operador_id: string | null
+          parcelas: number
+          status: string
+          updated_at: string
+          user_id: string
+          valorentrada: number
+          valorparcela: number
+          valorveiculo: number
+        }
+        Insert: {
+          admin_id?: string | null
+          ano: number
+          codigo: string
+          created_at?: string
+          id?: string
+          marca: string
+          modelo: string
+          operador_id?: string | null
+          parcelas: number
+          status?: string
+          updated_at?: string
+          user_id: string
+          valorentrada: number
+          valorparcela: number
+          valorveiculo: number
+        }
+        Update: {
+          admin_id?: string | null
+          ano?: number
+          codigo?: string
+          created_at?: string
+          id?: string
+          marca?: string
+          modelo?: string
+          operador_id?: string | null
+          parcelas?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+          valorentrada?: number
+          valorparcela?: number
+          valorveiculo?: number
         }
         Relationships: []
       }

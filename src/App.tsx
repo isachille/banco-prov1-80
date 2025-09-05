@@ -30,7 +30,9 @@ import FinancingSimulation from '@/pages/FinancingSimulation';
 import PropostasHistorico from '@/pages/PropostasHistorico';
 import DetalhesProposta from '@/pages/DetalhesProposta';
 import PainelOperador from '@/pages/PainelOperador';
-import FinancingAdmin from '@/pages/FinancingAdmin';
+import { FinancingAdmin } from '@/pages/FinancingAdmin';
+import { AssinarContrato } from '@/pages/AssinarContrato';
+import { ContratoAssinado } from '@/pages/ContratoAssinado';
 import AdminUsers from '@/pages/AdminUsers';
 import Cartoes from '@/pages/Cartoes';
 import PIX from '@/pages/PIX';
@@ -173,6 +175,8 @@ function App() {
               <Route path="/pixley" element={<ProtectedRoute><PixleyPage /></ProtectedRoute>} />
               <Route path="/proposta-aprovada/:id" element={<ProtectedRoute><PropostaAprovada /></ProtectedRoute>} />
               <Route path="/proposta-recusada/:id" element={<ProtectedRoute><PropostaRecusada /></ProtectedRoute>} />
+              <Route path="/assinar-contrato/:codigoContrato" element={<AssinarContrato />} />
+              <Route path="/contrato-assinado" element={<ContratoAssinado />} />
               
               {/* New routes */}
               <Route path="/cripto" element={

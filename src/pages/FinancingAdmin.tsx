@@ -1,107 +1,124 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Users, Clock, CheckCircle, Eye, UserPlus, Check, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from '@/hooks/use-toast';
+import { 
+  Eye, 
+  UserCheck, 
+  CheckCircle, 
+  XCircle, 
+  FileText, 
+  CreditCard, 
+  Send,
+  MoreHorizontal,
+  ArrowLeft,
+  Users,
+  Clock,
+  UserPlus,
+  Check,
+  X
+} from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useNavigate } from 'react-router-dom';
 
 interface Proposta {
   id: string;
-  codigo_proposta: string;
-  cliente_nome: string;
-  cliente_cpf: string;
-  veiculo: string;
+  codigo: string;
+  marca: string;
+  modelo: string;
+  ano: number;
   valor_veiculo: number;
-  valor_parcela: number;
+  valor_entrada: number;
   parcelas: number;
+  valor_parcela: number;
   status: string;
-  operador_nome?: string;
-  operador_telefone?: string;
+  user_id: string;
+  operador_id?: string;
   created_at: string;
+  user?: {
+    nome_completo: string;
+    cpf: string;
+    email: string;
+  };
+  operador?: {
+    nome: string;
+    telefone: string;
+  };
 }
 
 interface Operador {
   id: string;
   nome: string;
   telefone: string;
-  email?: string;
-  ativo: boolean;
+  email: string;
 }
 
-const FinancingAdmin = () => {
+export const FinancingAdmin: React.FC = () => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const [selectedOperator, setSelectedOperator] = useState<{ [key: string]: string }>({});
+  const [propostas, setPropostas] = useState<Proposta[]>([]);
+  const [operadores, setOperadores] = useState<Operador[]>([]);
+  const [selectedOperador, setSelectedOperador] = useState<{[key: string]: string}>({});
+  const [loading, setLoading] = useState(true);
 
-  // Buscar propostas
-  const { data: propostas = [], isLoading: loadingPropostas } = useQuery({
-    queryKey: ['propostas_financiamento'],
-    queryFn: async () => {
-      try {
-        const { data, error } = await supabase
-          .from('propostas_financiamento' as any)
-          .select('*')
-          .order('created_at', { ascending: false });
+  useEffect(() => {
+    fetchPropostas();
+    fetchOperadores();
+  }, []);
 
-        if (error) {
-          console.error('Erro ao buscar propostas:', error);
-          return [];
-        }
-        
-        return (data || []).map((item: any) => ({
-          id: item.id,
-          codigo_proposta: item.codigo_proposta || '',
-          cliente_nome: item.cliente_nome || '',
-          cliente_cpf: item.cliente_cpf || '',
-          veiculo: item.veiculo || '',
-          valor_veiculo: item.valor_veiculo || 0,
-          valor_parcela: item.valor_parcela || 0,
-          parcelas: item.parcelas || 0,
-          status: item.status || 'pendente',
-          operador_nome: item.operador_nome,
-          operador_telefone: item.operador_telefone,
-          created_at: item.created_at || ''
-        })) as Proposta[];
-      } catch (error) {
-        console.error('Erro ao buscar propostas:', error);
-        return [];
-      }
-    },
-    refetchInterval: 5000,
-  });
+  const fetchPropostas = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('propostas_financiamento')
+        .select(`
+          *,
+          user:users!propostas_financiamento_user_id_fkey(nome_completo, cpf, email),
+          operador:operadores!propostas_financiamento_operador_id_fkey(nome, telefone)
+        `)
+        .order('created_at', { ascending: false });
 
-  // Buscar operadores (mock data por enquanto)
-  const { data: operadores = [] } = useQuery({
-    queryKey: ['operadores_cadastrados'],
-    queryFn: async () => {
-      // Mock data para operadores
-      return [
-        { id: '1', nome: 'João Silva', telefone: '11999999999', ativo: true },
-        { id: '2', nome: 'Maria Santos', telefone: '11888888888', ativo: true },
-        { id: '3', nome: 'Pedro Costa', telefone: '11777777777', ativo: true }
-      ] as Operador[];
-    },
-  });
+      if (error) throw error;
+      setPropostas(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar propostas:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao carregar propostas",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchOperadores = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('operadores')
+        .select('*')
+        .eq('ativo', true)
+        .order('nome');
+
+      if (error) throw error;
+      setOperadores(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar operadores:', error);
+    }
+  };
 
   const atribuirOperador = async (propostaId: string, operadorId: string) => {
     try {
-      const operador = operadores.find(op => op.id === operadorId);
-      if (!operador) {
-        toast.error('Operador não encontrado');
-        return;
-      }
-
       const { error } = await supabase
-        .from('propostas_financiamento' as any)
+        .from('propostas_financiamento')
         .update({
           operador_id: operadorId,
-          operador_nome: operador.nome,
-          operador_telefone: operador.telefone,
           status: 'em_andamento',
           updated_at: new Date().toISOString()
         })
@@ -109,45 +126,101 @@ const FinancingAdmin = () => {
 
       if (error) throw error;
 
-      toast.success('Proposta atribuída ao operador com sucesso!');
-      queryClient.invalidateQueries({ queryKey: ['propostas_financiamento'] });
+      toast({
+        title: "Sucesso",
+        description: "Operador atribuído com sucesso!"
+      });
+
+      fetchPropostas();
     } catch (error) {
       console.error('Erro ao atribuir operador:', error);
-      toast.error('Erro ao atribuir operador à proposta');
+      toast({
+        title: "Erro",
+        description: "Erro ao atribuir operador",
+        variant: "destructive"
+      });
     }
   };
 
   const processarDecisao = async (propostaId: string, decisao: 'aprovado' | 'recusado') => {
     try {
-      const { data, error } = await supabase.functions.invoke('process-proposal-decision', {
-        body: { 
-          proposal_id: propostaId, 
-          decision: decisao 
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const response = await supabase.functions.invoke('process-proposal-decision', {
+        body: {
+          proposal_id: propostaId,
+          decision: decisao
+        },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
         }
       });
 
-      if (error) throw error;
+      if (response.error) throw new Error(response.error.message);
 
-      if (data?.error) {
-        toast.error(data.error);
-        return;
-      }
+      toast({
+        title: "Sucesso",
+        description: `Proposta ${decisao === 'aprovado' ? 'aprovada' : 'recusada'} com sucesso!`
+      });
 
-      toast.success(`Proposta ${decisao === 'aprovado' ? 'aprovada' : 'recusada'} com sucesso!`);
-      queryClient.invalidateQueries({ queryKey: ['propostas_financiamento'] });
+      fetchPropostas();
     } catch (error) {
       console.error('Erro ao processar decisão:', error);
-      toast.error('Erro ao processar decisão da proposta');
+      toast({
+        title: "Erro",
+        description: "Erro ao processar proposta",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const criarContrato = async (proposta: Proposta) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const codigoContrato = `CONT-${Date.now()}`;
+      
+      const { data, error } = await supabase
+        .from('contratos_financiamento')
+        .insert({
+          proposta_id: proposta.id,
+          user_id: proposta.user_id,
+          codigo_contrato: codigoContrato,
+          cliente_nome: proposta.user?.nome_completo || '',
+          cliente_cpf: proposta.user?.cpf || '',
+          banco_promotor: 'Pro Motors',
+          link_assinatura: `${window.location.origin}/assinar-contrato/${codigoContrato}`,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: "Contrato criado com sucesso!"
+      });
+
+      navigate(`/assinar-contrato/${codigoContrato}`);
+    } catch (error) {
+      console.error('Erro ao criar contrato:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao criar contrato",
+        variant: "destructive"
+      });
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pendente': return 'bg-yellow-100 text-yellow-800';
-      case 'em_andamento': return 'bg-blue-100 text-blue-800';
-      case 'aprovado': return 'bg-green-100 text-green-800';
-      case 'recusado': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'pendente': return 'bg-yellow-500 text-white';
+      case 'em_andamento': return 'bg-blue-500 text-white';
+      case 'aprovado': return 'bg-green-500 text-white';
+      case 'recusado': return 'bg-red-500 text-white';
+      default: return 'bg-gray-500 text-white';
     }
   };
 
@@ -159,11 +232,23 @@ const FinancingAdmin = () => {
   };
 
   const formatCPF = (cpf: string) => {
-    return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    return cpf?.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') || '';
   };
 
-  const propostalsPendentes = propostas.filter(p => p.status === 'pendente');
-  const propostasAndamento = propostas.filter(p => p.status === 'em_andamento');
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-lg">Carregando propostas...</div>
+      </div>
+    );
+  }
+
+  const estatisticas = {
+    total: propostas.length,
+    pendentes: propostas.filter(p => p.status === 'pendente').length,
+    emAndamento: propostas.filter(p => p.status === 'em_andamento').length,
+    aprovadas: propostas.filter(p => p.status === 'aprovado').length,
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -199,7 +284,7 @@ const FinancingAdmin = () => {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{propostas.length}</div>
+              <div className="text-2xl font-bold">{estatisticas.total}</div>
               <p className="text-xs text-muted-foreground">Todas as propostas</p>
             </CardContent>
           </Card>
@@ -210,7 +295,7 @@ const FinancingAdmin = () => {
               <Clock className="h-4 w-4 text-yellow-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-yellow-600">{propostalsPendentes.length}</div>
+              <div className="text-2xl font-bold text-yellow-600">{estatisticas.pendentes}</div>
               <p className="text-xs text-muted-foreground">Aguardando atribuição</p>
             </CardContent>
           </Card>
@@ -221,7 +306,7 @@ const FinancingAdmin = () => {
               <CheckCircle className="h-4 w-4 text-blue-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-600">{propostasAndamento.length}</div>
+              <div className="text-2xl font-bold text-blue-600">{estatisticas.emAndamento}</div>
               <p className="text-xs text-muted-foreground">Com operadores</p>
             </CardContent>
           </Card>
@@ -244,132 +329,141 @@ const FinancingAdmin = () => {
             <CardTitle>Propostas de Financiamento</CardTitle>
           </CardHeader>
           <CardContent>
-            {loadingPropostas ? (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0057FF] mx-auto"></div>
-                <p className="mt-2 text-muted-foreground">Carregando propostas...</p>
-              </div>
-            ) : propostas.length === 0 ? (
-              <div className="text-center py-8">
-                <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">Nenhuma proposta encontrada</p>
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Código</TableHead>
-                    <TableHead>Cliente</TableHead>
-                    <TableHead>Veículo</TableHead>
-                    <TableHead>Valor</TableHead>
-                    <TableHead>Parcelas</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Operador</TableHead>
-                    <TableHead>Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-2">Código</th>
+                    <th className="text-left p-2">Cliente</th>
+                    <th className="text-left p-2">Veículo</th>
+                    <th className="text-left p-2">Valor</th>
+                    <th className="text-left p-2">Financiamento</th>
+                    <th className="text-left p-2">Status</th>
+                    <th className="text-left p-2">Operador</th>
+                    <th className="text-left p-2">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
                   {propostas.map((proposta) => (
-                    <TableRow key={proposta.id}>
-                      <TableCell className="font-medium">{proposta.codigo_proposta}</TableCell>
-                      <TableCell>
+                    <tr key={proposta.id} className="border-b">
+                      <td className="p-2 font-mono text-sm">{proposta.codigo}</td>
+                      <td className="p-2">
                         <div>
-                          <p className="font-medium">{proposta.cliente_nome}</p>
-                          <p className="text-sm text-muted-foreground">{formatCPF(proposta.cliente_cpf)}</p>
+                          <div className="font-medium">{proposta.user?.nome_completo}</div>
+                          <div className="text-sm text-gray-500">{formatCPF(proposta.user?.cpf || '')}</div>
                         </div>
-                      </TableCell>
-                      <TableCell>{proposta.veiculo}</TableCell>
-                      <TableCell>{formatCurrency(proposta.valor_veiculo)}</TableCell>
-                      <TableCell>
-                        <div>
-                          <p>{proposta.parcelas}x</p>
-                          <p className="text-sm text-muted-foreground">{formatCurrency(proposta.valor_parcela)}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
+                      </td>
+                      <td className="p-2">
+                        <div className="font-medium">{proposta.marca} {proposta.modelo}</div>
+                        <div className="text-sm text-gray-500">{proposta.ano}</div>
+                      </td>
+                      <td className="p-2">{formatCurrency(proposta.valor_veiculo)}</td>
+                      <td className="p-2">
+                        <div>{proposta.parcelas}x {formatCurrency(proposta.valor_parcela)}</div>
+                        <div className="text-sm text-gray-500">Entrada: {formatCurrency(proposta.valor_entrada)}</div>
+                      </td>
+                      <td className="p-2">
                         <Badge className={getStatusColor(proposta.status)}>
-                          {proposta.status}
+                          {proposta.status.replace('_', ' ').toUpperCase()}
                         </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {proposta.operador_nome ? (
+                      </td>
+                      <td className="p-2">
+                        {proposta.status === 'pendente' ? (
+                          <div className="flex gap-2">
+                            <Select
+                              value={selectedOperador[proposta.id] || ''}
+                              onValueChange={(value) => setSelectedOperador({...selectedOperador, [proposta.id]: value})}
+                            >
+                              <SelectTrigger className="w-40">
+                                <SelectValue placeholder="Selecionar" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {operadores.map((op) => (
+                                  <SelectItem key={op.id} value={op.id}>
+                                    {op.nome}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <Button
+                              size="sm"
+                              onClick={() => atribuirOperador(proposta.id, selectedOperador[proposta.id])}
+                              disabled={!selectedOperador[proposta.id]}
+                            >
+                              <UserCheck className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : proposta.operador ? (
                           <div>
-                            <p className="font-medium">{proposta.operador_nome}</p>
-                            <p className="text-sm text-muted-foreground">{proposta.operador_telefone}</p>
+                            <div className="font-medium">{proposta.operador.nome}</div>
+                            <div className="text-sm text-gray-500">{proposta.operador.telefone}</div>
                           </div>
                         ) : (
-                          <span className="text-muted-foreground">Não atribuído</span>
+                          <span className="text-gray-400">Não atribuído</span>
                         )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-2">
-                          {proposta.status === 'pendente' && (
-                            <div className="flex items-center space-x-2">
-                              <Select
-                                value={selectedOperator[proposta.id] || ''}
-                                onValueChange={(value) => setSelectedOperator(prev => ({ ...prev, [proposta.id]: value }))}
-                              >
-                                <SelectTrigger className="w-32">
-                                  <SelectValue placeholder="Operador" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {operadores.map((operador) => (
-                                    <SelectItem key={operador.id} value={operador.id}>
-                                      {operador.nome}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <Button
-                                size="sm"
-                                onClick={() => atribuirOperador(proposta.id, selectedOperator[proposta.id])}
-                                disabled={!selectedOperator[proposta.id]}
-                              >
-                                Atribuir
-                              </Button>
-                            </div>
-                          )}
-                          
+                      </td>
+                      <td className="p-2">
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => navigate(`/detalhes-proposta/${proposta.id}`)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+
                           {proposta.status === 'em_andamento' && (
-                            <div className="flex items-center space-x-2">
+                            <>
                               <Button
                                 size="sm"
                                 onClick={() => processarDecisao(proposta.id, 'aprovado')}
-                                className="bg-green-600 hover:bg-green-700 text-white"
+                                className="bg-green-600 hover:bg-green-700"
                               >
-                                <Check className="h-4 w-4 mr-1" />
-                                Aprovar
+                                <CheckCircle className="h-4 w-4" />
                               </Button>
                               <Button
                                 size="sm"
                                 onClick={() => processarDecisao(proposta.id, 'recusado')}
-                                className="bg-red-600 hover:bg-red-700 text-white"
+                                className="bg-red-600 hover:bg-red-700"
                               >
-                                <X className="h-4 w-4 mr-1" />
-                                Recusar
+                                <XCircle className="h-4 w-4" />
                               </Button>
-                            </div>
+                            </>
                           )}
-                          
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => navigate(`/proposta/${proposta.id}`)}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
+
+                          {proposta.status === 'aprovado' && (
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button size="sm" variant="outline">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent>
+                                <DropdownMenuItem onClick={() => criarContrato(proposta)}>
+                                  <FileText className="mr-2 h-4 w-4" />
+                                  Assinar Contrato
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  <CreditCard className="mr-2 h-4 w-4" />
+                                  Emitir Cobrança
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  <Send className="mr-2 h-4 w-4" />
+                                  Pós Venda
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          )}
                         </div>
-                      </TableCell>
-                    </TableRow>
+                      </td>
+                    </tr>
                   ))}
-                </TableBody>
-              </Table>
-            )}
+                </tbody>
+              </table>
+            </div>
           </CardContent>
         </Card>
       </div>
     </div>
   );
 };
-
-export default FinancingAdmin;
