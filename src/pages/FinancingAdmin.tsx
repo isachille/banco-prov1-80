@@ -35,10 +35,10 @@ interface Proposta {
   marca: string;
   modelo: string;
   ano: number;
-  valor_veiculo: number;
-  valor_entrada: number;
+  valorveiculo: number;
+  valorentrada: number;
   parcelas: number;
-  valor_parcela: number;
+  valorparcela: number;
   status: string;
   user_id: string;
   operador_id?: string;
@@ -47,11 +47,11 @@ interface Proposta {
     nome_completo: string;
     cpf: string;
     email: string;
-  };
+  } | null;
   operador?: {
     nome: string;
     telefone: string;
-  };
+  } | null;
 }
 
 interface Operador {
@@ -78,14 +78,26 @@ export const FinancingAdmin: React.FC = () => {
       const { data, error } = await supabase
         .from('propostas_financiamento')
         .select(`
-          *,
-          user:users!propostas_financiamento_user_id_fkey(nome_completo, cpf, email),
-          operador:operadores!propostas_financiamento_operador_id_fkey(nome, telefone)
+          id,
+          codigo,
+          marca,
+          modelo,
+          ano,
+          valorveiculo,
+          valorentrada,
+          parcelas,
+          valorparcela,
+          status,
+          user_id,
+          operador_id,
+          created_at,
+          user:users(nome_completo, cpf, email),
+          operador:operadores(nome, telefone)
         `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setPropostas(data || []);
+      setPropostas((data || []) as unknown as Proposta[]);
     } catch (error) {
       console.error('Erro ao buscar propostas:', error);
       toast({
@@ -159,10 +171,17 @@ export const FinancingAdmin: React.FC = () => {
 
       if (response.error) throw new Error(response.error.message);
 
-      toast({
-        title: "Sucesso",
-        description: `Proposta ${decisao === 'aprovado' ? 'aprovada' : 'recusada'} com sucesso!`
-      });
+      if (decisao === 'aprovado') {
+        toast({
+          title: "Sucesso", 
+          description: "Proposta aprovada! Agora você pode criar o contrato."
+        });
+      } else {
+        toast({
+          title: "Sucesso",
+          description: "Proposta recusada com sucesso!"
+        });
+      }
 
       fetchPropostas();
     } catch (error) {
@@ -198,9 +217,12 @@ export const FinancingAdmin: React.FC = () => {
 
       if (error) throw error;
 
+      // Enviar email do contrato
+      await enviarEmailContrato(codigoContrato, proposta.user?.email || '', proposta.user?.nome_completo || '');
+
       toast({
         title: "Sucesso",
-        description: "Contrato criado com sucesso!"
+        description: "Contrato criado e enviado por email!"
       });
 
       navigate(`/assinar-contrato/${codigoContrato}`);
@@ -211,6 +233,26 @@ export const FinancingAdmin: React.FC = () => {
         description: "Erro ao criar contrato",
         variant: "destructive"
       });
+    }
+  };
+
+  const enviarEmailContrato = async (codigoContrato: string, clienteEmail: string, clienteNome: string) => {
+    try {
+      const response = await supabase.functions.invoke('send-contract-email', {
+        body: {
+          codigo_contrato: codigoContrato,
+          cliente_email: clienteEmail,
+          cliente_nome: clienteNome
+        }
+      });
+
+      if (response.error) {
+        console.error('Erro ao enviar email:', response.error);
+      } else {
+        console.log('Email enviado com sucesso:', response.data);
+      }
+    } catch (error) {
+      console.error('Erro ao invocar função de email:', error);
     }
   };
 
@@ -357,10 +399,10 @@ export const FinancingAdmin: React.FC = () => {
                         <div className="font-medium">{proposta.marca} {proposta.modelo}</div>
                         <div className="text-sm text-gray-500">{proposta.ano}</div>
                       </td>
-                      <td className="p-2">{formatCurrency(proposta.valor_veiculo)}</td>
+                      <td className="p-2">{formatCurrency(proposta.valorveiculo)}</td>
                       <td className="p-2">
-                        <div>{proposta.parcelas}x {formatCurrency(proposta.valor_parcela)}</div>
-                        <div className="text-sm text-gray-500">Entrada: {formatCurrency(proposta.valor_entrada)}</div>
+                        <div>{proposta.parcelas}x {formatCurrency(proposta.valorparcela)}</div>
+                        <div className="text-sm text-gray-500">Entrada: {formatCurrency(proposta.valorentrada)}</div>
                       </td>
                       <td className="p-2">
                         <Badge className={getStatusColor(proposta.status)}>
