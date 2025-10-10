@@ -73,6 +73,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({ proposal, kycD
           valorentrada: proposal.valorEntrada,
           parcelas: proposal.parcelas,
           valorparcela: proposal.valorParcela,
+          taxa_juros: proposal.taxaJuros || 1.5,
           status: 'pendente',
         },
       ])

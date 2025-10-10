@@ -28,7 +28,8 @@ Deno.serve(async (req) => {
       veiculo_ano,
       valor_veiculo,
       valor_entrada, 
-      parcelas
+      parcelas,
+      taxa_juros
     } = await req.json();
 
     if (!user_id || !cliente_nome || !cliente_cpf || !veiculo_marca || !veiculo_modelo || !valor_veiculo || !valor_entrada || !parcelas) {
@@ -40,7 +41,7 @@ Deno.serve(async (req) => {
 
     // Calcular financiamento
     const valorFinanciado = valor_veiculo - valor_entrada;
-    const taxaJuros = 0.015; // 1.5% ao mês (exemplo)
+    const taxaJuros = taxa_juros ? taxa_juros / 100 : 0.015; // Converter de percentual para decimal
     const valorParcela = (valorFinanciado * (1 + taxaJuros * parcelas)) / parcelas;
     const valorTotal = valorParcela * parcelas;
 

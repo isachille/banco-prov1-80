@@ -292,6 +292,7 @@ export type Database = {
           operador_id: string | null
           parcelas: number
           status: string
+          taxa_juros: number
           updated_at: string
           user_id: string
           valorentrada: number
@@ -309,6 +310,7 @@ export type Database = {
           operador_id?: string | null
           parcelas: number
           status?: string
+          taxa_juros?: number
           updated_at?: string
           user_id: string
           valorentrada: number
@@ -326,6 +328,7 @@ export type Database = {
           operador_id?: string | null
           parcelas?: number
           status?: string
+          taxa_juros?: number
           updated_at?: string
           user_id?: string
           valorentrada?: number

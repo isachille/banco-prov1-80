@@ -65,6 +65,7 @@ interface SimulationData {
   valorEntrada: number;
   parcelas: number;
   operadorId: string;
+  taxaJuros: number;
 }
 
 const FinancingSimulation = () => {
@@ -91,7 +92,8 @@ const FinancingSimulation = () => {
     },
     valorEntrada: 0,
     parcelas: 60,
-    operadorId: ''
+    operadorId: '',
+    taxaJuros: 1.5
   });
   const [loading, setLoading] = useState(false);
   const [canSimulateForOthers, setCanSimulateForOthers] = useState(false);
@@ -184,7 +186,7 @@ const FinancingSimulation = () => {
       if (!user) throw new Error('Usuário não autenticado');
 
       const valorFinanciado = formData.veiculo.valor - formData.valorEntrada;
-      const taxaJuros = 0.015;
+      const taxaJuros = formData.taxaJuros / 100;
       const valorParcela = (valorFinanciado * (1 + taxaJuros * formData.parcelas)) / formData.parcelas;
       const valorTotal = valorParcela * formData.parcelas;
 
@@ -212,7 +214,7 @@ const FinancingSimulation = () => {
         parcelas: formData.parcelas,
         valor_parcela: Math.round(valorParcela * 100) / 100,
         valor_total: Math.round(valorTotal * 100) / 100,
-        taxa_juros: taxaJuros * 100,
+        taxa_juros: formData.taxaJuros,
         operador: operadorSelecionado,
         status: 'pendente',
         created_at: new Date().toISOString()
@@ -232,7 +234,7 @@ const FinancingSimulation = () => {
         parcelas: formData.parcelas,
         valorParcela: Math.round(valorParcela * 100) / 100,
         valorTotal: Math.round(valorTotal * 100) / 100,
-        taxaJuros: taxaJuros * 100,
+        taxaJuros: formData.taxaJuros,
         operador: operadorSelecionado
       };
 
@@ -264,7 +266,9 @@ const FinancingSimulation = () => {
   };
 
   const valorFinanciado = formData.veiculo.valor - formData.valorEntrada;
-  const valorParcela = valorFinanciado > 0 ? (valorFinanciado * 1.90) / formData.parcelas : 0;
+  const taxaDecimal = formData.taxaJuros / 100;
+  const valorParcela = valorFinanciado > 0 ? (valorFinanciado * (1 + taxaDecimal * formData.parcelas)) / formData.parcelas : 0;
+  const valorTotal = valorParcela * formData.parcelas;
 
   if (showPreview && proposalData) {
     return (
@@ -539,6 +543,23 @@ const FinancingSimulation = () => {
                     </SelectContent>
                   </Select>
                 </div>
+
+                <div>
+                  <Label htmlFor="taxaJuros">Taxa de Juros (% ao mês)</Label>
+                  <Input
+                    id="taxaJuros"
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="10"
+                    value={formData.taxaJuros}
+                    onChange={(e) => setFormData(prev => ({ ...prev, taxaJuros: Number(e.target.value) }))}
+                    placeholder="1.5"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Ajuste a taxa para negociação (padrão: 1.5%)
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -605,6 +626,20 @@ const FinancingSimulation = () => {
                 <div className="text-center p-4 bg-purple-50 rounded-lg">
                   <p className="text-sm text-gray-600">Parcela Estimada</p>
                   <p className="text-lg font-bold text-purple-600">{formatCurrency(valorParcela)}</p>
+                </div>
+              </div>
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="text-center p-4 bg-orange-50 rounded-lg">
+                  <p className="text-sm text-gray-600">Taxa de Juros</p>
+                  <p className="text-lg font-bold text-orange-600">{formData.taxaJuros}% a.m.</p>
+                </div>
+                <div className="text-center p-4 bg-pink-50 rounded-lg">
+                  <p className="text-sm text-gray-600">Total a Pagar</p>
+                  <p className="text-lg font-bold text-pink-600">{formatCurrency(valorTotal)}</p>
+                </div>
+                <div className="text-center p-4 bg-indigo-50 rounded-lg">
+                  <p className="text-sm text-gray-600">Número de Parcelas</p>
+                  <p className="text-lg font-bold text-indigo-600">{formData.parcelas}x</p>
                 </div>
               </div>
             </CardContent>
