@@ -45,6 +45,44 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({ proposal, kycD
     }
   };
 
+  // Garante que a proposta exista no banco e retorna o UUID
+  const ensureDbProposal = async (): Promise<string> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Usuário não autenticado');
+
+    const { data: existing, error: findError } = await supabase
+      .from('propostas_financiamento')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('codigo', proposal.codigo)
+      .maybeSingle();
+
+    if (findError) throw findError;
+    if (existing?.id) return existing.id as string;
+
+    const { data: inserted, error: insertError } = await supabase
+      .from('propostas_financiamento')
+      .insert([
+        {
+          user_id: user.id,
+          codigo: proposal.codigo,
+          marca: proposal.marca,
+          modelo: proposal.modelo,
+          ano: proposal.ano,
+          valorveiculo: proposal.valorVeiculo,
+          valorentrada: proposal.valorEntrada,
+          parcelas: proposal.parcelas,
+          valorparcela: proposal.valorParcela,
+          status: 'pendente',
+        },
+      ])
+      .select('id')
+      .single();
+
+    if (insertError) throw insertError;
+    return inserted.id as string;
+  };
+
   const handleProposalDecision = async (decision: 'aprovado' | 'recusado') => {
     setProcessing(true);
     try {
@@ -54,13 +92,15 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({ proposal, kycD
         return;
       }
 
+      const proposalId = await ensureDbProposal();
+
       const response = await supabase.functions.invoke('process-proposal-decision', {
         body: {
-          proposal_id: proposal.id,
-          decision: decision
+          proposal_id: proposalId,
+          decision,
         },
         headers: {
-          Authorization: `Bearer ${session.access_token}`
+          Authorization: `Bearer ${session.access_token}`,
         }
       });
 
@@ -70,7 +110,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({ proposal, kycD
 
       // Salvar dados da proposta no localStorage para a tela de feedback
       const proposalData = {
-        id: proposal.id,
+        id: proposalId,
         codigo: proposal.codigo,
         cliente_nome: kycData.nome_completo,
         cliente_cpf: kycData.cpf,
@@ -79,15 +119,19 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({ proposal, kycD
         valor_entrada: proposal.valorEntrada,
         parcelas: proposal.parcelas,
         valor_parcela: proposal.valorParcela,
-        decision: decision
+        decision,
       };
       
-      localStorage.setItem(`proposta_${proposal.id}`, JSON.stringify(proposalData));
+      localStorage.setItem(`proposta_${proposalId}`, JSON.stringify(proposalData));
 
       toast.success(`Proposta ${decision === 'aprovado' ? 'aprovada' : 'recusada'} com sucesso!`);
       
       // Redirecionar para a tela de feedback
-      navigate(`/proposta-${decision}/${proposal.id}`);
+      if (decision === 'aprovado') {
+        navigate(`/proposta-aprovada/${proposalId}`);
+      } else {
+        navigate(`/proposta-recusada/${proposalId}`);
+      }
     } catch (error) {
       console.error('Erro ao processar decisão:', error);
       toast.error('Erro ao processar proposta. Tente novamente.');
