@@ -335,7 +335,15 @@ export type Database = {
           valorparcela?: number
           valorveiculo?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "propostas_financiamento_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subcontas: {
         Row: {

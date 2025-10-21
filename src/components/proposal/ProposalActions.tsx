@@ -109,22 +109,6 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({ proposal, kycD
         throw new Error(response.error.message);
       }
 
-      // Salvar dados da proposta no localStorage para a tela de feedback
-      const proposalData = {
-        id: proposalId,
-        codigo: proposal.codigo,
-        cliente_nome: kycData.nome_completo,
-        cliente_cpf: kycData.cpf,
-        veiculo: `${proposal.marca} ${proposal.modelo} ${proposal.ano}`,
-        valor_veiculo: proposal.valorVeiculo,
-        valor_entrada: proposal.valorEntrada,
-        parcelas: proposal.parcelas,
-        valor_parcela: proposal.valorParcela,
-        decision,
-      };
-      
-      localStorage.setItem(`proposta_${proposalId}`, JSON.stringify(proposalData));
-
       toast.success(`Proposta ${decision === 'aprovado' ? 'aprovada' : 'recusada'} com sucesso!`);
       
       // Redirecionar para a tela de feedback

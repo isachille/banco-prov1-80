@@ -44,13 +44,48 @@ const PropostasHistorico = () => {
         return;
       }
 
-      // Carregar propostas do localStorage
-      const propostasStorage = localStorage.getItem('propostas_usuario');
-      if (propostasStorage) {
-        const todasPropostas = JSON.parse(propostasStorage);
-        const propostasUsuario = todasPropostas.filter((p: Proposta) => p.usuario_id === user.id);
-        setPropostas(propostasUsuario);
-      }
+      const { data, error } = await supabase
+        .from('propostas_financiamento')
+        .select(`
+          id,
+          codigo,
+          user_id,
+          marca,
+          modelo,
+          ano,
+          valorveiculo,
+          valorentrada,
+          parcelas,
+          valorparcela,
+          status,
+          created_at,
+          operador_id
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const { data: userData } = await supabase
+        .from('users')
+        .select('nome_completo')
+        .eq('id', user.id)
+        .single();
+
+      const propostasFormatadas = data?.map(p => ({
+        id: p.id,
+        codigo: p.codigo,
+        usuario_id: p.user_id,
+        cliente_nome: userData?.nome_completo || '',
+        veiculo: `${p.marca} ${p.modelo} ${p.ano}`,
+        valor_veiculo: p.valorveiculo,
+        valor_parcela: p.valorparcela,
+        parcelas: p.parcelas,
+        status: p.status,
+        created_at: p.created_at
+      })) || [];
+
+      setPropostas(propostasFormatadas);
     } catch (error) {
       console.error('Erro ao carregar propostas:', error);
       toast.error('Erro ao carregar propostas');
@@ -188,9 +223,9 @@ const PropostasHistorico = () => {
                         variant="outline"
                         onClick={() => {
                           if (proposta.status === 'aprovado') {
-                            navigate(`/proposta-aprovada/${proposta.codigo}`);
+                            navigate(`/proposta-aprovada/${proposta.id}`);
                           } else if (proposta.status === 'recusado') {
-                            navigate(`/proposta-recusada/${proposta.codigo}`);
+                            navigate(`/proposta-recusada/${proposta.id}`);
                           } else {
                             navigate(`/proposta/${proposta.id}`);
                           }

@@ -34,28 +34,36 @@ const PropostaAprovada = () => {
       if (!id) return;
       
       try {
-        const { data, error } = await supabase
+        const { data: proposalData, error: proposalError } = await supabase
           .from('propostas_financiamento')
-          .select(`
-            id,
-            codigo,
-            marca,
-            modelo,
-            ano,
-            valorveiculo,
-            valorentrada,
-            parcelas,
-            valorparcela,
-            user:users(nome_completo, cpf, email)
-          `)
+          .select('*')
           .eq('id', id)
           .eq('status', 'aprovado')
           .single();
 
-        if (error) throw error;
+        if (proposalError) throw proposalError;
         
-        if (data) {
-          setProposalData(data as unknown as ProposalData);
+        if (proposalData) {
+          const { data: userData, error: userError } = await supabase
+            .from('users')
+            .select('nome_completo, cpf, email')
+            .eq('id', proposalData.user_id)
+            .single();
+
+          if (userError) throw userError;
+
+          setProposalData({
+            id: proposalData.id,
+            codigo: proposalData.codigo,
+            marca: proposalData.marca,
+            modelo: proposalData.modelo,
+            ano: proposalData.ano,
+            valorveiculo: proposalData.valorveiculo,
+            valorentrada: proposalData.valorentrada,
+            parcelas: proposalData.parcelas,
+            valorparcela: proposalData.valorparcela,
+            user: userData
+          });
         }
       } catch (error) {
         console.error('Erro ao buscar proposta:', error);
