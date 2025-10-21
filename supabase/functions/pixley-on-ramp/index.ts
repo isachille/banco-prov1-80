@@ -1,9 +1,20 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
+
+// Validation schema for on-ramp requests
+const OnRampSchema = z.object({
+  source_currency: z.enum(['BRL', 'USD'], { errorMap: () => ({ message: 'Moeda de origem deve ser BRL ou USD' }) }),
+  source_amount: z.number().positive('Valor deve ser positivo').min(10, 'Valor mínimo: 10').max(100000, 'Valor máximo: 100.000'),
+  target_currency: z.enum(['BTC', 'ETH', 'USDT', 'USDC'], { errorMap: () => ({ message: 'Criptomoeda inválida' }) }),
+  wallet_address: z.string().min(26, 'Endereço de carteira inválido').max(62, 'Endereço de carteira muito longo'),
+  network: z.enum(['ethereum', 'bitcoin', 'polygon', 'bsc'], { errorMap: () => ({ message: 'Rede blockchain inválida' }) }),
+  simulation: z.boolean().optional()
+})
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -37,6 +48,25 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Parse and validate request body
+    const requestData = await req.json();
+    const validationResult = OnRampSchema.safeParse(requestData);
+    
+    if (!validationResult.success) {
+      console.error('Validation error:', validationResult.error.format());
+      return new Response(
+        JSON.stringify({ 
+          status: 'error', 
+          message: 'Dados inválidos',
+          errors: validationResult.error.errors.map(err => ({
+            field: err.path.join('.'),
+            message: err.message
+          }))
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { 
       source_currency, 
       source_amount, 
@@ -44,14 +74,7 @@ Deno.serve(async (req) => {
       wallet_address, 
       network,
       simulation = false
-    } = await req.json();
-
-    if (!source_currency || !source_amount || !target_currency || !wallet_address || !network) {
-      return new Response(
-        JSON.stringify({ status: 'error', message: 'Dados obrigatórios: source_currency, source_amount, target_currency, wallet_address, network' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    } = validationResult.data;
 
     // Generate unique external ID for idempotency
     const externalId = `${user.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;

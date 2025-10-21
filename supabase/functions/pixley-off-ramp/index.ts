@@ -1,9 +1,38 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
+
+// PIX key validation schemas
+const PixKeySchemas = {
+  cpf: z.string().regex(/^\d{11}$/, 'CPF deve conter 11 dígitos'),
+  cnpj: z.string().regex(/^\d{14}$/, 'CNPJ deve conter 14 dígitos'),
+  email: z.string().email('Email inválido').max(77, 'Email muito longo'),
+  phone: z.string().regex(/^\+55\d{10,11}$/, 'Telefone deve estar no formato +55XXXXXXXXXXX'),
+  random: z.string().uuid('Chave aleatória inválida')
+};
+
+// Validation schema for off-ramp requests
+const OffRampSchema = z.object({
+  source_currency: z.enum(['BTC', 'ETH', 'USDT', 'USDC'], { errorMap: () => ({ message: 'Criptomoeda inválida' }) }),
+  source_amount: z.number().positive('Valor deve ser positivo').min(0.001, 'Valor mínimo: 0.001').max(1000000, 'Valor máximo: 1.000.000'),
+  target_currency: z.literal('PIX', { errorMap: () => ({ message: 'Moeda de destino deve ser PIX' }) }),
+  pix_key: z.string().min(1, 'Chave PIX é obrigatória').max(140, 'Chave PIX muito longa'),
+  pix_key_type: z.enum(['cpf', 'cnpj', 'email', 'phone', 'random'], { errorMap: () => ({ message: 'Tipo de chave PIX inválido' }) }),
+  recipient_name: z.string().trim().min(3, 'Nome deve ter no mínimo 3 caracteres').max(100, 'Nome muito longo'),
+  recipient_document: z.string().regex(/^\d{11}$|^\d{14}$/, 'Documento deve ser CPF (11 dígitos) ou CNPJ (14 dígitos)'),
+  network: z.enum(['ethereum', 'bitcoin', 'polygon', 'bsc'], { errorMap: () => ({ message: 'Rede blockchain inválida' }) }),
+  simulation: z.boolean().optional()
+}).refine(
+  (data) => {
+    const keyType = data.pix_key_type as keyof typeof PixKeySchemas;
+    return PixKeySchemas[keyType].safeParse(data.pix_key).success;
+  },
+  { message: 'Chave PIX inválida para o tipo especificado', path: ['pix_key'] }
+)
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -37,27 +66,39 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Parse and validate request body
+    const requestData = await req.json();
+    const validationResult = OffRampSchema.safeParse({
+      ...requestData,
+      target_currency: requestData.target_currency || 'PIX'
+    });
+    
+    if (!validationResult.success) {
+      console.error('Validation error:', validationResult.error.format());
+      return new Response(
+        JSON.stringify({ 
+          status: 'error', 
+          message: 'Dados inválidos',
+          errors: validationResult.error.errors.map(err => ({
+            field: err.path.join('.'),
+            message: err.message
+          }))
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { 
       source_currency,
       source_amount,
-      target_currency = 'PIX',
+      target_currency,
       pix_key,
       pix_key_type,
       recipient_name,
       recipient_document,
       network,
       simulation = false
-    } = await req.json();
-
-    if (!source_currency || !source_amount || !pix_key || !pix_key_type || !recipient_name || !recipient_document || !network) {
-      return new Response(
-        JSON.stringify({ 
-          status: 'error', 
-          message: 'Dados obrigatórios: source_currency, source_amount, pix_key, pix_key_type, recipient_name, recipient_document, network' 
-        }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    } = validationResult.data;
 
     // Generate unique external ID for idempotency
     const externalId = `${user.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
