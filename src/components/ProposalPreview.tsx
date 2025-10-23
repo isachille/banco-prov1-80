@@ -1,9 +1,6 @@
-
 import React from 'react';
 import { ProposalActions } from '@/components/proposal/ProposalActions';
-import sedanImage from '@/assets/sedan-3d.png';
-import suvImage from '@/assets/suv-3d.png';
-import motoImage from '@/assets/moto-3d.png';
+import { Vehicle3D } from '@/components/Vehicle3D';
 
 interface ProposalPreviewProps {
   proposal: {
@@ -11,6 +8,8 @@ interface ProposalPreviewProps {
     marca: string;
     modelo: string;
     ano: number;
+    categoria: string;
+    cor: string;
     valorVeiculo: number;
     valorEntrada: number;
     parcelas: number;
@@ -193,16 +192,12 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
             <div className="bg-blue-50 p-6 rounded-lg mb-6 border border-blue-200">
               <h3 className="text-blue-800 font-bold text-center mb-4">DADOS DO BEM. DESEJADO COM CRÉDITO BANCÁRIO</h3>
               
-              {/* Imagem do Veículo */}
+              {/* Imagem do Veículo 3D */}
               <div className="flex justify-center mb-6">
-                <img 
-                  src={
-                    proposal.modelo.toLowerCase().includes('moto') || proposal.modelo.toLowerCase().includes('motorcycle') ? motoImage :
-                    proposal.modelo.toLowerCase().includes('suv') || proposal.modelo.toLowerCase().includes('pickup') ? suvImage :
-                    sedanImage
-                  }
-                  alt={`${proposal.marca} ${proposal.modelo}`}
-                  className="w-48 h-36 object-contain"
+                <Vehicle3D 
+                  categoria={proposal.categoria || 'SUVs'}
+                  cor={proposal.cor || 'Preto'}
+                  className="w-64 h-48"
                 />
               </div>
 
@@ -220,7 +215,7 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
                   <div className="border-r border-gray-300 border-t p-3 text-center text-gray-900 font-semibold">{proposal.marca || 'N/A'}</div>
                   <div className="border-r border-gray-300 border-t p-3 text-center text-gray-900 font-semibold">R$ {new Intl.NumberFormat('pt-BR').format(proposal.valorVeiculo || 0)},00</div>
                   <div className="border-r border-gray-300 border-t p-3 text-center text-gray-900 font-semibold">R$ {new Intl.NumberFormat('pt-BR').format((proposal.valorVeiculo || 0) - (proposal.valorEntrada || 0))},00</div>
-                  <div className="border-r border-gray-300 border-t p-3 text-center text-gray-900 font-semibold">A DEFINIR</div>
+                  <div className="border-r border-gray-300 border-t p-3 text-center text-gray-900 font-semibold">{proposal.cor || 'A DEFINIR'}</div>
                   <div className="border-t p-3 text-center text-gray-900 font-semibold">{proposal.ano || 'N/A'}</div>
                 </div>
                 

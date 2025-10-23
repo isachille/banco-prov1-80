@@ -31,6 +31,7 @@ interface VehicleData {
   valor: number;
   valorFipe?: number;
   categoria: string;
+  cor: string;
 }
 
 interface Operador {
@@ -88,7 +89,8 @@ const FinancingSimulation = () => {
       modelo: '',
       ano: new Date().getFullYear(),
       valor: 0,
-      categoria: ''
+      categoria: '',
+      cor: 'Preto'
     },
     valorEntrada: 0,
     parcelas: 60,
@@ -229,6 +231,8 @@ const FinancingSimulation = () => {
         marca: formData.veiculo.marca,
         modelo: formData.veiculo.modelo,
         ano: formData.veiculo.ano,
+        categoria: formData.veiculo.categoria,
+        cor: formData.veiculo.cor,
         valorVeiculo: formData.veiculo.valor,
         valorEntrada: formData.valorEntrada,
         parcelas: formData.parcelas,
@@ -463,6 +467,28 @@ const FinancingSimulation = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
+                  <Label htmlFor="cor">Cor do Veículo *</Label>
+                  <Select value={formData.veiculo.cor} onValueChange={(value) => setFormData(prev => ({ 
+                    ...prev, 
+                    veiculo: { ...prev.veiculo, cor: value }
+                  }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a cor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Preto">Preto</SelectItem>
+                      <SelectItem value="Branco">Branco</SelectItem>
+                      <SelectItem value="Prata">Prata</SelectItem>
+                      <SelectItem value="Vermelho">Vermelho</SelectItem>
+                      <SelectItem value="Azul">Azul</SelectItem>
+                      <SelectItem value="Cinza">Cinza</SelectItem>
+                      <SelectItem value="Amarelo">Amarelo</SelectItem>
+                      <SelectItem value="Verde">Verde</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
                   <Label htmlFor="valor">Valor do Veículo</Label>
                   <Input
                     id="valor"
@@ -503,7 +529,7 @@ const FinancingSimulation = () => {
                       <SelectValue placeholder="Selecione o ano" />
                     </SelectTrigger>
                     <SelectContent>
-                      {Array.from({ length: 15 }, (_, i) => {
+                      {Array.from({ length: 20 }, (_, i) => {
                         const year = new Date().getFullYear() - i;
                         return (
                           <SelectItem key={year} value={String(year)}>
@@ -514,7 +540,9 @@ const FinancingSimulation = () => {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="entrada">Valor de Entrada</Label>
                   <Input
@@ -525,9 +553,6 @@ const FinancingSimulation = () => {
                     placeholder="0"
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="parcelas">Número de Parcelas</Label>
                   <Select value={String(formData.parcelas)} onValueChange={(value) => setFormData(prev => ({ ...prev, parcelas: Number(value) }))}>

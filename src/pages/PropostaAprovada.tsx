@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Vehicle3D } from '@/components/Vehicle3D';
 
 interface ProposalData {
   id: string;
@@ -16,10 +17,12 @@ interface ProposalData {
   valorentrada: number;
   parcelas: number;
   valorparcela: number;
+  cor_veiculo: string;
   user: {
     nome_completo: string;
     cpf: string;
     email: string;
+    data_nascimento: string | null;
   };
 }
 
@@ -44,14 +47,6 @@ const PropostaAprovada = () => {
         if (proposalError) throw proposalError;
         
         if (proposalData) {
-          const { data: userData, error: userError } = await supabase
-            .from('users')
-            .select('nome_completo, cpf, email')
-            .eq('id', proposalData.user_id)
-            .single();
-
-          if (userError) throw userError;
-
           setProposalData({
             id: proposalData.id,
             codigo: proposalData.codigo,
@@ -62,7 +57,13 @@ const PropostaAprovada = () => {
             valorentrada: proposalData.valorentrada,
             parcelas: proposalData.parcelas,
             valorparcela: proposalData.valorparcela,
-            user: userData
+            cor_veiculo: proposalData.cor_veiculo || 'Preto',
+            user: {
+              nome_completo: proposalData.cliente_nome || 'Não informado',
+              cpf: proposalData.cliente_cpf || '',
+              email: '',
+              data_nascimento: proposalData.cliente_nascimento || null
+            }
           });
         }
       } catch (error) {
@@ -136,9 +137,11 @@ const PropostaAprovada = () => {
                 <div className="text-gray-900 font-semibold text-lg mt-1">{proposalData.user?.nome_completo}</div>
               </div>
               <div className="bg-white rounded-lg p-4 shadow-sm">
-                <span className="font-semibold text-gray-500 text-xs uppercase">CPF</span>
-                <div className="text-gray-900 font-semibold text-lg mt-1 font-mono">
-                  {proposalData.user?.cpf ? proposalData.user.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : 'Não informado'}
+                <span className="font-semibold text-gray-500 text-xs uppercase">Data de Nascimento</span>
+                <div className="text-gray-900 font-semibold text-lg mt-1">
+                  {proposalData.user?.data_nascimento 
+                    ? new Date(proposalData.user.data_nascimento).toLocaleDateString('pt-BR')
+                    : 'Não informado'}
                 </div>
               </div>
             </div>
@@ -152,11 +155,27 @@ const PropostaAprovada = () => {
               </div>
               <h3 className="font-bold text-purple-900 text-lg">Veículo Financiado</h3>
             </div>
+
+            {/* Elemento 3D do Veículo */}
+            <div className="bg-white rounded-lg p-4 shadow-sm mb-4 flex justify-center">
+              <Vehicle3D 
+                categoria={proposalData.marca.toLowerCase().includes('honda') || proposalData.marca.toLowerCase().includes('yamaha') ? 'Motocicletas' : 'Sedans'}
+                cor={proposalData.cor_veiculo}
+                className="w-48 h-32"
+              />
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-white rounded-lg p-4 shadow-sm md:col-span-2">
                 <span className="font-semibold text-gray-500 text-xs uppercase">Veículo</span>
                 <div className="text-gray-900 font-bold text-xl mt-1">
                   {proposalData.marca} {proposalData.modelo} - {proposalData.ano}
+                </div>
+              </div>
+              <div className="bg-white rounded-lg p-4 shadow-sm">
+                <span className="font-semibold text-gray-500 text-xs uppercase">Cor</span>
+                <div className="text-purple-700 font-bold text-lg mt-1">
+                  {proposalData.cor_veiculo}
                 </div>
               </div>
               <div className="bg-white rounded-lg p-4 shadow-sm">
@@ -171,7 +190,7 @@ const PropostaAprovada = () => {
                   {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposalData.valorentrada)}
                 </div>
               </div>
-              <div className="bg-white rounded-lg p-4 shadow-sm md:col-span-2">
+              <div className="bg-white rounded-lg p-4 shadow-sm">
                 <span className="font-semibold text-gray-500 text-xs uppercase">Financiamento</span>
                 <div className="text-purple-700 font-bold text-xl mt-1">
                   {proposalData.parcelas}x de {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(proposalData.valorparcela)}

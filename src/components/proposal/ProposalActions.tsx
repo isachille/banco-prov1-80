@@ -60,7 +60,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({ proposal, kycD
     if (findError) throw findError;
     if (existing?.id) return existing.id as string;
 
-    const { data: inserted, error: insertError } = await supabase
+      const { data: inserted, error: insertError } = await supabase
       .from('propostas_financiamento')
       .insert([
         {
@@ -75,6 +75,12 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({ proposal, kycD
           valorparcela: proposal.valorParcela,
           taxa_juros: proposal.taxaJuros || 1.5,
           status: 'pendente',
+          cliente_nome: kycData.nome_completo,
+          cliente_cpf: kycData.cpf,
+          cliente_nascimento: kycData.data_nascimento,
+          cliente_mae: kycData.nome_mae,
+          cliente_profissao: kycData.profissao,
+          cor_veiculo: proposal.cor || 'Preto',
         },
       ])
       .select('id')

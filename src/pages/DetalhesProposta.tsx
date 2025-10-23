@@ -13,6 +13,8 @@ interface PropostaDetalhada {
   marca: string;
   modelo: string;
   ano: number;
+  categoria: string;
+  cor: string;
   valorVeiculo: number;
   valorEntrada: number;
   parcelas: number;
@@ -71,6 +73,8 @@ const DetalhesProposta = () => {
             marca: propostaEncontrada.marca,
             modelo: propostaEncontrada.modelo,
             ano: propostaEncontrada.ano,
+            categoria: propostaEncontrada.categoria || 'SUVs',
+            cor: propostaEncontrada.cor_veiculo || 'Preto',
             valorVeiculo: propostaEncontrada.valor_veiculo,
             valorEntrada: propostaEncontrada.valor_entrada,
             parcelas: propostaEncontrada.parcelas,

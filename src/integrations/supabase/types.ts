@@ -284,7 +284,13 @@ export type Database = {
         Row: {
           admin_id: string | null
           ano: number
+          cliente_cpf: string | null
+          cliente_mae: string | null
+          cliente_nascimento: string | null
+          cliente_nome: string | null
+          cliente_profissao: string | null
           codigo: string
+          cor_veiculo: string | null
           created_at: string
           id: string
           marca: string
@@ -302,7 +308,13 @@ export type Database = {
         Insert: {
           admin_id?: string | null
           ano: number
+          cliente_cpf?: string | null
+          cliente_mae?: string | null
+          cliente_nascimento?: string | null
+          cliente_nome?: string | null
+          cliente_profissao?: string | null
           codigo: string
+          cor_veiculo?: string | null
           created_at?: string
           id?: string
           marca: string
@@ -320,7 +332,13 @@ export type Database = {
         Update: {
           admin_id?: string | null
           ano?: number
+          cliente_cpf?: string | null
+          cliente_mae?: string | null
+          cliente_nascimento?: string | null
+          cliente_nome?: string | null
+          cliente_profissao?: string | null
           codigo?: string
+          cor_veiculo?: string | null
           created_at?: string
           id?: string
           marca?: string
@@ -706,10 +724,7 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_admin_user: {
-        Args: { user_id: string }
-        Returns: boolean
-      }
+      is_admin_user: { Args: { user_id: string }; Returns: boolean }
       process_proposal_decision: {
         Args: { admin_user_id: string; decision: string; proposal_id: string }
         Returns: Json
