@@ -138,7 +138,7 @@ const PropostaAprovada = () => {
               <div className="bg-white rounded-lg p-4 shadow-sm">
                 <span className="font-semibold text-gray-500 text-xs uppercase">CPF</span>
                 <div className="text-gray-900 font-semibold text-lg mt-1 font-mono">
-                  {proposalData.user?.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')}
+                  {proposalData.user?.cpf ? proposalData.user.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : 'Não informado'}
                 </div>
               </div>
             </div>
