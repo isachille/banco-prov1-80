@@ -115,10 +115,10 @@ const PropostaAprovada = () => {
             </div>
           </div>
           <CardTitle className="text-3xl font-bold mb-2">
-            🎉 Parabéns! Proposta Aprovada pelo Sistema
+            🎉 Parabéns! Proposta Aprovada
           </CardTitle>
           <p className="text-green-100 text-lg">
-            Protocolo: <span className="font-bold text-white">#{proposalData.codigo}</span>
+            Resultado da Análise - Protocolo: <span className="font-bold text-white">#{proposalData.codigo}</span>
           </p>
         </CardHeader>
         
@@ -207,10 +207,10 @@ const PropostaAprovada = () => {
               </div>
             </div>
             <h3 className="font-bold text-green-900 text-xl text-center mb-3">
-              Proposta Aprovada pelo Sistema!
+              Resultado da Análise: Aprovado!
             </h3>
             <p className="text-green-800 text-center leading-relaxed mb-4">
-              Sua solicitação de financiamento foi aprovada automaticamente pelo nosso sistema. 
+              Sua solicitação de financiamento foi analisada e aprovada pelo nosso sistema. 
               Em breve, você receberá as próximas instruções para dar continuidade ao processo.
             </p>
           </div>

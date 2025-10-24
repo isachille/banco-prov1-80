@@ -631,7 +631,7 @@ const FinancingSimulation = () => {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Calculator className="mr-2 h-5 w-5" />
-                Resumo da Simulação
+                Resultado da Análise
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -678,7 +678,7 @@ const FinancingSimulation = () => {
             size="lg"
             className="px-8 py-3"
           >
-            {loading ? 'Processando...' : 'Gerar Proposta de Financiamento'}
+            {loading ? 'Processando...' : 'Gerar Resultado da Análise'}
           </Button>
         </div>
       </div>

@@ -24,13 +24,18 @@ export const vehicleCategories: VehicleCategory[] = [
           { name: 'Mobi', price: 58000, year: 2024 },
           { name: 'Argo', price: 75000, year: 2024 },
           { name: 'Siena', price: 52000, year: 2020 },
+          { name: 'Siena EL 1.0', price: 26000, year: 2012 },
           { name: 'Palio', price: 48000, year: 2019 },
           { name: 'Palio Fire', price: 28000, year: 2010 },
           { name: 'Palio EX', price: 18000, year: 2005 },
+          { name: 'Palio Weekend', price: 30000, year: 2008 },
           { name: 'Uno Mille', price: 22000, year: 2011 },
           { name: 'Uno Vivace', price: 35000, year: 2015 },
+          { name: 'Uno Way', price: 38000, year: 2013 },
+          { name: 'Uno Fire', price: 20000, year: 2007 },
           { name: 'Cronos', price: 78000, year: 2024 },
-          { name: 'Punto', price: 32000, year: 2013 }
+          { name: 'Punto', price: 32000, year: 2013 },
+          { name: 'Strada Working', price: 45000, year: 2012 }
         ]
       },
       {
@@ -54,10 +59,15 @@ export const vehicleCategories: VehicleCategory[] = [
           { name: 'Gol G5 1.6', price: 28000, year: 2012 },
           { name: 'Gol G4 1.0', price: 24000, year: 2011 },
           { name: 'Gol G4', price: 22000, year: 2009 },
-          { name: 'Gol G3', price: 16000, year: 2005 },
+          { name: 'Gol G3 1.0', price: 16000, year: 2005 },
+          { name: 'Gol G3', price: 14000, year: 2004 },
+          { name: 'Gol G2', price: 12000, year: 2000 },
           { name: 'Virtus', price: 88000, year: 2024 },
           { name: 'Fox', price: 32000, year: 2015 },
-          { name: 'Voyage', price: 38000, year: 2016 }
+          { name: 'Fox Plus', price: 28000, year: 2010 },
+          { name: 'Voyage', price: 38000, year: 2016 },
+          { name: 'Voyage 1.6', price: 30000, year: 2010 },
+          { name: 'Up!', price: 45000, year: 2018 }
         ]
       },
       {
@@ -209,17 +219,27 @@ export const vehicleCategories: VehicleCategory[] = [
       {
         name: 'Honda',
         models: [
-          { name: 'CG 160 Titan', price: 12500, year: 2024 },
           { name: 'CG 160 Start', price: 11800, year: 2023 },
+          { name: 'CG 160 Titan', price: 12500, year: 2024 },
+          { name: 'CG 160 Fan', price: 13000, year: 2022 },
           { name: 'CG 150 Titan', price: 9500, year: 2015 },
+          { name: 'CG 150 Fan', price: 8800, year: 2012 },
           { name: 'CG 125 Fan', price: 11200, year: 2024 },
           { name: 'CG 125 Titan', price: 6500, year: 2008 },
+          { name: 'CG 125 Cargo', price: 7200, year: 2010 },
           { name: 'Biz 125', price: 10800, year: 2024 },
+          { name: 'Biz 110i', price: 9200, year: 2020 },
           { name: 'Biz 100', price: 5800, year: 2010 },
           { name: 'Bros 160', price: 14800, year: 2024 },
           { name: 'Bros 150', price: 10500, year: 2012 },
+          { name: 'Bros 125', price: 8000, year: 2008 },
           { name: 'PCX 150', price: 16800, year: 2024 },
-          { name: 'Pop 110i', price: 9800, year: 2022 }
+          { name: 'PCX 125', price: 14500, year: 2018 },
+          { name: 'Pop 110i', price: 9800, year: 2022 },
+          { name: 'Pop 100', price: 6500, year: 2012 },
+          { name: 'CB 300R', price: 18500, year: 2020 },
+          { name: 'NC 750X', price: 32000, year: 2018 },
+          { name: 'XRE 300', price: 22000, year: 2016 }
         ]
       },
       {
