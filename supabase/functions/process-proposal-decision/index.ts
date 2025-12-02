@@ -49,14 +49,22 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Check if user is admin
-    const { data: adminData, error: adminError } = await supabase
-      .from('users')
-      .select('is_admin, role')
-      .eq('id', user.id)
-      .single();
+    // Check if user has admin role using user_roles table (secure server-side check)
+    const { data: roleData, error: roleError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .in('role', ['admin', 'dono', 'gerente']);
 
-    if (adminError || (!adminData?.is_admin && !['admin', 'dono'].includes(adminData?.role))) {
+    if (roleError) {
+      console.error('Erro ao verificar roles:', roleError);
+      return new Response(
+        JSON.stringify({ error: 'Erro ao verificar permissões' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!roleData || roleData.length === 0) {
       return new Response(
         JSON.stringify({ error: 'Acesso negado. Apenas administradores podem processar propostas' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
