@@ -30,7 +30,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({ proposal, kycD
       if (!user) return;
 
       // Use server-side has_role RPC for secure role checking
-      const adminRoles = ['admin', 'dono', 'gerente'];
+      const adminRoles = ['admin', 'dono', 'gerente'] as const;
       for (const role of adminRoles) {
         const { data: hasRole, error } = await supabase.rpc('has_role', { 
           _user_id: user.id, 

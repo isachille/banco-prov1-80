@@ -56,7 +56,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         // Check admin roles server-side using has_role RPC
         let hasAdminRole = false;
         try {
-          const adminRoles = ['admin', 'dono', 'gerente'];
+          const adminRoles = ['admin', 'dono', 'gerente'] as const;
           for (const role of adminRoles) {
             const { data: roleCheck } = await supabase.rpc('has_role', { 
               _user_id: session.user.id, 
