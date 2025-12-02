@@ -29,19 +29,21 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({ proposal, kycD
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data: userData } = await supabase
-        .from('users')
-        .select('is_admin, role')
-        .eq('id', user.id)
-        .single();
-
-      if (userData) {
-        const adminStatus = userData.is_admin === true || 
-                           ['admin', 'dono', 'gerente'].includes(userData.role);
-        setIsAdmin(adminStatus);
+      // Use server-side has_role RPC for secure role checking
+      const adminRoles = ['admin', 'dono', 'gerente'];
+      for (const role of adminRoles) {
+        const { data: hasRole, error } = await supabase.rpc('has_role', { 
+          _user_id: user.id, 
+          _role: role 
+        });
+        if (!error && hasRole === true) {
+          setIsAdmin(true);
+          return;
+        }
       }
+      setIsAdmin(false);
     } catch (error) {
-      console.error('Erro ao verificar status admin:', error);
+      setIsAdmin(false);
     }
   };
 

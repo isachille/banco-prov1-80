@@ -40,10 +40,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           return;
         }
 
-        // Buscar dados do usuário na tabela users
+        // Buscar dados do usuário na tabela users (status only)
         const { data: userData, error } = await supabase
           .from('users')
-          .select('status, is_admin, role')
+          .select('status')
           .eq('id', session.user.id)
           .maybeSingle();
 
@@ -53,21 +53,36 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           return;
         }
 
+        // Check admin roles server-side using has_role RPC
+        let hasAdminRole = false;
+        try {
+          const adminRoles = ['admin', 'dono', 'gerente'];
+          for (const role of adminRoles) {
+            const { data: roleCheck } = await supabase.rpc('has_role', { 
+              _user_id: session.user.id, 
+              _role: role 
+            });
+            if (roleCheck === true) {
+              hasAdminRole = true;
+              break;
+            }
+          }
+        } catch (roleError) {
+          console.error('Erro ao verificar roles:', roleError);
+        }
+
         // Se não encontrou o usuário, aguardar processamento dos triggers
         if (!userData) {
-          console.log('Usuário não encontrado na tabela users, aguardando processamento...');
-          
           // Aguardar um pouco e tentar novamente
           await new Promise(resolve => setTimeout(resolve, 2000));
           
           const { data: userData2 } = await supabase
             .from('users')
-            .select('status, is_admin, role')
+            .select('status')
             .eq('id', session.user.id)
             .maybeSingle();
           
           if (!userData2) {
-            console.log('Usuário ainda não processado, redirecionando para aguardar');
             navigate('/confirmado');
             return;
           }
@@ -76,52 +91,31 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         const finalUserData = userData || null;
         console.log('Dados do usuário na proteção:', finalUserData);
 
-        // Verificar se é rota admin
+        // Verificar se é rota admin usando has_role server-side
         if (adminOnly) {
-          const isAdmin = finalUserData?.is_admin === true || 
-                         ['admin', 'gerente', 'dono'].includes(finalUserData?.role);
-          
-          console.log('Verificando se é admin:', { 
-            isAdmin, 
-            is_admin: finalUserData?.is_admin, 
-            role: finalUserData?.role 
-          });
-          
-          if (!isAdmin) {
-            console.log('Acesso negado - não é admin/gerente/dono');
+          if (!hasAdminRole) {
             navigate('/home');
             return;
           }
-
-          console.log('Acesso autorizado para admin - role:', finalUserData?.role);
         }
 
         // Para usuários normais ou verificações de status
         if (requireActive && !adminOnly && finalUserData) {
-          // Usuários dono/admin sempre passam na verificação de status
-          const isAdminUser = finalUserData?.is_admin === true || 
-                             ['admin', 'gerente', 'dono'].includes(finalUserData?.role);
-          
-          if (!isAdminUser) {
+          // Usuários com roles admin sempre passam na verificação de status
+          if (!hasAdminRole) {
             switch (finalUserData.status) {
               case 'pendente':
-                console.log('Status pendente, redirecionando para /pendente');
                 navigate('/pendente');
                 return;
               case 'recusado':
-                console.log('Status recusado, redirecionando para /recusado');
                 navigate('/recusado');
                 return;
               case 'ativo':
-                console.log('Status ativo, permitindo acesso');
                 break;
               default:
-                console.log('Status desconhecido, redirecionando para pendente');
                 navigate('/pendente');
                 return;
             }
-          } else {
-            console.log('Usuário admin/dono, ignorando verificação de status');
           }
         }
 
