@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ProposalActions } from '@/components/proposal/ProposalActions';
 import { Vehicle3D } from '@/components/Vehicle3D';
+import { CreditScoreGauge } from '@/components/CreditScoreGauge';
 
 interface ProposalPreviewProps {
   proposal: {
@@ -36,6 +37,9 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
   kycData,
   onBack
 }) => {
+  // Score fixo entre 300-599 (zona amarela) - gerado uma vez
+  const creditScore = useMemo(() => Math.floor(Math.random() * (599 - 300 + 1)) + 300, []);
+  
   return (
     <div className="min-h-screen bg-background">
       <ProposalActions 
@@ -159,28 +163,13 @@ export const ProposalPreview: React.FC<ProposalPreviewProps> = ({
               </div>
             </div>
 
-            {/* Score SPC-SERASA Fictício */}
-            <div className="bg-yellow-50 p-6 rounded-lg mb-6 border border-yellow-400">
-              <h3 className="text-yellow-800 font-bold text-center mb-4">SCORE SPC-SERASA</h3>
-              <div className="flex flex-col items-center">
-                <div className="bg-yellow-400 text-yellow-900 px-8 py-4 rounded-lg mb-4">
-                  <div className="text-center">
-                    <div className="text-5xl font-bold">{Math.floor(Math.random() * (599 - 300 + 1)) + 300}</div>
-                    <div className="text-sm font-semibold mt-1">PONTOS</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-4 h-4 bg-red-500 rounded"></div>
-                  <span className="text-xs text-gray-600">0-299</span>
-                  <div className="w-4 h-4 bg-yellow-400 rounded border-2 border-yellow-600"></div>
-                  <span className="text-xs text-gray-600 font-bold">300-599</span>
-                  <div className="w-4 h-4 bg-green-500 rounded"></div>
-                  <span className="text-xs text-gray-600">600-1000</span>
-                </div>
-                <div className="bg-yellow-100 border border-yellow-400 px-6 py-3 rounded-lg text-center">
-                  <div className="text-yellow-800 font-bold text-lg">PENDENTE DE REGULARIZAÇÃO CADASTRAL</div>
-                  <div className="text-yellow-700 text-sm mt-1">Consulte nossos operadores para regularizar sua situação</div>
-                </div>
+            {/* Score SPC-SERASA - Motor de Crédito */}
+            <div className="bg-gradient-to-b from-gray-50 to-white p-6 rounded-lg mb-6 border border-gray-200 shadow-sm">
+              <h3 className="text-gray-800 font-bold text-center mb-4 text-lg">MOTOR DE CRÉDITO SPC-SERASA</h3>
+              <CreditScoreGauge score={creditScore} />
+              <div className="bg-yellow-100 border border-yellow-400 px-6 py-3 rounded-lg text-center mt-4">
+                <div className="text-yellow-800 font-bold text-lg">⚠️ PENDENTE DE REGULARIZAÇÃO CADASTRAL</div>
+                <div className="text-yellow-700 text-sm mt-1">Consulte nossos operadores para regularizar sua situação</div>
               </div>
             </div>
 
