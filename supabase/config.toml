@@ -2,3 +2,6 @@ project_id = "fjyeqltwvlhexgncudpz"
 
 [functions.sumup]
 verify_jwt = true
+
+[functions.ficha-cadastral]
+verify_jwt = false

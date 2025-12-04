@@ -142,6 +142,170 @@ export type Database = {
           },
         ]
       }
+      fichas_cadastrais: {
+        Row: {
+          bairro: string | null
+          banco_preferido: string | null
+          bancos_possui: string[] | null
+          cargo: string | null
+          cep: string | null
+          cidade: string | null
+          complemento: string | null
+          cpf: string | null
+          created_at: string | null
+          created_by: string | null
+          data_nascimento: string | null
+          documento_frente_url: string | null
+          documento_verso_url: string | null
+          email: string | null
+          empresa_cnpj: string | null
+          empresa_nome: string | null
+          endereco: string | null
+          estado: string | null
+          estado_civil: string | null
+          expira_em: string
+          id: string
+          nome_completo: string | null
+          nome_mae: string | null
+          nome_pai: string | null
+          numero: string | null
+          parcelas: number | null
+          preenchido_em: string | null
+          proposta_id: string | null
+          referencia_nome: string | null
+          referencia_parentesco: string | null
+          referencia_telefone: string | null
+          renda_mensal: number | null
+          rg: string | null
+          status: string | null
+          telefone: string | null
+          telefone_alternativo: string | null
+          tempo_servico: string | null
+          tipo_conta: string | null
+          tipo_contrato: string | null
+          tipo_documento: string | null
+          token_acesso: string
+          updated_at: string | null
+          valor_entrada: number | null
+          valor_parcela: number | null
+          valor_veiculo: number | null
+          veiculo_ano: number | null
+          veiculo_cor: string | null
+          veiculo_marca: string | null
+          veiculo_modelo: string | null
+        }
+        Insert: {
+          bairro?: string | null
+          banco_preferido?: string | null
+          bancos_possui?: string[] | null
+          cargo?: string | null
+          cep?: string | null
+          cidade?: string | null
+          complemento?: string | null
+          cpf?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          data_nascimento?: string | null
+          documento_frente_url?: string | null
+          documento_verso_url?: string | null
+          email?: string | null
+          empresa_cnpj?: string | null
+          empresa_nome?: string | null
+          endereco?: string | null
+          estado?: string | null
+          estado_civil?: string | null
+          expira_em: string
+          id?: string
+          nome_completo?: string | null
+          nome_mae?: string | null
+          nome_pai?: string | null
+          numero?: string | null
+          parcelas?: number | null
+          preenchido_em?: string | null
+          proposta_id?: string | null
+          referencia_nome?: string | null
+          referencia_parentesco?: string | null
+          referencia_telefone?: string | null
+          renda_mensal?: number | null
+          rg?: string | null
+          status?: string | null
+          telefone?: string | null
+          telefone_alternativo?: string | null
+          tempo_servico?: string | null
+          tipo_conta?: string | null
+          tipo_contrato?: string | null
+          tipo_documento?: string | null
+          token_acesso: string
+          updated_at?: string | null
+          valor_entrada?: number | null
+          valor_parcela?: number | null
+          valor_veiculo?: number | null
+          veiculo_ano?: number | null
+          veiculo_cor?: string | null
+          veiculo_marca?: string | null
+          veiculo_modelo?: string | null
+        }
+        Update: {
+          bairro?: string | null
+          banco_preferido?: string | null
+          bancos_possui?: string[] | null
+          cargo?: string | null
+          cep?: string | null
+          cidade?: string | null
+          complemento?: string | null
+          cpf?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          data_nascimento?: string | null
+          documento_frente_url?: string | null
+          documento_verso_url?: string | null
+          email?: string | null
+          empresa_cnpj?: string | null
+          empresa_nome?: string | null
+          endereco?: string | null
+          estado?: string | null
+          estado_civil?: string | null
+          expira_em?: string
+          id?: string
+          nome_completo?: string | null
+          nome_mae?: string | null
+          nome_pai?: string | null
+          numero?: string | null
+          parcelas?: number | null
+          preenchido_em?: string | null
+          proposta_id?: string | null
+          referencia_nome?: string | null
+          referencia_parentesco?: string | null
+          referencia_telefone?: string | null
+          renda_mensal?: number | null
+          rg?: string | null
+          status?: string | null
+          telefone?: string | null
+          telefone_alternativo?: string | null
+          tempo_servico?: string | null
+          tipo_conta?: string | null
+          tipo_contrato?: string | null
+          tipo_documento?: string | null
+          token_acesso?: string
+          updated_at?: string | null
+          valor_entrada?: number | null
+          valor_parcela?: number | null
+          valor_veiculo?: number | null
+          veiculo_ano?: number | null
+          veiculo_cor?: string | null
+          veiculo_marca?: string | null
+          veiculo_modelo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fichas_cadastrais_proposta_id_fkey"
+            columns: ["proposta_id"]
+            isOneToOne: false
+            referencedRelation: "propostas_financiamento"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       giftcards: {
         Row: {
           codigo: string
