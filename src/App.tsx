@@ -61,6 +61,8 @@ import PropostaRecusada from '@/pages/PropostaRecusada';
 
 import ExtratoPix from '@/pages/ExtratoPix';
 import LimitesPix from '@/pages/LimitesPix';
+import FichaCadastral from '@/pages/FichaCadastral';
+import FichasAdmin from '@/pages/FichasAdmin';
 
 const queryClient = new QueryClient();
 
@@ -86,6 +88,9 @@ function App() {
               <Route path="/pendente" element={<AguardandoAprovacao />} />
               <Route path="/recusado" element={<ContaRecusada />} />
               <Route path="/analise" element={<ContaAnalise />} />
+              
+              {/* Public ficha cadastral (no auth required) */}
+              <Route path="/ficha-cadastral/:token" element={<FichaCadastral />} />
 
               {/* Protected routes */}
               <Route path="/home" element={
@@ -243,6 +248,11 @@ function App() {
               <Route path="/transacoes-globais" element={
                 <ProtectedRoute adminOnly>
                   <TransacoesGlobais />
+                </ProtectedRoute>
+              } />
+              <Route path="/fichas-admin" element={
+                <ProtectedRoute adminOnly>
+                  <FichasAdmin />
                 </ProtectedRoute>
               } />
 

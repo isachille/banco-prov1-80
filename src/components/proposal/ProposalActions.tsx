@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, MessageCircle, ArrowLeft, CheckCircle, XCircle } from 'lucide-react';
+import { Download, MessageCircle, ArrowLeft, CheckCircle, XCircle, FileText, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { generateFinancingPDF, shareWhatsApp } from '@/components/PDFGenerator';
 import { toast } from 'sonner';
@@ -18,6 +18,8 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({ proposal, kycD
   const navigate = useNavigate();
   const [generatingPDF, setGeneratingPDF] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [creatingFicha, setCreatingFicha] = useState(false);
+  const [fichaLink, setFichaLink] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
@@ -316,6 +318,67 @@ Aguardo retorno. Obrigado!`;
           >
             <MessageCircle className="h-4 w-4" />
             WhatsApp
+          </Button>
+
+          <Button 
+            variant="outline"
+            className="flex items-center gap-2"
+            disabled={creatingFicha}
+            onClick={async () => {
+              setCreatingFicha(true);
+              try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                  toast.error('Você precisa estar logado');
+                  return;
+                }
+                
+                const res = await fetch(
+                  `https://fjyeqltwvlhexgncudpz.supabase.co/functions/v1/ficha-cadastral?action=create`,
+                  {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${session.access_token}`
+                    },
+                    body: JSON.stringify({
+                      propostaData: {
+                        proposta_id: proposal.id,
+                        marca: proposal.marca,
+                        modelo: proposal.modelo,
+                        ano: proposal.ano,
+                        cor: proposal.cor,
+                        valorVeiculo: proposal.valorVeiculo,
+                        entrada: proposal.valorEntrada,
+                        parcelas: proposal.parcelas,
+                        valorParcela: proposal.valorParcela,
+                        nomeCliente: kycData.nome_completo,
+                        cpfCliente: kycData.cpf,
+                        nomeMae: kycData.nome_mae,
+                        dataNascimento: kycData.data_nascimento
+                      }
+                    })
+                  }
+                );
+                
+                const data = await res.json();
+                if (data.success) {
+                  const link = `${window.location.origin}/ficha-cadastral/${data.ficha.token_acesso}`;
+                  setFichaLink(link);
+                  navigator.clipboard.writeText(link);
+                  toast.success('Ficha criada! Link copiado para compartilhar com o cliente.');
+                } else {
+                  throw new Error(data.error);
+                }
+              } catch (err: any) {
+                toast.error(err.message || 'Erro ao criar ficha');
+              } finally {
+                setCreatingFicha(false);
+              }
+            }}
+          >
+            <FileText className="h-4 w-4" />
+            {creatingFicha ? 'Criando...' : fichaLink ? 'Copiar Link' : 'Ficha Cadastral'}
           </Button>
         </div>
       </div>
