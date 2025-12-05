@@ -18,7 +18,19 @@ serve(async (req) => {
     );
 
     const url = new URL(req.url);
-    const action = url.searchParams.get('action');
+    let action = url.searchParams.get('action');
+    
+    // For POST requests, also check body for action
+    let bodyData: any = null;
+    if (req.method === 'POST' && !action) {
+      const clonedReq = req.clone();
+      try {
+        bodyData = await clonedReq.json();
+        action = bodyData.action || null;
+      } catch (e) {
+        // Not JSON body, continue
+      }
+    }
 
     // GET - Fetch ficha by token
     if (req.method === 'GET' && action === 'get') {
@@ -222,7 +234,11 @@ serve(async (req) => {
         );
       }
 
-      const { propostaData } = await req.json();
+      // Use already parsed body or parse now
+      const requestData = bodyData || await req.json();
+      
+      // Accept data directly or wrapped in propostaData
+      const propostaData = requestData.propostaData || requestData;
 
       // Generate unique token
       const token = crypto.randomUUID().replace(/-/g, '');
@@ -231,24 +247,26 @@ serve(async (req) => {
       const expiraEm = new Date();
       expiraEm.setDate(expiraEm.getDate() + 7);
 
+      console.log('Creating ficha with data:', propostaData);
+
       const { data: ficha, error: createError } = await supabase
         .from('fichas_cadastrais')
         .insert({
           proposta_id: propostaData.proposta_id || null,
           token_acesso: token,
           expira_em: expiraEm.toISOString(),
-          veiculo_marca: propostaData.marca,
-          veiculo_modelo: propostaData.modelo,
-          veiculo_ano: propostaData.ano,
-          veiculo_cor: propostaData.cor,
-          valor_veiculo: propostaData.valorVeiculo,
-          valor_entrada: propostaData.entrada,
+          veiculo_marca: propostaData.veiculo_marca || propostaData.marca,
+          veiculo_modelo: propostaData.veiculo_modelo || propostaData.modelo,
+          veiculo_ano: propostaData.veiculo_ano || propostaData.ano,
+          veiculo_cor: propostaData.veiculo_cor || propostaData.cor,
+          valor_veiculo: propostaData.valor_veiculo || propostaData.valorVeiculo,
+          valor_entrada: propostaData.valor_entrada || propostaData.entrada,
           parcelas: propostaData.parcelas,
-          valor_parcela: propostaData.valorParcela,
-          nome_completo: propostaData.nomeCliente,
-          cpf: propostaData.cpfCliente,
-          nome_mae: propostaData.nomeMae,
-          data_nascimento: propostaData.dataNascimento,
+          valor_parcela: propostaData.valor_parcela || propostaData.valorParcela,
+          nome_completo: propostaData.nome_completo || propostaData.nomeCliente,
+          cpf: propostaData.cpf || propostaData.cpfCliente,
+          nome_mae: propostaData.nome_mae || propostaData.nomeMae,
+          data_nascimento: propostaData.data_nascimento || propostaData.dataNascimento,
           created_by: user.id,
           status: 'pendente'
         })
@@ -258,7 +276,7 @@ serve(async (req) => {
       if (createError) {
         console.error('Error creating ficha:', createError);
         return new Response(
-          JSON.stringify({ error: 'Erro ao criar ficha' }),
+          JSON.stringify({ error: 'Erro ao criar ficha', details: createError.message }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
@@ -267,6 +285,7 @@ serve(async (req) => {
         JSON.stringify({ 
           success: true, 
           ficha,
+          token: token,
           link: `${req.headers.get('origin')}/ficha-cadastral/${token}`
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
