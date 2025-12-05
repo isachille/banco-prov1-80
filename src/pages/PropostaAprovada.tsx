@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { CheckCircle, Phone, ArrowLeft, Car, User, Mail, MessageCircle, XCircle } from 'lucide-react';
+import { CheckCircle, Phone, ArrowLeft, Car, User, Mail, MessageCircle, XCircle, FileText, Share2, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
@@ -31,6 +31,8 @@ const PropostaAprovada = () => {
   const { id } = useParams();
   const [proposalData, setProposalData] = useState<ProposalData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [creatingFicha, setCreatingFicha] = useState(false);
+  const [fichaLink, setFichaLink] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProposalData = async () => {
@@ -257,6 +259,79 @@ const PropostaAprovada = () => {
 
           {/* Botões de Ação */}
           <div className="flex flex-col gap-3 pt-4">
+            {/* Botão Ir para o Analista */}
+            <Button 
+              onClick={async () => {
+                setCreatingFicha(true);
+                try {
+                  const { data: session } = await supabase.auth.getSession();
+                  if (!session.session) {
+                    toast.error('Sessão expirada');
+                    return;
+                  }
+
+                  const response = await supabase.functions.invoke('ficha-cadastral', {
+                    body: {
+                      action: 'create',
+                      proposta_id: proposalData.id,
+                      veiculo_marca: proposalData.marca,
+                      veiculo_modelo: proposalData.modelo,
+                      veiculo_ano: proposalData.ano,
+                      veiculo_cor: proposalData.cor_veiculo,
+                      valor_veiculo: proposalData.valorveiculo,
+                      valor_entrada: proposalData.valorentrada,
+                      parcelas: proposalData.parcelas,
+                      valor_parcela: proposalData.valorparcela
+                    }
+                  });
+
+                  if (response.error) throw response.error;
+
+                  const link = `${window.location.origin}/ficha-cadastral/${response.data.token}`;
+                  setFichaLink(link);
+                  toast.success('Ficha cadastral criada!');
+                } catch (error) {
+                  console.error('Erro ao criar ficha:', error);
+                  toast.error('Erro ao criar ficha cadastral');
+                } finally {
+                  setCreatingFicha(false);
+                }
+              }}
+              disabled={creatingFicha || !!fichaLink}
+              size="lg"
+              className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold shadow-lg"
+            >
+              <FileText className="w-5 h-5 mr-2" />
+              {creatingFicha ? 'Criando...' : fichaLink ? 'Ficha Criada!' : 'Ir para o Analista'}
+            </Button>
+
+            {/* Opções após criar ficha */}
+            {fichaLink && (
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  onClick={() => {
+                    navigator.clipboard.writeText(fichaLink);
+                    toast.success('Link copiado! Envie para o cliente preencher.');
+                  }}
+                  variant="outline"
+                  size="lg"
+                  className="border-2 border-orange-300 hover:bg-orange-50 text-orange-700"
+                >
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Compartilhar Link
+                </Button>
+                <Button
+                  onClick={() => window.open(fichaLink, '_blank')}
+                  variant="outline"
+                  size="lg"
+                  className="border-2 border-blue-300 hover:bg-blue-50 text-blue-700"
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Preencher Agora
+                </Button>
+              </div>
+            )}
+
             <Button 
               onClick={() => navigate('/home')}
               size="lg"
