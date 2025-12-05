@@ -490,28 +490,109 @@ export default function FichasAdmin() {
                 <CardHeader className="py-3">
                   <CardTitle className="text-sm flex items-center gap-2">
                     <FileText className="h-4 w-4" />
-                    Documentos
+                    Documentos Enviados
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="text-sm">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      {selectedFicha.documento_frente_url ? (
-                        <CheckCircle className="h-5 w-5 text-green-500" />
-                      ) : (
-                        <AlertCircle className="h-5 w-5 text-yellow-500" />
+                <CardContent className="text-sm space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center gap-2">
+                        {selectedFicha.documento_frente_url ? (
+                          <CheckCircle className="h-5 w-5 text-green-500" />
+                        ) : (
+                          <AlertCircle className="h-5 w-5 text-yellow-500" />
+                        )}
+                        <span>{selectedFicha.tipo_documento || 'Documento'} Frente</span>
+                      </div>
+                      {selectedFicha.documento_frente_url && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={async () => {
+                            const { data } = await supabase.storage
+                              .from('fichas-documentos')
+                              .createSignedUrl(selectedFicha.documento_frente_url, 3600);
+                            if (data?.signedUrl) {
+                              window.open(data.signedUrl, '_blank');
+                            } else {
+                              toast.error('Erro ao baixar documento');
+                            }
+                          }}
+                        >
+                          <Download className="h-4 w-4 mr-1" />
+                          Baixar
+                        </Button>
                       )}
-                      <span>{selectedFicha.tipo_documento || 'Documento'} Frente</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      {selectedFicha.documento_verso_url ? (
-                        <CheckCircle className="h-5 w-5 text-green-500" />
-                      ) : (
-                        <AlertCircle className="h-5 w-5 text-yellow-500" />
+                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center gap-2">
+                        {selectedFicha.documento_verso_url ? (
+                          <CheckCircle className="h-5 w-5 text-green-500" />
+                        ) : (
+                          <AlertCircle className="h-5 w-5 text-yellow-500" />
+                        )}
+                        <span>{selectedFicha.tipo_documento || 'Documento'} Verso</span>
+                      </div>
+                      {selectedFicha.documento_verso_url && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={async () => {
+                            const { data } = await supabase.storage
+                              .from('fichas-documentos')
+                              .createSignedUrl(selectedFicha.documento_verso_url, 3600);
+                            if (data?.signedUrl) {
+                              window.open(data.signedUrl, '_blank');
+                            } else {
+                              toast.error('Erro ao baixar documento');
+                            }
+                          }}
+                        >
+                          <Download className="h-4 w-4 mr-1" />
+                          Baixar
+                        </Button>
                       )}
-                      <span>{selectedFicha.tipo_documento || 'Documento'} Verso</span>
                     </div>
                   </div>
+                  
+                  {/* Botão para baixar todos os documentos */}
+                  {(selectedFicha.documento_frente_url || selectedFicha.documento_verso_url) && (
+                    <Button
+                      variant="default"
+                      className="w-full"
+                      onClick={async () => {
+                        toast.info('Baixando documentos...');
+                        if (selectedFicha.documento_frente_url) {
+                          const { data } = await supabase.storage
+                            .from('fichas-documentos')
+                            .createSignedUrl(selectedFicha.documento_frente_url, 3600);
+                          if (data?.signedUrl) {
+                            const link = document.createElement('a');
+                            link.href = data.signedUrl;
+                            link.download = `${selectedFicha.nome_completo || 'documento'}_frente`;
+                            link.click();
+                          }
+                        }
+                        if (selectedFicha.documento_verso_url) {
+                          setTimeout(async () => {
+                            const { data } = await supabase.storage
+                              .from('fichas-documentos')
+                              .createSignedUrl(selectedFicha.documento_verso_url, 3600);
+                            if (data?.signedUrl) {
+                              const link = document.createElement('a');
+                              link.href = data.signedUrl;
+                              link.download = `${selectedFicha.nome_completo || 'documento'}_verso`;
+                              link.click();
+                            }
+                          }, 500);
+                        }
+                        toast.success('Documentos baixados!');
+                      }}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Baixar Todos os Documentos
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
 

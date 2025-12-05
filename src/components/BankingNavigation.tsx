@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   Home, Receipt, Send, CreditCard, 
-  Car, Gift, PiggyBank, TrendingUp, Settings, Bitcoin
+  Car, Gift, PiggyBank, TrendingUp, Settings, Bitcoin, FileText
 } from 'lucide-react';
 
 const BankingNavigation = () => {
@@ -13,7 +13,7 @@ const BankingNavigation = () => {
   const navigationItems = [
     { icon: Home, label: 'Home', path: '/home' },
     { icon: Send, label: 'PIX', path: '/pix' },
-    { icon: Bitcoin, label: 'Pixley', path: '/pixley' },
+    { icon: FileText, label: 'Fichas', path: '/fichas-admin' },
     { icon: CreditCard, label: 'Transferências', path: '/transferencias' },
     { icon: Gift, label: 'Gift Cards', path: '/gift-cards-page' }
   ];
