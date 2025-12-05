@@ -18,6 +18,10 @@ interface ProposalData {
   parcelas: number;
   valorparcela: number;
   cor_veiculo: string;
+  cliente_nome?: string;
+  cliente_cpf?: string;
+  cliente_nascimento?: string;
+  cliente_mae?: string;
   user: {
     nome_completo: string;
     cpf: string;
@@ -274,6 +278,7 @@ const PropostaAprovada = () => {
                     body: {
                       action: 'create',
                       proposta_id: proposalData.id,
+                      // Dados do veículo
                       veiculo_marca: proposalData.marca,
                       veiculo_modelo: proposalData.modelo,
                       veiculo_ano: proposalData.ano,
@@ -281,7 +286,12 @@ const PropostaAprovada = () => {
                       valor_veiculo: proposalData.valorveiculo,
                       valor_entrada: proposalData.valorentrada,
                       parcelas: proposalData.parcelas,
-                      valor_parcela: proposalData.valorparcela
+                      valor_parcela: proposalData.valorparcela,
+                      // Dados do cliente
+                      nome_completo: proposalData.cliente_nome,
+                      cpf: proposalData.cliente_cpf,
+                      data_nascimento: proposalData.cliente_nascimento,
+                      nome_mae: proposalData.cliente_mae
                     }
                   });
 
