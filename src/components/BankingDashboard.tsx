@@ -7,7 +7,7 @@ import { QuickActions } from './QuickActions';
 import { RecentTransactions } from './RecentTransactions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Gift, Calculator, FileText } from 'lucide-react';
+import { Gift, Calculator, FileText, ClipboardList } from 'lucide-react';
 
 export const BankingDashboard = () => {
   const navigate = useNavigate();
@@ -64,6 +64,25 @@ export const BankingDashboard = () => {
                   <h4 className="font-semibold text-gray-900 dark:text-white">Simular Financiamento</h4>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     Simule seu financiamento veicular
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-shadow bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700"
+            onClick={() => navigate('/fichas-admin')}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center">
+                <div className="bg-orange-100 dark:bg-orange-900/30 p-2 rounded-lg mr-3">
+                  <ClipboardList className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900 dark:text-white">Fichas Cadastrais</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Ver fichas pendentes e completas
                   </p>
                 </div>
               </div>
