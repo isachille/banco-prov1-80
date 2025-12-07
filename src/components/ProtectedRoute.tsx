@@ -25,17 +25,17 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
-          console.log('Nenhuma sessão encontrada, redirecionando para login');
+          // No session found, redirect to login
           navigate('/login');
           return;
         }
 
-        console.log('Sessão encontrada:', session.user.id);
+        // Session found
         setUser(session.user);
 
         // Verificar se o email foi confirmado
         if (!session.user.email_confirmed_at) {
-          console.log('Email não confirmado, redirecionando para confirmação');
+          // Email not confirmed, redirect to confirmation
           navigate('/confirme-email');
           return;
         }
@@ -48,7 +48,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           .maybeSingle();
 
         if (error) {
-          console.error('Erro ao verificar dados do usuário:', error);
+          // Error verifying user data
           navigate('/login');
           return;
         }
@@ -67,8 +67,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
               break;
             }
           }
-        } catch (roleError) {
-          console.error('Erro ao verificar roles:', roleError);
+        } catch {
+          // Error checking roles - continue with default permissions
         }
 
         // Se não encontrou o usuário, aguardar processamento dos triggers
@@ -89,7 +89,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         }
 
         const finalUserData = userData || null;
-        console.log('Dados do usuário na proteção:', finalUserData);
+        // User data loaded for protection check
 
         // Verificar se é rota admin usando has_role server-side
         if (adminOnly) {
@@ -121,8 +121,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
         setLoading(false);
 
-      } catch (error) {
-        console.error('Erro na verificação de autenticação:', error);
+      } catch {
+        // Authentication verification error
         navigate('/login');
       }
     };
@@ -131,7 +131,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.id);
+        // Auth state changed
         if (event === 'SIGNED_OUT' || !session) {
           navigate('/login');
         } else {

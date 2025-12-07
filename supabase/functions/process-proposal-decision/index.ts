@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Verify user is admin
+    // Verify user is authenticated
     const { data: { user }, error: authError } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
     if (authError || !user) {
       return new Response(
@@ -49,22 +49,29 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Check if user has admin role using user_roles table (secure server-side check)
-    const { data: roleData, error: roleError } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-      .in('role', ['admin', 'dono', 'gerente']);
-
-    if (roleError) {
-      console.error('Erro ao verificar roles:', roleError);
-      return new Response(
-        JSON.stringify({ error: 'Erro ao verificar permissões' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // Check if user has admin role using has_role() RPC function
+    // This is the secure way to check roles, avoiding direct table queries
+    const adminRoles = ['admin', 'dono', 'gerente'] as const;
+    let hasAdminRole = false;
+    
+    for (const role of adminRoles) {
+      const { data: roleCheck, error: roleError } = await supabase.rpc('has_role', {
+        _user_id: user.id,
+        _role: role
+      });
+      
+      if (roleError) {
+        console.error('Error checking role:', roleError.message);
+        continue;
+      }
+      
+      if (roleCheck === true) {
+        hasAdminRole = true;
+        break;
+      }
     }
 
-    if (!roleData || roleData.length === 0) {
+    if (!hasAdminRole) {
       return new Response(
         JSON.stringify({ error: 'Acesso negado. Apenas administradores podem processar propostas' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -82,7 +89,7 @@ Deno.serve(async (req) => {
       .eq('id', proposal_id);
 
     if (updateError) {
-      console.error('Erro ao atualizar proposta:', updateError);
+      console.error('Error updating proposal:', updateError.message);
       return new Response(
         JSON.stringify({ error: 'Erro ao processar decisão da proposta' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -99,7 +106,8 @@ Deno.serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Erro no processamento:', error);
+    // Log error server-side only, return generic message to client
+    console.error('Processing error:', error);
     return new Response(
       JSON.stringify({ error: 'Erro interno do servidor' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
