@@ -41,7 +41,7 @@ const Login = () => {
           }
         }
       } catch (error) {
-        console.warn('Erro ao verificar usuário:', error);
+        // Error checking user - silently continue
       }
     };
     checkUser();
@@ -65,7 +65,7 @@ const Login = () => {
       try {
         await supabase.auth.signOut({ scope: 'global' });
       } catch (err) {
-        console.warn('Logout preventivo falhou (continuando):', err);
+        // Preventive logout failed - continue
       }
 
       // Aguardar um pouco para garantir limpeza
@@ -77,7 +77,7 @@ const Login = () => {
       });
 
       if (error) {
-        console.error('Erro no login:', error);
+        // Login error - show user-friendly message
         
         if (error.message.includes('Email not confirmed')) {
           toast.error('Por favor, confirme seu email antes de fazer login. Verifique sua caixa de entrada.');
@@ -98,7 +98,7 @@ const Login = () => {
           .single();
 
         if (userError) {
-          console.error('Erro ao buscar dados do usuário:', userError);
+          // Error fetching user data
           toast.error('Erro ao verificar dados do usuário');
           return;
         }
@@ -108,7 +108,7 @@ const Login = () => {
           return;
         }
 
-        console.log('Login realizado com sucesso:', userData);
+        // Login successful
 
         if (userData.status === 'pendente' && !['admin', 'dono'].includes(userData.role)) {
           toast.info('Sua conta está pendente de aprovação');
@@ -129,8 +129,8 @@ const Login = () => {
           navigate('/home');
         }, 500);
       }
-    } catch (error: any) {
-      console.error('Erro geral no login:', error);
+    } catch (error: unknown) {
+      // General login error
       toast.error('Erro interno. Tente novamente em alguns momentos.');
     } finally {
       setLoading(false);
@@ -156,8 +156,8 @@ const Login = () => {
       
       try {
         await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        console.warn('Logout preventivo falhou (continuando):', err);
+      } catch {
+        // Preventive logout failed - continue
       }
 
       // Aguardar um pouco para garantir limpeza
@@ -174,7 +174,7 @@ const Login = () => {
       });
 
       if (error) {
-        console.error('Erro no cadastro:', error);
+        // Signup error - show user-friendly message
         
         if (error.message.includes('User already registered')) {
           toast.error('Este email já está cadastrado. Tente fazer login.');
@@ -194,8 +194,8 @@ const Login = () => {
           navigate('/confirme-email');
         }, 1000);
       }
-    } catch (error: any) {
-      console.error('Erro geral no cadastro:', error);
+    } catch (error: unknown) {
+      // General signup error
       toast.error('Erro interno. Tente novamente em alguns momentos.');
     } finally {
       setLoading(false);
