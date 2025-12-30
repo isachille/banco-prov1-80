@@ -5,3 +5,15 @@ verify_jwt = true
 
 [functions.ficha-cadastral]
 verify_jwt = false
+
+[functions.hiperbanco-contas]
+verify_jwt = true
+
+[functions.hiperbanco-pix]
+verify_jwt = true
+
+[functions.hiperbanco-ted]
+verify_jwt = true
+
+[functions.hiperbanco-webhook]
+verify_jwt = false
