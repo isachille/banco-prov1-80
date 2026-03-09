@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import heroPerson from '@/assets/hero-person.png';
 import paymentsPerson from '@/assets/payments-person.png';
+import bancoProLogo from '/lovable-uploads/4712549c-a705-4aad-8498-4702dc3cdd8f.png';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -47,10 +48,7 @@ const LandingPage = () => {
           <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Logo */}
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-              <div className="w-10 h-10 bg-gradient-to-br from-[#0057FF] to-[#003DB8] rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-                <span className="text-white font-bold text-xl">P</span>
-              </div>
-              <span className="text-xl font-bold text-[#0a1628]">BANCO <span className="text-[#0057FF]">PRO</span></span>
+              <img src={bancoProLogo} alt="Banco PRO" className="h-10 w-auto" />
             </div>
 
             {/* Desktop Menu */}
@@ -396,10 +394,7 @@ const LandingPage = () => {
             {/* Brand */}
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-[#0057FF] to-[#003DB8] rounded-xl flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">P</span>
-                </div>
-                <span className="text-lg font-bold">BANCO <span className="text-[#0057FF]">PRO</span></span>
+                <img src={bancoProLogo} alt="Banco PRO" className="h-10 w-auto brightness-0 invert" />
               </div>
               <p className="text-slate-400 text-sm leading-relaxed">
                 Sua fintech completa com soluções financeiras modernas e seguras.
