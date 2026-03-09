@@ -74,7 +74,7 @@ function App() {
           <ThemeProvider>
             <Routes>
               {/* Public routes */}
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<LandingPage />} />
               <Route path="/splash" element={<Splash />} />
               <Route path="/login" element={<Login />} />
               <Route path="/cadastro" element={<CadastroTipo />} />
