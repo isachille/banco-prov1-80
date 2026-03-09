@@ -48,10 +48,7 @@ const LandingPage = () => {
           <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Logo */}
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-              <div className="w-10 h-10 bg-gradient-to-br from-[#0057FF] to-[#003DB8] rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-                <span className="text-white font-bold text-xl">P</span>
-              </div>
-              <span className="text-xl font-bold text-[#0a1628]">BANCO <span className="text-[#0057FF]">PRO</span></span>
+              <img src={bancoProLogo} alt="Banco PRO" className="h-10 w-auto" />
             </div>
 
             {/* Desktop Menu */}
