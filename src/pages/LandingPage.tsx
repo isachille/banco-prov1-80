@@ -394,10 +394,7 @@ const LandingPage = () => {
             {/* Brand */}
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-[#0057FF] to-[#003DB8] rounded-xl flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">P</span>
-                </div>
-                <span className="text-lg font-bold">BANCO <span className="text-[#0057FF]">PRO</span></span>
+                <img src={bancoProLogo} alt="Banco PRO" className="h-10 w-auto brightness-0 invert" />
               </div>
               <p className="text-slate-400 text-sm leading-relaxed">
                 Sua fintech completa com soluções financeiras modernas e seguras.
