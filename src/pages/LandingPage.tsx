@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import heroPerson from '@/assets/hero-person.png';
 import paymentsPerson from '@/assets/payments-person.png';
+import bancoProLogo from '/lovable-uploads/4712549c-a705-4aad-8498-4702dc3cdd8f.png';
 
 const LandingPage = () => {
   const navigate = useNavigate();
