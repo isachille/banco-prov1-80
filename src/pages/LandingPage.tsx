@@ -41,35 +41,32 @@ const LandingPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden">
+    <div className="min-h-screen bg-[#0a1628] overflow-x-hidden">
       {/* ===== HEADER ===== */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-sm">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[#0a1628]/95 backdrop-blur-md border-b border-white/10 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 lg:h-20">
-            {/* Logo */}
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-              <img src={bancoProLogo} alt="Banco PRO" className="h-10 w-auto" />
+              <img src={bancoProLogo} alt="Banco PRO" className="h-10 w-auto brightness-0 invert" />
             </div>
 
-            {/* Desktop Menu */}
             <nav className="hidden lg:flex items-center gap-1">
               {menuItems.map((item) => (
                 <a
                   key={item}
                   href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
-                  className="px-3 py-2 text-sm font-medium text-slate-600 hover:text-[#0057FF] transition-colors rounded-lg hover:bg-blue-50"
+                  className="px-3 py-2 text-sm font-medium text-slate-400 hover:text-[#4d9aff] transition-colors rounded-lg hover:bg-white/5"
                 >
                   {item}
                 </a>
               ))}
             </nav>
 
-            {/* Desktop Buttons */}
             <div className="hidden lg:flex items-center gap-3">
               <Button
                 variant="ghost"
                 onClick={() => navigate('/login')}
-                className="text-[#0057FF] font-semibold hover:bg-blue-50"
+                className="text-[#4d9aff] font-semibold hover:bg-white/5"
               >
                 Entrar
               </Button>
@@ -81,29 +78,27 @@ const LandingPage = () => {
               </Button>
             </div>
 
-            {/* Mobile Menu Toggle */}
             <button className="lg:hidden p-2" onClick={() => setMenuOpen(!menuOpen)}>
-              {menuOpen ? <X className="h-6 w-6 text-slate-700" /> : <Menu className="h-6 w-6 text-slate-700" />}
+              {menuOpen ? <X className="h-6 w-6 text-slate-300" /> : <Menu className="h-6 w-6 text-slate-300" />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Menu */}
         {menuOpen && (
-          <div className="lg:hidden bg-white border-t border-slate-100 shadow-xl animate-fade-in">
+          <div className="lg:hidden bg-[#0d1b30] border-t border-white/10 shadow-xl animate-fade-in">
             <div className="px-4 py-4 space-y-1">
               {menuItems.map((item) => (
                 <a
                   key={item}
                   href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
-                  className="block px-4 py-3 text-slate-700 font-medium rounded-lg hover:bg-blue-50 hover:text-[#0057FF] transition-colors"
+                  className="block px-4 py-3 text-slate-300 font-medium rounded-lg hover:bg-white/5 hover:text-[#4d9aff] transition-colors"
                   onClick={() => setMenuOpen(false)}
                 >
                   {item}
                 </a>
               ))}
-              <div className="pt-4 space-y-2 border-t border-slate-100">
-                <Button variant="outline" className="w-full border-[#0057FF] text-[#0057FF]" onClick={() => navigate('/login')}>
+              <div className="pt-4 space-y-2 border-t border-white/10">
+                <Button variant="outline" className="w-full border-[#0057FF] text-[#4d9aff] hover:bg-white/5" onClick={() => navigate('/login')}>
                   Entrar
                 </Button>
                 <Button className="w-full bg-gradient-to-r from-[#0057FF] to-[#003DB8] text-white rounded-full" onClick={() => navigate('/cadastro')}>
@@ -116,25 +111,25 @@ const LandingPage = () => {
       </header>
 
       {/* ===== HERO ===== */}
-      <section className="pt-24 lg:pt-32 pb-16 lg:pb-24 bg-gradient-to-br from-[#f0f6ff] via-white to-[#e8f0fe] relative overflow-hidden">
+      <section className="pt-24 lg:pt-32 pb-16 lg:pb-24 bg-gradient-to-br from-[#0a1628] via-[#0d1b30] to-[#0a1628] relative overflow-hidden">
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#0057FF]/5 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 -left-20 w-72 h-72 bg-[#003DB8]/5 rounded-full blur-3xl" />
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#0057FF]/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 -left-20 w-72 h-72 bg-[#003DB8]/10 rounded-full blur-3xl" />
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="animate-on-scroll opacity-0 translate-y-8 transition-all duration-700">
-              <div className="inline-flex items-center gap-2 bg-[#0057FF]/10 text-[#0057FF] px-4 py-2 rounded-full text-sm font-semibold mb-6">
+              <div className="inline-flex items-center gap-2 bg-[#0057FF]/20 text-[#4d9aff] px-4 py-2 rounded-full text-sm font-semibold mb-6">
                 <Star className="h-4 w-4" />
                 Fintech 100% digital
               </div>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#0a1628] leading-tight mb-6">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6">
                 O sonho do seu carro novo{' '}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0057FF] to-[#003DB8]">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4d9aff] to-[#0057FF]">
                   mais perto de você.
                 </span>
               </h1>
-              <p className="text-lg text-slate-500 mb-8 max-w-lg">
+              <p className="text-lg text-slate-400 mb-8 max-w-lg">
                 Financiamento, pagamentos, conta digital e soluções financeiras completas para transformar sua vida.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
@@ -149,7 +144,7 @@ const LandingPage = () => {
                   size="lg"
                   variant="outline"
                   onClick={() => window.open('https://promotorsfinch.com.br', '_blank')}
-                  className="border-[#0057FF] text-[#0057FF] font-bold px-8 rounded-full hover:bg-blue-50 text-base"
+                  className="border-[#0057FF]/50 text-[#4d9aff] font-bold px-8 rounded-full hover:bg-white/5 text-base"
                 >
                   Conheça nossa concessionária
                 </Button>
@@ -159,23 +154,22 @@ const LandingPage = () => {
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#0057FF]/20 to-[#003DB8]/20 rounded-full blur-3xl scale-75" />
                 <img src={heroPerson} alt="Pessoa com chave de carro e celular" className="relative w-80 lg:w-96 drop-shadow-2xl" />
-                {/* Floating badges */}
-                <div className="absolute top-8 -left-4 bg-white rounded-2xl shadow-xl p-3 flex items-center gap-2 animate-bounce-slow">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <Zap className="h-4 w-4 text-green-600" />
+                <div className="absolute top-8 -left-4 bg-[#141f35] border border-white/10 rounded-2xl shadow-xl p-3 flex items-center gap-2 animate-bounce-slow">
+                  <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center">
+                    <Zap className="h-4 w-4 text-green-400" />
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-slate-800">PIX Aprovado</p>
-                    <p className="text-xs text-green-600">R$ 1.500,00</p>
+                    <p className="text-xs font-bold text-slate-200">PIX Aprovado</p>
+                    <p className="text-xs text-green-400">R$ 1.500,00</p>
                   </div>
                 </div>
-                <div className="absolute bottom-16 -right-4 bg-white rounded-2xl shadow-xl p-3 flex items-center gap-2">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <Shield className="h-4 w-4 text-[#0057FF]" />
+                <div className="absolute bottom-16 -right-4 bg-[#141f35] border border-white/10 rounded-2xl shadow-xl p-3 flex items-center gap-2">
+                  <div className="w-8 h-8 bg-[#0057FF]/20 rounded-full flex items-center justify-center">
+                    <Shield className="h-4 w-4 text-[#4d9aff]" />
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-slate-800">100% Seguro</p>
-                    <p className="text-xs text-slate-500">Proteção total</p>
+                    <p className="text-xs font-bold text-slate-200">100% Seguro</p>
+                    <p className="text-xs text-slate-400">Proteção total</p>
                   </div>
                 </div>
               </div>
@@ -185,13 +179,13 @@ const LandingPage = () => {
       </section>
 
       {/* ===== CONHEÇA O BANCO PRO ===== */}
-      <section id="o-banco-pro" className="py-20 lg:py-28 bg-white">
+      <section id="o-banco-pro" className="py-20 lg:py-28 bg-[#0d1b30]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16 animate-on-scroll opacity-0 translate-y-8 transition-all duration-700">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0a1628] mb-4">
-              Conheça o <span className="text-[#0057FF]">Banco PRO</span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">
+              Conheça o <span className="text-[#4d9aff]">Banco PRO</span>
             </h2>
-            <p className="text-slate-500 text-lg max-w-2xl mx-auto">
+            <p className="text-slate-400 text-lg max-w-2xl mx-auto">
               Soluções financeiras modernas para você e sua empresa.
             </p>
           </div>
@@ -201,35 +195,35 @@ const LandingPage = () => {
                 icon: Banknote,
                 title: 'Empréstimos e Financiamentos',
                 desc: 'Realize seus projetos com crédito acessível e taxas competitivas do mercado.',
-                color: 'from-blue-500 to-blue-700',
-                bg: 'bg-blue-50',
+                bg: 'bg-blue-500/10',
+                iconColor: '#4d9aff',
               },
               {
                 icon: Building2,
                 title: 'Conta digital gratuita',
                 desc: 'Conta digital completa para pessoas físicas e jurídicas sem taxas de manutenção.',
-                color: 'from-emerald-500 to-emerald-700',
-                bg: 'bg-emerald-50',
+                bg: 'bg-emerald-500/10',
+                iconColor: '#34d399',
               },
               {
                 icon: BarChart3,
                 title: 'TAX++',
                 desc: 'Sistema exclusivo de rendimento em CDI com tecnologia digital avançada.',
-                color: 'from-violet-500 to-violet-700',
-                bg: 'bg-violet-50',
+                bg: 'bg-violet-500/10',
+                iconColor: '#a78bfa',
               },
             ].map((card, i) => (
               <div
                 key={card.title}
-                className={`animate-on-scroll opacity-0 translate-y-8 transition-all duration-700 group cursor-pointer`}
+                className="animate-on-scroll opacity-0 translate-y-8 transition-all duration-700 group cursor-pointer"
                 style={{ transitionDelay: `${i * 150}ms` }}
               >
-                <div className="bg-white border border-slate-100 rounded-3xl p-8 h-full shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
+                <div className="bg-[#141f35] border border-white/5 rounded-3xl p-8 h-full hover:border-white/15 hover:-translate-y-2 transition-all duration-300">
                   <div className={`w-14 h-14 ${card.bg} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-                    <card.icon className={`h-7 w-7 text-transparent bg-clip-text bg-gradient-to-r ${card.color}`} style={{ color: card.color.includes('blue') ? '#3b82f6' : card.color.includes('emerald') ? '#10b981' : '#8b5cf6' }} />
+                    <card.icon className="h-7 w-7" style={{ color: card.iconColor }} />
                   </div>
-                  <h3 className="text-xl font-bold text-[#0a1628] mb-3">{card.title}</h3>
-                  <p className="text-slate-500 leading-relaxed">{card.desc}</p>
+                  <h3 className="text-xl font-bold text-white mb-3">{card.title}</h3>
+                  <p className="text-slate-400 leading-relaxed">{card.desc}</p>
                 </div>
               </div>
             ))}
@@ -238,48 +232,47 @@ const LandingPage = () => {
       </section>
 
       {/* ===== PAGAMENTOS DIGITAIS ===== */}
-      <section id="pagamentos" className="py-20 lg:py-28 bg-gradient-to-br from-[#f0f6ff] to-white">
+      <section id="pagamentos" className="py-20 lg:py-28 bg-gradient-to-br from-[#0a1628] to-[#0d1b30]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="animate-on-scroll opacity-0 translate-y-8 transition-all duration-700 order-2 lg:order-1 flex justify-center">
               <div className="relative">
                 <img src={paymentsPerson} alt="Pagamentos digitais" className="w-72 lg:w-80 drop-shadow-xl" />
-                {/* Notification bubbles */}
-                <div className="absolute top-4 -right-8 bg-white rounded-2xl shadow-lg p-3 border border-slate-100">
+                <div className="absolute top-4 -right-8 bg-[#141f35] border border-white/10 rounded-2xl shadow-lg p-3">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                      <Send className="h-4 w-4 text-white" />
+                    <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center">
+                      <Send className="h-4 w-4 text-green-400" />
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-slate-800">PIX enviado</p>
-                      <p className="text-sm font-bold text-green-600">R$ 1.000</p>
+                      <p className="text-xs font-bold text-slate-200">PIX enviado</p>
+                      <p className="text-sm font-bold text-green-400">R$ 1.000</p>
                     </div>
                   </div>
                 </div>
-                <div className="absolute top-1/2 -left-12 bg-white rounded-2xl shadow-lg p-3 border border-slate-100">
+                <div className="absolute top-1/2 -left-12 bg-[#141f35] border border-white/10 rounded-2xl shadow-lg p-3">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-[#0057FF] rounded-full flex items-center justify-center">
-                      <CreditCard className="h-4 w-4 text-white" />
+                    <div className="w-8 h-8 bg-[#0057FF]/20 rounded-full flex items-center justify-center">
+                      <CreditCard className="h-4 w-4 text-[#4d9aff]" />
                     </div>
-                    <p className="text-xs font-bold text-slate-800">Pagamento finalizado</p>
+                    <p className="text-xs font-bold text-slate-200">Pagamento finalizado</p>
                   </div>
                 </div>
-                <div className="absolute bottom-8 -right-4 bg-white rounded-2xl shadow-lg p-3 border border-slate-100">
+                <div className="absolute bottom-8 -right-4 bg-[#141f35] border border-white/10 rounded-2xl shadow-lg p-3">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center">
-                      <Zap className="h-4 w-4 text-white" />
+                    <div className="w-8 h-8 bg-amber-500/20 rounded-full flex items-center justify-center">
+                      <Zap className="h-4 w-4 text-amber-400" />
                     </div>
-                    <p className="text-xs font-bold text-slate-800">Pedido recebido</p>
+                    <p className="text-xs font-bold text-slate-200">Pedido recebido</p>
                   </div>
                 </div>
               </div>
             </div>
             <div className="animate-on-scroll opacity-0 translate-y-8 transition-all duration-700 delay-200 order-1 lg:order-2">
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0a1628] mb-6">
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-6">
                 Pagamentos rápidos e seguros com{' '}
-                <span className="text-[#0057FF]">tecnologia avançada.</span>
+                <span className="text-[#4d9aff]">tecnologia avançada.</span>
               </h2>
-              <p className="text-lg text-slate-500 mb-8">
+              <p className="text-lg text-slate-400 mb-8">
                 PIX, TED, boletos e pagamentos instantâneos na palma da sua mão. Tudo integrado em uma única plataforma.
               </p>
               <div className="space-y-4">
@@ -288,7 +281,7 @@ const LandingPage = () => {
                     <div className="w-6 h-6 bg-[#0057FF] rounded-full flex items-center justify-center flex-shrink-0">
                       <ChevronRight className="h-4 w-4 text-white" />
                     </div>
-                    <span className="text-slate-700 font-medium">{item}</span>
+                    <span className="text-slate-300 font-medium">{item}</span>
                   </div>
                 ))}
               </div>
@@ -298,30 +291,30 @@ const LandingPage = () => {
       </section>
 
       {/* ===== VANTAGENS ===== */}
-      <section id="vantagens" className="py-20 lg:py-28 bg-white">
+      <section id="vantagens" className="py-20 lg:py-28 bg-[#0d1b30]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16 animate-on-scroll opacity-0 translate-y-8 transition-all duration-700">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0a1628] mb-4">
-              Por que escolher o <span className="text-[#0057FF]">Banco PRO</span>?
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">
+              Por que escolher o <span className="text-[#4d9aff]">Banco PRO</span>?
             </h2>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { icon: Headphones, title: 'Suporte 24h', desc: 'Atendimento humano e inteligente a qualquer hora do dia.', color: 'bg-blue-50', iconColor: '#0057FF' },
-              { icon: Lock, title: 'Segurança avançada', desc: 'Infraestrutura com múltiplas camadas de proteção.', color: 'bg-emerald-50', iconColor: '#10b981' },
-              { icon: Zap, title: 'Transferências instantâneas', desc: 'PIX e pagamentos em segundos.', color: 'bg-amber-50', iconColor: '#f59e0b' },
-              { icon: TrendingUp, title: 'Fintech moderna', desc: 'Tecnologia financeira com inovação constante.', color: 'bg-violet-50', iconColor: '#8b5cf6' },
+              { icon: Headphones, title: 'Suporte 24h', desc: 'Atendimento humano e inteligente a qualquer hora do dia.', bg: 'bg-blue-500/10', iconColor: '#4d9aff' },
+              { icon: Lock, title: 'Segurança avançada', desc: 'Infraestrutura com múltiplas camadas de proteção.', bg: 'bg-emerald-500/10', iconColor: '#34d399' },
+              { icon: Zap, title: 'Transferências instantâneas', desc: 'PIX e pagamentos em segundos.', bg: 'bg-amber-500/10', iconColor: '#fbbf24' },
+              { icon: TrendingUp, title: 'Fintech moderna', desc: 'Tecnologia financeira com inovação constante.', bg: 'bg-violet-500/10', iconColor: '#a78bfa' },
             ].map((item, i) => (
               <div
                 key={item.title}
                 className="animate-on-scroll opacity-0 translate-y-8 transition-all duration-700 text-center"
                 style={{ transitionDelay: `${i * 100}ms` }}
               >
-                <div className={`w-16 h-16 ${item.color} rounded-2xl flex items-center justify-center mx-auto mb-5`}>
+                <div className={`w-16 h-16 ${item.bg} rounded-2xl flex items-center justify-center mx-auto mb-5`}>
                   <item.icon className="h-8 w-8" style={{ color: item.iconColor }} />
                 </div>
-                <h3 className="text-lg font-bold text-[#0a1628] mb-2">{item.title}</h3>
-                <p className="text-slate-500 text-sm leading-relaxed">{item.desc}</p>
+                <h3 className="text-lg font-bold text-white mb-2">{item.title}</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -353,7 +346,7 @@ const LandingPage = () => {
       </section>
 
       {/* ===== BAIXAR APP ===== */}
-      <section id="baixe-o-app" className="py-20 lg:py-28 bg-[#0a1628] relative overflow-hidden">
+      <section id="baixe-o-app" className="py-20 lg:py-28 bg-[#071020] relative overflow-hidden">
         <div className="absolute inset-0">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#0057FF]/10 rounded-full blur-3xl" />
         </div>
@@ -388,41 +381,38 @@ const LandingPage = () => {
       </section>
 
       {/* ===== FOOTER ===== */}
-      <footer className="bg-[#071020] text-white pt-16 pb-8">
+      <footer className="bg-[#050d1a] text-white pt-16 pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
-            {/* Brand */}
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <img src={bancoProLogo} alt="Banco PRO" className="h-10 w-auto brightness-0 invert" />
               </div>
-              <p className="text-slate-400 text-sm leading-relaxed">
+              <p className="text-slate-500 text-sm leading-relaxed">
                 Sua fintech completa com soluções financeiras modernas e seguras.
               </p>
             </div>
 
-            {/* Menu rápido */}
             <div>
-              <h4 className="font-bold text-sm uppercase tracking-wider text-slate-300 mb-4">Menu rápido</h4>
+              <h4 className="font-bold text-sm uppercase tracking-wider text-slate-400 mb-4">Menu rápido</h4>
               <ul className="space-y-2">
                 {['Pagamentos', 'Conta digital', 'Planos e taxas', 'Vantagens'].map((item) => (
                   <li key={item}>
-                    <a href="#" className="text-slate-400 text-sm hover:text-[#0057FF] transition-colors">{item}</a>
+                    <a href="#" className="text-slate-500 text-sm hover:text-[#4d9aff] transition-colors">{item}</a>
                   </li>
                 ))}
               </ul>
             </div>
 
-            {/* Contato */}
             <div>
-              <h4 className="font-bold text-sm uppercase tracking-wider text-slate-300 mb-4">Contato</h4>
+              <h4 className="font-bold text-sm uppercase tracking-wider text-slate-400 mb-4">Contato</h4>
               <ul className="space-y-3">
-                <li className="flex items-center gap-2 text-sm text-slate-400">
-                  <Mail className="h-4 w-4 text-[#0057FF]" />
+                <li className="flex items-center gap-2 text-sm text-slate-500">
+                  <Mail className="h-4 w-4 text-[#4d9aff]" />
                   ouvidoria@bancopro.com.br
                 </li>
                 <li>
-                  <a href="https://wa.me/5500000000000" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-slate-400 hover:text-green-400 transition-colors">
+                  <a href="https://wa.me/5500000000000" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-slate-500 hover:text-green-400 transition-colors">
                     <MessageCircle className="h-4 w-4 text-green-500" />
                     Suporte WhatsApp
                   </a>
@@ -430,22 +420,21 @@ const LandingPage = () => {
               </ul>
             </div>
 
-            {/* Redes sociais */}
             <div>
-              <h4 className="font-bold text-sm uppercase tracking-wider text-slate-300 mb-4">Redes sociais</h4>
+              <h4 className="font-bold text-sm uppercase tracking-wider text-slate-400 mb-4">Redes sociais</h4>
               <div className="flex gap-3">
-                <a href="#" className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center hover:bg-[#0057FF] transition-colors">
+                <a href="#" className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center hover:bg-[#0057FF] transition-colors">
                   <Linkedin className="h-5 w-5" />
                 </a>
-                <a href="#" className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center hover:bg-gradient-to-br hover:from-purple-500 hover:to-pink-500 transition-colors">
+                <a href="#" className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center hover:bg-gradient-to-br hover:from-purple-500 hover:to-pink-500 transition-colors">
                   <Instagram className="h-5 w-5" />
                 </a>
               </div>
             </div>
           </div>
 
-          <div className="border-t border-white/10 pt-8 text-center">
-            <p className="text-slate-500 text-sm">
+          <div className="border-t border-white/5 pt-8 text-center">
+            <p className="text-slate-600 text-sm">
               Banco PRO © {new Date().getFullYear()} Todos os direitos reservados.
             </p>
           </div>
