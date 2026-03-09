@@ -8,7 +8,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { FloatingChatButton } from '@/components/FloatingChatButton';
 
 // Import pages
-import Index from '@/pages/Index';
+import LandingPage from '@/pages/LandingPage';
 import Splash from '@/pages/Splash';
 import Login from '@/pages/Login';
 import CadastroTipo from '@/pages/CadastroTipo';
@@ -74,7 +74,7 @@ function App() {
           <ThemeProvider>
             <Routes>
               {/* Public routes */}
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<LandingPage />} />
               <Route path="/splash" element={<Splash />} />
               <Route path="/login" element={<Login />} />
               <Route path="/cadastro" element={<CadastroTipo />} />
