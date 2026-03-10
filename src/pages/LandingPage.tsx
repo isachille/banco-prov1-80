@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   CreditCard, Shield, TrendingUp, Zap, Headphones, Lock, 
@@ -11,10 +11,12 @@ import { Button } from '@/components/ui/button';
 import heroPerson from '@/assets/hero-person.png';
 import paymentsPerson from '@/assets/payments-person.png';
 import bancoProLogo from '/lovable-uploads/4712549c-a705-4aad-8498-4702dc3cdd8f.png';
+import FinancingCalculatorModal from '@/components/FinancingCalculatorModal';
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = React.useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [calculatorOpen, setCalculatorOpen] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
