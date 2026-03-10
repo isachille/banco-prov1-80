@@ -145,7 +145,7 @@ const LandingPage = () => {
                 <Button
                   size="lg"
                   variant="outline"
-                  onClick={() => window.open('https://promotorsfinch.com.br', '_blank')}
+                  onClick={() => window.open('https://www.instagram.com/bancoprobrasil/', '_blank')}
                   className="border-[#0057FF]/50 text-[#4d9aff] font-bold px-8 rounded-full hover:bg-white/5 text-base"
                 >
                   Conheça nossa concessionária
