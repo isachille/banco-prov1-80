@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   CreditCard, Shield, TrendingUp, Zap, Headphones, Lock, 
@@ -11,10 +11,12 @@ import { Button } from '@/components/ui/button';
 import heroPerson from '@/assets/hero-person.png';
 import paymentsPerson from '@/assets/payments-person.png';
 import bancoProLogo from '/lovable-uploads/4712549c-a705-4aad-8498-4702dc3cdd8f.png';
+import FinancingCalculatorModal from '@/components/FinancingCalculatorModal';
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = React.useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [calculatorOpen, setCalculatorOpen] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
@@ -143,7 +145,7 @@ const LandingPage = () => {
                 <Button
                   size="lg"
                   variant="outline"
-                  onClick={() => window.open('https://promotorsfinch.com.br', '_blank')}
+                  onClick={() => window.open('https://www.instagram.com/bancoprobrasil/', '_blank')}
                   className="border-[#0057FF]/50 text-[#4d9aff] font-bold px-8 rounded-full hover:bg-white/5 text-base"
                 >
                   Conheça nossa concessionária
@@ -197,6 +199,7 @@ const LandingPage = () => {
                 desc: 'Realize seus projetos com crédito acessível e taxas competitivas do mercado.',
                 bg: 'bg-blue-500/10',
                 iconColor: '#4d9aff',
+                action: () => setCalculatorOpen(true),
               },
               {
                 icon: Building2,
@@ -204,6 +207,7 @@ const LandingPage = () => {
                 desc: 'Conta digital completa para pessoas físicas e jurídicas sem taxas de manutenção.',
                 bg: 'bg-emerald-500/10',
                 iconColor: '#34d399',
+                action: () => navigate('/cadastro'),
               },
               {
                 icon: BarChart3,
@@ -211,12 +215,14 @@ const LandingPage = () => {
                 desc: 'Sistema exclusivo de rendimento em CDI com tecnologia digital avançada.',
                 bg: 'bg-violet-500/10',
                 iconColor: '#a78bfa',
+                action: undefined,
               },
             ].map((card, i) => (
               <div
                 key={card.title}
                 className="animate-on-scroll opacity-0 translate-y-8 transition-all duration-700 group cursor-pointer"
                 style={{ transitionDelay: `${i * 150}ms` }}
+                onClick={card.action}
               >
                 <div className="bg-[#141f35] border border-white/5 rounded-3xl p-8 h-full hover:border-white/15 hover:-translate-y-2 transition-all duration-300">
                   <div className={`w-14 h-14 ${card.bg} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
@@ -460,6 +466,8 @@ const LandingPage = () => {
           animation: bounce-slow 3s ease-in-out infinite;
         }
       `}</style>
+
+      <FinancingCalculatorModal open={calculatorOpen} onOpenChange={setCalculatorOpen} />
     </div>
   );
 };
