@@ -466,6 +466,8 @@ const LandingPage = () => {
           animation: bounce-slow 3s ease-in-out infinite;
         }
       `}</style>
+
+      <FinancingCalculatorModal open={calculatorOpen} onOpenChange={setCalculatorOpen} />
     </div>
   );
 };
