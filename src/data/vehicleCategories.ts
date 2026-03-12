@@ -42,6 +42,7 @@ export const vehicleCategories: VehicleCategory[] = [
         name: 'Chevrolet',
         models: [
           { name: 'Onix', price: 78000, year: 2024 },
+          { name: 'Onix Turbo S 1.0 LT', price: 95000, year: 2024 },
           { name: 'Prisma', price: 70000, year: 2023 },
           { name: 'Celta', price: 35000, year: 2018 },
           { name: 'Celta Life', price: 18000, year: 2009 },
