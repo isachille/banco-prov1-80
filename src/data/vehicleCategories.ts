@@ -141,7 +141,23 @@ export const vehicleCategories: VehicleCategory[] = [
       {
         name: 'Hyundai',
         models: [
-          { name: 'Creta', price: 112000, year: 2024 }
+          { name: 'Creta', price: 112000, year: 2024 },
+          { name: 'Tucson', price: 185000, year: 2024 },
+          { name: 'Tucson GLS', price: 195000, year: 2024 }
+        ]
+      },
+      {
+        name: 'BYD',
+        models: [
+          { name: 'Song Plus', price: 185000, year: 2024 },
+          { name: 'Song Pro', price: 155000, year: 2024 },
+          { name: 'Yuan Plus', price: 175000, year: 2024 },
+          { name: 'Dolphin', price: 115000, year: 2024 },
+          { name: 'Dolphin Mini', price: 99800, year: 2024 },
+          { name: 'Seal', price: 260000, year: 2024 },
+          { name: 'Tan', price: 450000, year: 2024 },
+          { name: 'King', price: 550000, year: 2024 },
+          { name: 'Han', price: 320000, year: 2024 }
         ]
       },
       {
