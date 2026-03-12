@@ -224,7 +224,15 @@ const FinancingCalculatorModal: React.FC<FinancingCalculatorModalProps> = ({ ope
               onClick={() => setShowResult(false)}
               className="w-full border-white/10 text-slate-300 hover:bg-white/5 rounded-full"
             >
-              Nova simulação
+              ← Voltar e editar simulação
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={handleReset}
+              className="w-full border-white/10 text-slate-500 hover:bg-white/5 rounded-full"
+            >
+              Nova simulação do zero
             </Button>
           </div>
         ) : null}
