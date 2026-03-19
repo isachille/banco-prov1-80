@@ -7,7 +7,7 @@ import { QuickActions } from './QuickActions';
 import { RecentTransactions } from './RecentTransactions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Gift, Calculator, FileText, ClipboardList } from 'lucide-react';
+import { Gift, Calculator, FileText, ClipboardList, Users } from 'lucide-react';
 
 export const BankingDashboard = () => {
   const navigate = useNavigate();
