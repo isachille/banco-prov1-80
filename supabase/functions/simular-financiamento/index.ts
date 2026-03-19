@@ -110,6 +110,31 @@ Deno.serve(async (req) => {
       throw proposalError;
     }
 
+    // Criar registro automático no acompanhamento
+    const { error: acompError } = await supabase
+      .from('acompanhamentos_clientes')
+      .insert({
+        nome_completo: cliente_nome,
+        cpf: cliente_cpf,
+        telefone: '',
+        email: '',
+        veiculo: `${veiculo_marca} ${veiculo_modelo}${veiculo_ano ? ' ' + veiculo_ano : ''}`,
+        valor_veiculo: valor_veiculo,
+        entrada_disponivel: valor_entrada,
+        banco_financeira: '',
+        status: 'Pendente em análise',
+        etapa_progresso: 'Cadastro realizado',
+        responsavel_atendimento: '',
+        profissao: cliente_profissao || null,
+        ano_veiculo: veiculo_ano || null,
+        created_by: user_id,
+      });
+
+    if (acompError) {
+      console.error('Erro ao criar acompanhamento:', acompError);
+      // Não lançar erro — a proposta já foi salva
+    }
+
     return new Response(
       JSON.stringify({ 
         status: 'success', 
