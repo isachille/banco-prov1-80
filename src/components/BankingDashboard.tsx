@@ -7,7 +7,7 @@ import { QuickActions } from './QuickActions';
 import { RecentTransactions } from './RecentTransactions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Gift, Calculator, FileText, ClipboardList } from 'lucide-react';
+import { Gift, Calculator, FileText, ClipboardList, Users } from 'lucide-react';
 
 export const BankingDashboard = () => {
   const navigate = useNavigate();
@@ -102,6 +102,25 @@ export const BankingDashboard = () => {
                   <h4 className="font-semibold text-gray-900 dark:text-white">Minhas Propostas</h4>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     Histórico de propostas de financiamento
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-shadow bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700"
+            onClick={() => navigate('/acompanhamento')}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center">
+                <div className="bg-purple-100 dark:bg-purple-900/30 p-2 rounded-lg mr-3">
+                  <Users className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900 dark:text-white">Acompanhamento</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    CRM de acompanhamento de clientes
                   </p>
                 </div>
               </div>
