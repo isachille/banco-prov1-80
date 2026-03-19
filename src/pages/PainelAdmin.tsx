@@ -320,6 +320,23 @@ const PainelAdmin = () => {
 
           <Card 
             className="cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => navigate('/acompanhamento')}
+          >
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center text-lg">
+                <ClipboardList className="mr-2 h-5 w-5 text-teal-600" />
+                Acompanhamento
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                CRM interno para acompanhamento de propostas de clientes
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-shadow"
             onClick={() => navigate('/admin/relatorios')}
           >
             <CardHeader className="pb-3">
