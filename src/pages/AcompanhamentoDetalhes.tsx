@@ -5,7 +5,13 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   ArrowLeft,
   Edit,
@@ -16,6 +22,8 @@ import {
   CheckCircle,
   Circle,
   Printer,
+  ChevronRight,
+  ChevronLeft,
 } from 'lucide-react';
 
 const ETAPAS = [
@@ -25,6 +33,15 @@ const ETAPAS = [
   'Documentação recebida',
   'Aprovado',
   'Contrato emitido',
+  'Finalizado',
+];
+
+const STATUS_OPTIONS = [
+  'Aprovado',
+  'Ativo',
+  'Pendente em análise',
+  'Aguardando documentação',
+  'Reprovado',
   'Finalizado',
 ];
 
@@ -54,6 +71,7 @@ const AcompanhamentoDetalhes = () => {
   const { id } = useParams();
   const [cliente, setCliente] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
     fetchCliente();
@@ -75,6 +93,46 @@ const AcompanhamentoDetalhes = () => {
     setLoading(false);
   };
 
+  const updateEtapa = async (novaEtapa: string) => {
+    setUpdating(true);
+    const { error } = await supabase
+      .from('acompanhamentos_clientes')
+      .update({ etapa_progresso: novaEtapa, updated_at: new Date().toISOString() })
+      .eq('id', id);
+    if (error) {
+      toast.error('Erro ao atualizar etapa');
+    } else {
+      toast.success(`Etapa atualizada: ${novaEtapa}`);
+      setCliente((prev: any) => ({ ...prev, etapa_progresso: novaEtapa, updated_at: new Date().toISOString() }));
+    }
+    setUpdating(false);
+  };
+
+  const updateStatus = async (novoStatus: string) => {
+    setUpdating(true);
+    const { error } = await supabase
+      .from('acompanhamentos_clientes')
+      .update({ status: novoStatus, updated_at: new Date().toISOString() })
+      .eq('id', id);
+    if (error) {
+      toast.error('Erro ao atualizar status');
+    } else {
+      toast.success(`Status atualizado: ${novoStatus}`);
+      setCliente((prev: any) => ({ ...prev, status: novoStatus, updated_at: new Date().toISOString() }));
+    }
+    setUpdating(false);
+  };
+
+  const etapaAtualIndex = cliente ? ETAPAS.indexOf(cliente.etapa_progresso) : -1;
+
+  const avancarEtapa = () => {
+    if (etapaAtualIndex < ETAPAS.length - 1) updateEtapa(ETAPAS[etapaAtualIndex + 1]);
+  };
+
+  const voltarEtapa = () => {
+    if (etapaAtualIndex > 0) updateEtapa(ETAPAS[etapaAtualIndex - 1]);
+  };
+
   if (loading || !cliente) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -83,11 +141,8 @@ const AcompanhamentoDetalhes = () => {
     );
   }
 
-  const etapaAtualIndex = ETAPAS.indexOf(cliente.etapa_progresso);
-
   return (
     <div className="min-h-screen bg-background">
-      {/* Header - hidden on print */}
       <div className="bg-gradient-to-r from-[#001B3A] to-[#003F5C] text-white p-6 print:bg-white print:text-black">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
@@ -114,7 +169,6 @@ const AcompanhamentoDetalhes = () => {
       </div>
 
       <div className="container mx-auto p-6 space-y-6 max-w-5xl">
-        {/* Print Header */}
         <div className="hidden print:flex items-center justify-between mb-6">
           <div>
             <h2 className="text-xl font-bold">Banco PRO - Acompanhamento de Proposta</h2>
@@ -123,7 +177,7 @@ const AcompanhamentoDetalhes = () => {
           <img src="/lovable-uploads/4712549c-a705-4aad-8498-4702dc3cdd8f.png" alt="Banco Pro" className="h-10" />
         </div>
 
-        {/* Status destaque */}
+        {/* Status + Alterar */}
         <Card className="border-2">
           <CardContent className="p-6 flex flex-col md:flex-row items-center justify-between gap-4">
             <div>
@@ -131,6 +185,19 @@ const AcompanhamentoDetalhes = () => {
               <Badge variant="outline" className={`text-lg px-4 py-2 ${getStatusColor(cliente.status)}`}>
                 {cliente.status}
               </Badge>
+            </div>
+            <div className="print:hidden">
+              <p className="text-sm text-muted-foreground mb-1">Alterar Status</p>
+              <Select value={cliente.status} onValueChange={updateStatus} disabled={updating}>
+                <SelectTrigger className="w-[220px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {STATUS_OPTIONS.map((s) => (
+                    <SelectItem key={s} value={s}>{s}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="text-right">
               <p className="text-sm text-muted-foreground">Responsável</p>
@@ -145,7 +212,22 @@ const AcompanhamentoDetalhes = () => {
 
         {/* Progresso */}
         <Card>
-          <CardHeader><CardTitle>Progresso da Proposta</CardTitle></CardHeader>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>Progresso da Proposta</CardTitle>
+              <div className="flex gap-2 print:hidden">
+                <Button size="sm" variant="outline" onClick={voltarEtapa} disabled={updating || etapaAtualIndex <= 0}>
+                  <ChevronLeft className="h-4 w-4 mr-1" /> Voltar
+                </Button>
+                <Button size="sm" onClick={avancarEtapa} disabled={updating || etapaAtualIndex >= ETAPAS.length - 1}>
+                  Avançar <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground print:hidden">
+              Etapa atual: <span className="font-semibold text-foreground">{cliente.etapa_progresso}</span>
+            </p>
+          </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between overflow-x-auto pb-2">
               {ETAPAS.map((etapa, i) => {
@@ -156,11 +238,16 @@ const AcompanhamentoDetalhes = () => {
                     {i > 0 && (
                       <div className={`absolute top-4 -left-1/2 w-full h-0.5 ${i <= etapaAtualIndex ? 'bg-green-500' : 'bg-gray-200'}`} />
                     )}
-                    <div className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center ${
-                      concluida ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-400'
-                    } ${atual ? 'ring-4 ring-green-200' : ''}`}>
+                    <button
+                      onClick={() => !updating && updateEtapa(etapa)}
+                      disabled={updating}
+                      className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all print:pointer-events-none ${
+                        concluida ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-400 hover:bg-gray-300'
+                      } ${atual ? 'ring-4 ring-green-200' : ''} cursor-pointer`}
+                      title={`Ir para: ${etapa}`}
+                    >
                       {concluida ? <CheckCircle className="h-5 w-5" /> : <Circle className="h-5 w-5" />}
-                    </div>
+                    </button>
                     <p className={`text-xs mt-2 text-center ${concluida ? 'font-semibold text-green-700' : 'text-muted-foreground'}`}>
                       {etapa}
                     </p>
@@ -171,13 +258,11 @@ const AcompanhamentoDetalhes = () => {
           </CardContent>
         </Card>
 
-        {/* Dados Pessoais */}
+        {/* Dados Pessoais + Veículo */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" /> Dados Pessoais
-              </CardTitle>
+              <CardTitle className="flex items-center gap-2"><User className="h-5 w-5" /> Dados Pessoais</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <InfoRow label="Nome Completo" value={cliente.nome_completo} />
@@ -195,9 +280,7 @@ const AcompanhamentoDetalhes = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Car className="h-5 w-5" /> Dados do Veículo
-              </CardTitle>
+              <CardTitle className="flex items-center gap-2"><Car className="h-5 w-5" /> Dados do Veículo</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <InfoRow label="Veículo" value={cliente.veiculo} />
@@ -214,32 +297,22 @@ const AcompanhamentoDetalhes = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" /> Pendências de Documentação
-              </CardTitle>
+              <CardTitle className="flex items-center gap-2"><FileText className="h-5 w-5" /> Pendências de Documentação</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm whitespace-pre-wrap">
-                {cliente.pendencias_documentacao || 'Nenhuma pendência registrada.'}
-              </p>
+              <p className="text-sm whitespace-pre-wrap">{cliente.pendencias_documentacao || 'Nenhuma pendência registrada.'}</p>
             </CardContent>
           </Card>
-
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageSquare className="h-5 w-5" /> Observações Internas
-              </CardTitle>
+              <CardTitle className="flex items-center gap-2"><MessageSquare className="h-5 w-5" /> Observações Internas</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm whitespace-pre-wrap">
-                {cliente.observacoes_internas || 'Nenhuma observação registrada.'}
-              </p>
+              <p className="text-sm whitespace-pre-wrap">{cliente.observacoes_internas || 'Nenhuma observação registrada.'}</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Footer print */}
         <div className="hidden print:block border-t pt-4 mt-8 text-center text-xs text-gray-400">
           <p>Banco PRO Brasil — Documento gerado automaticamente para fins de acompanhamento interno.</p>
         </div>
