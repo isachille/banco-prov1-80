@@ -14,6 +14,90 @@ export type Database = {
   }
   public: {
     Tables: {
+      acompanhamentos_clientes: {
+        Row: {
+          ano_veiculo: number | null
+          banco_financeira: string
+          cnh: string | null
+          cpf: string
+          created_at: string
+          created_by: string | null
+          email: string
+          entrada_disponivel: number
+          etapa_progresso: string
+          id: string
+          nome_completo: string
+          observacoes_internas: string | null
+          pendencias_documentacao: string | null
+          placa_veiculo: string | null
+          profissao: string | null
+          renda_mensal: number | null
+          responsavel_atendimento: string
+          rg: string | null
+          score_estimado: number | null
+          status: string
+          telefone: string
+          tipo_cliente: string | null
+          updated_at: string
+          valor_veiculo: number
+          veiculo: string
+        }
+        Insert: {
+          ano_veiculo?: number | null
+          banco_financeira?: string
+          cnh?: string | null
+          cpf: string
+          created_at?: string
+          created_by?: string | null
+          email: string
+          entrada_disponivel?: number
+          etapa_progresso?: string
+          id?: string
+          nome_completo: string
+          observacoes_internas?: string | null
+          pendencias_documentacao?: string | null
+          placa_veiculo?: string | null
+          profissao?: string | null
+          renda_mensal?: number | null
+          responsavel_atendimento?: string
+          rg?: string | null
+          score_estimado?: number | null
+          status?: string
+          telefone: string
+          tipo_cliente?: string | null
+          updated_at?: string
+          valor_veiculo?: number
+          veiculo: string
+        }
+        Update: {
+          ano_veiculo?: number | null
+          banco_financeira?: string
+          cnh?: string | null
+          cpf?: string
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          entrada_disponivel?: number
+          etapa_progresso?: string
+          id?: string
+          nome_completo?: string
+          observacoes_internas?: string | null
+          pendencias_documentacao?: string | null
+          placa_veiculo?: string | null
+          profissao?: string | null
+          renda_mensal?: number | null
+          responsavel_atendimento?: string
+          rg?: string | null
+          score_estimado?: number | null
+          status?: string
+          telefone?: string
+          tipo_cliente?: string | null
+          updated_at?: string
+          valor_veiculo?: number
+          veiculo?: string
+        }
+        Relationships: []
+      }
       binance_transactions: {
         Row: {
           chave_pix: string | null
