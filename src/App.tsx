@@ -258,6 +258,26 @@ function App() {
                   <FichasAdmin />
                 </ProtectedRoute>
               } />
+              <Route path="/acompanhamento" element={
+                <ProtectedRoute adminOnly>
+                  <Acompanhamento />
+                </ProtectedRoute>
+              } />
+              <Route path="/acompanhamento/novo" element={
+                <ProtectedRoute adminOnly>
+                  <AcompanhamentoForm />
+                </ProtectedRoute>
+              } />
+              <Route path="/acompanhamento/editar/:id" element={
+                <ProtectedRoute adminOnly>
+                  <AcompanhamentoForm />
+                </ProtectedRoute>
+              } />
+              <Route path="/acompanhamento/:id" element={
+                <ProtectedRoute adminOnly>
+                  <AcompanhamentoDetalhes />
+                </ProtectedRoute>
+              } />
 
               <Route path="/admin/users" element={
                 <ProtectedRoute adminOnly>
