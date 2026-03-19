@@ -58,6 +58,9 @@ import InvestorProfile from '@/pages/InvestorProfile';
 import PixleyPage from '@/pages/PixleyPage';
 import PropostaAprovada from '@/pages/PropostaAprovada';
 import PropostaRecusada from '@/pages/PropostaRecusada';
+import Acompanhamento from '@/pages/Acompanhamento';
+import AcompanhamentoForm from '@/pages/AcompanhamentoForm';
+import AcompanhamentoDetalhes from '@/pages/AcompanhamentoDetalhes';
 
 import ExtratoPix from '@/pages/ExtratoPix';
 import LimitesPix from '@/pages/LimitesPix';
